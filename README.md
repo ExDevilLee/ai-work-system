@@ -28,7 +28,7 @@ English version: [README-EN.md](README-EN.md)
 
 ## 当前草稿
 
-- [从一次性 AI 聊天到长期 AI 工作系统](content/articles/2026-07-07-long-term-ai-work-system.md) — 大纲阶段
+- [从一次性 AI 聊天到长期 AI 工作系统](content/articles/2026-07-07-long-term-ai-work-system.md) — 初稿阶段
 
 ## 发布原则
 
