@@ -26,6 +26,10 @@ English version: [README-EN.md](README-EN.md)
 - 从 prompt 到 workflow：我如何把 AI 变成个人工作系统？
 - 人和 AI 长期协作后，真正改变的不是效率，而是工作方式。
 
+## 当前草稿
+
+- [从一次性 AI 聊天到长期 AI 工作系统](content/articles/2026-07-07-long-term-ai-work-system.md)
+
 ## 发布原则
 
 Markdown 是内容源头。

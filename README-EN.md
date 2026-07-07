@@ -20,6 +20,10 @@ The core theme:
 - A lightweight static-site publishing pipeline.
 - Platform-specific exports for personal websites and other publishing channels.
 
+## Current Drafts
+
+- [From One-Off AI Chats To A Long-Term AI Work System](content/articles/2026-07-07-long-term-ai-work-system.md)
+
 ## Publishing Principle
 
 Markdown is the source of truth.
