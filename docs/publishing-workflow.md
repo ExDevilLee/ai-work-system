@@ -119,9 +119,11 @@ GitHub main
 
 Gitee Go 需要配置流水线变量或密钥：
 
-- `GITEE_TOKEN`：具备推送 Gitee Wiki 仓库权限的 token。
-- `GITEE_USERNAME`：可选，默认 `ExDevilLee`。
-- `GITEE_EMAIL`：可选，默认 `gitee-go@users.noreply.gitee.com`。
+- `WIKI_PUSH_TOKEN`：具备推送 Gitee Wiki 仓库权限的 token。
+- `WIKI_PUSH_USERNAME`：可选，默认 `ExDevilLee`。
+- `WIKI_PUSH_EMAIL`：可选，默认 `gitee-go@users.noreply.gitee.com`。
+
+不要使用 `GITEE_` 或 `GO_` 作为自定义变量前缀；这些前缀在 Gitee Go 中属于系统变量命名空间，容易和平台内置参数冲突。
 
 Gitee Wiki 使用同一个同步脚本，但指定不同远端和展示层名称：
 

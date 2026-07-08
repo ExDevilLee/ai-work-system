@@ -21,12 +21,16 @@ stages:
         pythonVersion: "3.9"
         commands:
           - |
-            if [ -z "$GITEE_TOKEN" ]; then
-              echo "Missing GITEE_TOKEN. Add it as a Gitee Go pipeline variable or secret." >&2
+            WIKI_USERNAME="${WIKI_PUSH_USERNAME:-ExDevilLee}"
+            WIKI_EMAIL="${WIKI_PUSH_EMAIL:-gitee-go@users.noreply.gitee.com}"
+            WIKI_TOKEN="${WIKI_PUSH_TOKEN:-${GITEE_TOKEN:-}}"
+
+            if [ -z "$WIKI_TOKEN" ]; then
+              echo "Missing WIKI_PUSH_TOKEN. Add it as a Gitee Go pipeline variable or secret." >&2
               exit 1
             fi
-          - git config --global user.name "${GITEE_USERNAME:-ExDevilLee}"
-          - git config --global user.email "${GITEE_EMAIL:-gitee-go@users.noreply.gitee.com}"
-          - git config --global url."https://${GITEE_USERNAME:-ExDevilLee}:${GITEE_TOKEN}@gitee.com/".insteadOf "https://gitee.com/"
+            git config --global user.name "$WIKI_USERNAME"
+            git config --global user.email "$WIKI_EMAIL"
+            git config --global url."https://${WIKI_USERNAME}:${WIKI_TOKEN}@gitee.com/".insteadOf "https://gitee.com/"
           - python3 -m py_compile scripts/sync_wiki.py
           - python3 scripts/sync_wiki.py --push --site-name "Gitee Wiki" --wiki-dir ".wiki/ai-work-system.gitee-wiki" --remote "https://gitee.com/ExDevilLee/ai-work-system.wiki.git"
