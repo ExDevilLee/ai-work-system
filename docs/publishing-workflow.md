@@ -109,23 +109,7 @@ python3 scripts/sync_wiki.py --push
 
 Gitee 仓库由 GitHub Actions 的 `.github/workflows/sync-to-gitee.yml` 从 GitHub `main` 镜像过去。
 
-Gitee 侧 Wiki 通过 Gitee Go 流水线同步：
-
-```text
-.workflow/sync-gitee-wiki.yml
-```
-
-同步链路：
-
-```text
-GitHub main
-  -> GitHub Actions 同步主仓库到 Gitee main
-  -> Gitee Go 监听 Gitee main push
-  -> 运行 scripts/sync_wiki.py
-  -> 推送到 https://gitee.com/ExDevilLee/ai-work-system.wiki.git
-```
-
-为了避免 Gitee Go 未自动触发时造成 Wiki 漏发布，GitHub Actions 的 `.github/workflows/sync-to-gitee.yml` 也会在镜像主仓库到 Gitee 后执行一次 Gitee Wiki 同步兜底：
+Gitee Wiki 当前由 GitHub Actions 的 `.github/workflows/sync-to-gitee.yml` 统一同步。该 workflow 会先把主仓库镜像到 Gitee main，再执行一次 Gitee Wiki 同步：
 
 ```text
 GitHub main
@@ -134,19 +118,9 @@ GitHub main
   -> 推送到 https://gitee.com/ExDevilLee/ai-work-system.wiki.git
 ```
 
-因此当前 Gitee Wiki 发布有两条路径：Gitee Go 是 Gitee 侧发布链路，GitHub Actions 是兜底发布链路。两条路径都从主仓库的 `content/articles/*.md` 生成 Wiki，不直接修改 Wiki 页面。
+Gitee Go 发布链路已停用，仓库不再保留 `.workflow/sync-gitee-wiki.yml`。这样可以避免 GitHub Actions 和 Gitee Go 同时推送 Gitee Wiki，减少重复执行和偶发竞态。
 
-Gitee Go 需要配置流水线变量或密钥：
-
-- `WIKI_PUSH_TOKEN`：具备推送 Gitee Wiki 仓库权限的 token。
-- `WIKI_PUSH_USERNAME`：可选，默认 `ExDevilLee`。
-- `WIKI_PUSH_EMAIL`：可选，默认 `gitee-go@users.noreply.gitee.com`。
-
-在 Gitee Go 中，先到 `通用变量` 创建 `WIKI_PUSH_TOKEN`，并勾选 `密文`；然后进入 `Sync Gitee Wiki` 流水线编辑页，把该通用变量关联到流水线。只创建通用变量但不关联流水线时，构建环境可能拿不到该变量。
-
-不要使用 `GITEE_` 或 `GO_` 作为自定义变量前缀；这些前缀在 Gitee Go 中属于系统变量命名空间，容易和平台内置参数冲突。
-
-GitHub Actions 兜底路径复用同步主仓库到 Gitee 时已有的 GitHub Secrets：
+GitHub Actions 路径复用同步主仓库到 Gitee 时已有的 GitHub Secrets：
 
 - `GITEE_USERNAME`
 - `GITEE_TOKEN`

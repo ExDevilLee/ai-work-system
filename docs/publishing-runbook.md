@@ -27,8 +27,7 @@ python3 scripts/sync_wiki.py --dry-run
 GitHub main
   -> GitHub Actions 同步到 GitHub Wiki
   -> GitHub Actions 镜像主仓库到 Gitee main
-  -> GitHub Actions 兜底发布到 Gitee Wiki
-  -> Gitee Go 发布到 Gitee Wiki
+  -> GitHub Actions 发布到 Gitee Wiki
 ```
 
 9. 打开 GitHub Wiki 和 Gitee Wiki 检查文章阅读页。
@@ -68,20 +67,17 @@ python3 scripts/sync_wiki.py --dry-run
 
 检查 GitHub Actions 的同步到 Gitee workflow 是否成功。
 
-如果 GitHub 到 Gitee 的镜像失败，Gitee Go 不会看到新的 push，也就不会触发 Gitee Wiki 发布。
+如果 GitHub 到 Gitee 的镜像失败，Gitee Wiki 发布也不会继续执行。
 
 ### Gitee Wiki 没有更新
 
-先检查 GitHub Actions 的 `Sync to Gitee` workflow 是否成功。该 workflow 会在镜像主仓库到 Gitee 后兜底同步 Gitee Wiki。
-
-如果 GitHub Actions 成功但 Gitee Wiki 仍未更新，再检查 Gitee Go 的 `Sync Gitee Wiki` 流水线。
+检查 GitHub Actions 的 `Sync to Gitee` workflow 是否成功。该 workflow 会在镜像主仓库到 Gitee 后同步 Gitee Wiki。
 
 常见原因：
 
 - GitHub Secrets 中的 `GITEE_USERNAME` 或 `GITEE_TOKEN` 缺失、权限不足或已失效。
-- `WIKI_PUSH_TOKEN` 只创建在通用变量里，但没有关联到流水线。
-- token 权限不足或已失效。
-- 自定义变量使用了 `GITEE_` 或 `GO_` 前缀，和平台系统变量冲突。
+- `GITEE_REPO` 配置错误，导致主仓库镜像没有推到目标 Gitee 仓库。
+- Gitee Wiki 仓库权限不足，导致 `scripts/sync_wiki.py --push` 无法推送。
 
 ### Wiki 页面内容不对
 
