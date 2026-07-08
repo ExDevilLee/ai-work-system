@@ -74,8 +74,9 @@ python3 scripts/sync_wiki.py
 - 生成或更新本地 Wiki working copy：`.wiki/ai-work-system.wiki/`
 - 生成 `Home.md`
 - 生成 `_Sidebar.md`
-- 为每篇 `ready` 文章生成一个 Wiki 页面
+- 为每篇 `ready` 文章生成一个 Wiki 页面；文章页文件名带 `01-`、`02-` 这类阅读序号前缀，用来稳定 Gitee 左侧页面树顺序。
 - Home 和 Sidebar 使用标准 Markdown 链接，不依赖 GitHub 专属 `[[title|page]]` Wiki 语法，避免 Gitee Wiki 渲染成原始文本。
+- 同步时会清理旧的已生成文章页面，避免改名后 Gitee 左侧残留旧页面；没有文章来源标记的手工 Wiki 页面不会被自动删除。
 - 不自动 push
 
 发布到远端 Wiki 时显式执行：

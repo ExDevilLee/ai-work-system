@@ -50,10 +50,13 @@ def parse_frontmatter(path: Path) -> tuple[dict[str, str], str]:
     return metadata, body.lstrip()
 
 
-def wiki_page_name(title: str) -> str:
+def wiki_page_name(title: str, index: int | None = None) -> str:
     name = re.sub(r"[\\/:*?\"<>|#\[\]]+", "-", title).strip()
     name = re.sub(r"\s+", " ", name)
-    return name or "Untitled"
+    name = name or "Untitled"
+    if index is None:
+        return name
+    return f"{index:02d}-{name}"
 
 
 def wiki_page_url(page: str, base_url: str) -> str:
@@ -62,11 +65,15 @@ def wiki_page_url(page: str, base_url: str) -> str:
 
 
 def ready_articles() -> list[dict[str, str | Path]]:
-    articles: list[dict[str, str | Path]] = []
+    rows: list[tuple[Path, dict[str, str], str]] = []
     for path in sorted(ARTICLES_DIR.glob("*.md")):
         metadata, body = parse_frontmatter(path)
         if metadata.get("status") != "ready":
             continue
+        rows.append((path, metadata, body))
+
+    articles: list[dict[str, str | Path]] = []
+    for index, (path, metadata, body) in enumerate(rows, start=1):
         title = metadata.get("title") or path.stem
         articles.append(
             {
@@ -74,7 +81,7 @@ def ready_articles() -> list[dict[str, str | Path]]:
                 "title": title,
                 "summary": metadata.get("summary", ""),
                 "body": body,
-                "page": wiki_page_name(title),
+                "page": wiki_page_name(title, index),
             }
         )
     return articles
@@ -158,7 +165,18 @@ def write_wiki(
     home_path.write_text("\n".join(home_lines).rstrip() + "\n", encoding="utf-8")
     sidebar_path.write_text("\n".join(sidebar_lines).rstrip() + "\n", encoding="utf-8")
     written.extend([home_path, sidebar_path])
+    remove_stale_wiki_pages(wiki_dir, written)
     return written
+
+
+def remove_stale_wiki_pages(wiki_dir: Path, written: list[Path]) -> None:
+    written_paths = {path.resolve() for path in written}
+    for path in wiki_dir.glob("*.md"):
+        if path.resolve() in written_paths:
+            continue
+        if "Source: `content/articles/" not in path.read_text(encoding="utf-8"):
+            continue
+        path.unlink()
 
 
 def commit_and_push(wiki_dir: Path) -> None:

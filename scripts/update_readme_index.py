@@ -32,20 +32,27 @@ def parse_frontmatter(path: Path) -> dict[str, str]:
     return metadata
 
 
-def wiki_page_name(title: str) -> str:
+def wiki_page_name(title: str, index: int | None = None) -> str:
     name = re.sub(r"[\\/:*?\"<>|#\[\]]+", "-", title).strip()
     name = re.sub(r"\s+", " ", name)
-    return name or "Untitled"
+    name = name or "Untitled"
+    if index is None:
+        return name
+    return f"{index:02d}-{name}"
 
 
 def article_rows() -> list[dict[str, str]]:
-    rows: list[dict[str, str]] = []
+    ready_paths: list[tuple[Path, dict[str, str]]] = []
     for path in sorted(ARTICLES_DIR.glob("*.md")):
         metadata = parse_frontmatter(path)
         if metadata.get("status") != "ready":
             continue
+        ready_paths.append((path, metadata))
+
+    rows: list[dict[str, str]] = []
+    for index, (path, metadata) in enumerate(ready_paths, start=1):
         title = metadata.get("title") or path.stem
-        page = wiki_page_name(title)
+        page = wiki_page_name(title, index)
         rows.append(
             {
                 "title": title,
