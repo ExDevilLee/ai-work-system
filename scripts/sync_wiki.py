@@ -88,6 +88,19 @@ def ensure_wiki_repo(wiki_dir: Path, remote: str) -> None:
     run(["git", "remote", "add", "origin", remote], cwd=wiki_dir)
 
 
+def align_wiki_repo_with_remote(wiki_dir: Path) -> None:
+    fetch = run(["git", "fetch", "origin", "master"], cwd=wiki_dir, check=False)
+    if fetch.returncode != 0:
+        if "Repository not found" in fetch.stderr:
+            return
+        sys.stderr.write(fetch.stderr)
+        raise SystemExit(fetch.returncode)
+
+    remote_head = run(["git", "rev-parse", "--verify", "origin/master"], cwd=wiki_dir, check=False)
+    if remote_head.returncode == 0:
+        run(["git", "reset", "--hard", "origin/master"], cwd=wiki_dir)
+
+
 def render_article(article: dict[str, str | Path]) -> str:
     source = Path(article["path"]).relative_to(REPO_ROOT)
     return (
@@ -174,6 +187,8 @@ def main() -> int:
         return 0
 
     ensure_wiki_repo(args.wiki_dir, args.remote)
+    if args.push:
+        align_wiki_repo_with_remote(args.wiki_dir)
     written = write_wiki(args.wiki_dir, articles)
     print(f"Synced ready articles: {len(articles)}")
     for path in written:
