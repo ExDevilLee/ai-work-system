@@ -20,12 +20,21 @@ English version: [README-EN.md](README-EN.md)
 
 > 从一次性 AI 聊天，走向有记忆、有流程、有证据、有复盘的长期 AI 工作系统。
 
-## 初步文章方向
+## 推荐阅读顺序
 
-- 为什么普通 AI 聊天用久了还是会失忆？
-- 我是怎么给 AI 建长期记忆和工作习惯的？
-- 一个不会从零开始的 AI 助手，实际能帮我做什么？
-- 从 prompt 到 workflow：我如何把 AI 变成个人工作系统？
+如果你是第一次看到这个项目，建议按下面的顺序阅读：
+
+1. [我不是在使用 AI 工具，而是在搭建长期工作系统](https://github.com/ExDevilLee/ai-work-system/wiki/01-%E6%88%91%E4%B8%8D%E6%98%AF%E5%9C%A8%E4%BD%BF%E7%94%A8-AI-%E5%B7%A5%E5%85%B7%EF%BC%8C%E8%80%8C%E6%98%AF%E5%9C%A8%E6%90%AD%E5%BB%BA%E9%95%BF%E6%9C%9F%E5%B7%A5%E4%BD%9C%E7%B3%BB%E7%BB%9F)
+2. [为什么 AI 总是失忆？](https://github.com/ExDevilLee/ai-work-system/wiki/02-%E4%B8%BA%E4%BB%80%E4%B9%88-AI-%E6%80%BB%E6%98%AF%E5%A4%B1%E5%BF%86%EF%BC%9F)
+3. [为什么有了长期工作系统后，AI 写作反而不显 AI 味？](https://github.com/ExDevilLee/ai-work-system/wiki/03-%E4%B8%BA%E4%BB%80%E4%B9%88%E6%9C%89%E4%BA%86%E9%95%BF%E6%9C%9F%E5%B7%A5%E4%BD%9C%E7%B3%BB%E7%BB%9F%E5%90%8E%EF%BC%8CAI-%E5%86%99%E4%BD%9C%E5%8F%8D%E8%80%8C%E4%B8%8D%E6%98%BE-AI-%E5%91%B3%EF%BC%9F)
+
+下一篇适合接回第二篇末尾留下的问题：如果要给 AI 建一个最小可用的项目记忆系统，哪些文件应该先出现，哪些规则应该先写下来。
+
+## 后续选题池
+
+- 最小可用项目记忆系统：哪些文件先出现，哪些规则先写下来。
+- 一个不会从零开始的 AI 助手，实际能帮我做什么。
+- 从 prompt 到 workflow：如何把 AI 变成个人工作系统。
 - 人和 AI 长期协作后，真正改变的不是效率，而是工作方式。
 
 ## 已发布文章
