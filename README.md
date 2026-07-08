@@ -26,9 +26,9 @@ English version: [README-EN.md](README-EN.md)
 - 从 prompt 到 workflow：我如何把 AI 变成个人工作系统？
 - 人和 AI 长期协作后，真正改变的不是效率，而是工作方式。
 
-## 当前草稿
+## 已发布文章
 
-- [我不是在使用 AI 工具，而是在搭建长期工作系统](content/articles/2026-07-07-long-term-ai-work-system.md) — 可发布稿阶段
+- [我不是在使用 AI 工具，而是在搭建长期工作系统](content/articles/2026-07-07-long-term-ai-work-system.md) — 已发布到 GitHub Wiki 和 Gitee Wiki
 
 ## 发布原则
 
@@ -48,7 +48,7 @@ Markdown 是内容源头。
 
 当前约定见 [docs/publishing-workflow.md](docs/publishing-workflow.md)。
 
-第一阶段先接入 GitHub Wiki：
+第一阶段先接入 GitHub Wiki 和 Gitee Wiki：
 
 ```bash
 python3 scripts/sync_wiki.py

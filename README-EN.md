@@ -20,9 +20,9 @@ The core theme:
 - A lightweight static-site publishing pipeline.
 - Platform-specific exports for personal websites and other publishing channels.
 
-## Current Drafts
+## Published Articles
 
-- [I Am Not Just Using AI Tools; I Am Building A Long-Term Work System](content/articles/2026-07-07-long-term-ai-work-system.md) — ready for publication
+- [I Am Not Just Using AI Tools; I Am Building A Long-Term Work System](content/articles/2026-07-07-long-term-ai-work-system.md) — published to GitHub Wiki and Gitee Wiki
 
 ## Publishing Principle
 
@@ -40,7 +40,7 @@ Future publishing targets may include:
 
 Current workflow notes: [docs/publishing-workflow.md](docs/publishing-workflow.md).
 
-The first display layer is GitHub Wiki:
+The first display layers are GitHub Wiki and Gitee Wiki:
 
 ```bash
 python3 scripts/sync_wiki.py
