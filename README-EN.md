@@ -4,6 +4,8 @@ A public writing and publishing workspace for building a long-term personal AI w
 
 中文说明见 [README.md](README.md).
 
+`CodexClaw` refers to my long-term personal AI work system and collaboration practice built around Codex, not a single standalone product.
+
 ## What This Repository Is For
 
 This repository will collect public writing, notes, templates, and publishing workflow experiments about building a personal AI work system that can accumulate context over time.

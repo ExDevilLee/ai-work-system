@@ -4,6 +4,8 @@
 
 English version: [README-EN.md](README-EN.md)
 
+这里提到的 `CodexClaw`，指我基于 Codex 长期沉淀出来的一套个人 AI 工作系统和协作方式，不是单一工具产品。
+
 ## 这个仓库用来做什么
 
 这个仓库会逐步沉淀：
