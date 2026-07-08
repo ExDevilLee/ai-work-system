@@ -23,8 +23,10 @@ The core theme:
 ## Published Articles
 
 <!-- articles:index:start -->
-- [I Am Not Just Using AI Tools; I Am Building A Long-Term Work System](https://github.com/ExDevilLee/ai-work-system/wiki/%E6%88%91%E4%B8%8D%E6%98%AF%E5%9C%A8%E4%BD%BF%E7%94%A8-AI-%E5%B7%A5%E5%85%B7%EF%BC%8C%E8%80%8C%E6%98%AF%E5%9C%A8%E6%90%AD%E5%BB%BA%E9%95%BF%E6%9C%9F%E5%B7%A5%E4%BD%9C%E7%B3%BB%E7%BB%9F) — published to GitHub Wiki and Gitee Wiki ([Gitee Wiki](https://gitee.com/ExDevilLee/ai-work-system/wikis/%E6%88%91%E4%B8%8D%E6%98%AF%E5%9C%A8%E4%BD%BF%E7%94%A8%20AI%20%E5%B7%A5%E5%85%B7%EF%BC%8C%E8%80%8C%E6%98%AF%E5%9C%A8%E6%90%AD%E5%BB%BA%E9%95%BF%E6%9C%9F%E5%B7%A5%E4%BD%9C%E7%B3%BB%E7%BB%9F), [source Markdown](content/articles/2026-07-07-long-term-ai-work-system.md))
-- [Why Does AI Keep Forgetting?](https://github.com/ExDevilLee/ai-work-system/wiki/%E4%B8%BA%E4%BB%80%E4%B9%88-AI-%E6%80%BB%E6%98%AF%E5%A4%B1%E5%BF%86%EF%BC%9F) — published to GitHub Wiki and Gitee Wiki ([Gitee Wiki](https://gitee.com/ExDevilLee/ai-work-system/wikis/%E4%B8%BA%E4%BB%80%E4%B9%88%20AI%20%E6%80%BB%E6%98%AF%E5%A4%B1%E5%BF%86%EF%BC%9F), [source Markdown](content/articles/2026-07-08-why-ai-keeps-forgetting.md))
+- [I Am Not Just Using AI Tools; I Am Building A Long-Term Work System](https://github.com/ExDevilLee/ai-work-system/wiki/%E6%88%91%E4%B8%8D%E6%98%AF%E5%9C%A8%E4%BD%BF%E7%94%A8-AI-%E5%B7%A5%E5%85%B7%EF%BC%8C%E8%80%8C%E6%98%AF%E5%9C%A8%E6%90%AD%E5%BB%BA%E9%95%BF%E6%9C%9F%E5%B7%A5%E4%BD%9C%E7%B3%BB%E7%BB%9F)
+- [Why Does AI Keep Forgetting?](https://github.com/ExDevilLee/ai-work-system/wiki/%E4%B8%BA%E4%BB%80%E4%B9%88-AI-%E6%80%BB%E6%98%AF%E5%A4%B1%E5%BF%86%EF%BC%9F)
+
+Article titles link to the GitHub Wiki reading pages by default; Gitee Wiki stays in sync, and source Markdown is available from each Wiki page's source link.
 <!-- articles:index:end -->
 
 ## Publishing Principle

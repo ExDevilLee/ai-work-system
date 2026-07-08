@@ -75,19 +75,27 @@ def main() -> int:
     rows = article_rows()
 
     zh_lines = [
-        (
-            f"- [{row['title']}]({row['github_wiki']}) — 已发布到 GitHub Wiki 和 Gitee Wiki"
-            f"（[Gitee Wiki]({row['gitee_wiki']})，[源码 Markdown]({row['source']})）"
-        )
+        f"- [{row['title']}]({row['github_wiki']})"
         for row in rows
     ]
     en_lines = [
-        (
-            f"- [{row['title_en']}]({row['github_wiki']}) — published to GitHub Wiki and Gitee Wiki"
-            f" ([Gitee Wiki]({row['gitee_wiki']}), [source Markdown]({row['source']}))"
-        )
+        f"- [{row['title_en']}]({row['github_wiki']})"
         for row in rows
     ]
+
+    if rows:
+        zh_lines.extend(
+            [
+                "",
+                "文章标题默认链接到 GitHub Wiki 阅读页；Gitee Wiki 保持同步展示，源码 Markdown 可从 Wiki 页面底部的来源入口进入。",
+            ]
+        )
+        en_lines.extend(
+            [
+                "",
+                "Article titles link to the GitHub Wiki reading pages by default; Gitee Wiki stays in sync, and source Markdown is available from each Wiki page's source link.",
+            ]
+        )
 
     replace_block(
         REPO_ROOT / "README.md",
