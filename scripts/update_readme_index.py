@@ -94,6 +94,8 @@ def main() -> int:
             [
                 "",
                 "Article titles link to the GitHub Wiki reading pages by default; Gitee Wiki stays in sync, and source Markdown is available from each Wiki page's source link.",
+                "",
+                "Article bodies are currently written in Chinese first. English titles are provided for navigation; full English translations may be added selectively.",
             ]
         )
 

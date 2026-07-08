@@ -17,6 +17,8 @@ content/articles/*.md
 
 如果在 Wiki、个人网站或其他平台发现需要改文章，应该回到主仓库修改 `content/articles/*.md`，再重新同步。
 
+文章正文默认以中文为主。`README-EN.md` 提供英文项目入口和文章导航，文章可以维护 `title_en`、`summary_en` 等英文元信息；完整英文译文按需维护，不作为每篇文章的默认发布要求。
+
 ## 内容状态
 
 文章通过 frontmatter 的 `status` 字段表示当前阶段：

@@ -27,6 +27,8 @@ The core theme:
 - [Why Does AI Keep Forgetting?](https://github.com/ExDevilLee/ai-work-system/wiki/%E4%B8%BA%E4%BB%80%E4%B9%88-AI-%E6%80%BB%E6%98%AF%E5%A4%B1%E5%BF%86%EF%BC%9F)
 
 Article titles link to the GitHub Wiki reading pages by default; Gitee Wiki stays in sync, and source Markdown is available from each Wiki page's source link.
+
+Article bodies are currently written in Chinese first. English titles are provided for navigation; full English translations may be added selectively.
 <!-- articles:index:end -->
 
 ## Publishing Principle
