@@ -22,7 +22,7 @@ The core theme:
 
 ## Current Drafts
 
-- [From One-Off AI Chats To A Long-Term AI Work System](content/articles/2026-07-07-long-term-ai-work-system.md) — first draft stage
+- [I Am Not Just Using AI Tools; I Am Building A Long-Term Work System](content/articles/2026-07-07-long-term-ai-work-system.md) — ready for publication
 
 ## Publishing Principle
 
