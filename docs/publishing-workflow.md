@@ -97,6 +97,41 @@ python3 scripts/sync_wiki.py --push
 
 如果 GitHub 默认 `GITHUB_TOKEN` 无法写入 Wiki 仓库，需要在仓库 Secrets 中添加具备 Wiki 写入权限的 `WIKI_PUSH_TOKEN`，workflow 会优先使用该 token。
 
+## Gitee Wiki 同步
+
+Gitee 仓库由 GitHub Actions 的 `.github/workflows/sync-to-gitee.yml` 从 GitHub `main` 镜像过去。
+
+Gitee 侧 Wiki 通过 Gitee Go 流水线同步：
+
+```text
+.workflow/sync-gitee-wiki.yml
+```
+
+同步链路：
+
+```text
+GitHub main
+  -> GitHub Actions 同步主仓库到 Gitee main
+  -> Gitee Go 监听 Gitee main push
+  -> 运行 scripts/sync_wiki.py
+  -> 推送到 https://gitee.com/ExDevilLee/ai-work-system.wiki.git
+```
+
+Gitee Go 需要配置流水线变量或密钥：
+
+- `GITEE_TOKEN`：具备推送 Gitee Wiki 仓库权限的 token。
+- `GITEE_USERNAME`：可选，默认 `ExDevilLee`。
+- `GITEE_EMAIL`：可选，默认 `gitee-go@users.noreply.gitee.com`。
+
+Gitee Wiki 使用同一个同步脚本，但指定不同远端和展示层名称：
+
+```bash
+python3 scripts/sync_wiki.py --push \
+  --site-name "Gitee Wiki" \
+  --wiki-dir ".wiki/ai-work-system.gitee-wiki" \
+  --remote "https://gitee.com/ExDevilLee/ai-work-system.wiki.git"
+```
+
 ## 后续扩展
 
 未来可以继续增加展示层：

@@ -5,7 +5,6 @@ from __future__ import annotations
 
 import argparse
 import re
-import shutil
 import subprocess
 import sys
 from pathlib import Path
@@ -15,6 +14,7 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 ARTICLES_DIR = REPO_ROOT / "content" / "articles"
 DEFAULT_WIKI_DIR = REPO_ROOT / ".wiki" / "ai-work-system.wiki"
 DEFAULT_REMOTE = "https://github.com/ExDevilLee/ai-work-system.wiki.git"
+DEFAULT_SITE_NAME = "GitHub Wiki"
 
 
 def run(cmd: list[str], cwd: Path | None = None, check: bool = True) -> subprocess.CompletedProcess[str]:
@@ -110,13 +110,13 @@ def render_article(article: dict[str, str | Path]) -> str:
     )
 
 
-def write_wiki(wiki_dir: Path, articles: list[dict[str, str | Path]]) -> list[Path]:
+def write_wiki(wiki_dir: Path, articles: list[dict[str, str | Path]], site_name: str) -> list[Path]:
     written: list[Path] = []
 
     home_lines = [
         "# AI Work System",
         "",
-        "这里是 `ai-work-system` 的 GitHub Wiki 展示层。",
+        f"这里是 `ai-work-system` 的 {site_name} 展示层。",
         "",
         "内容源头在主仓库 `content/articles/`；Wiki 只同步 `status: ready` 的文章。",
         "",
@@ -175,6 +175,7 @@ def main() -> int:
     parser = argparse.ArgumentParser(description="Sync ready articles to GitHub Wiki.")
     parser.add_argument("--wiki-dir", type=Path, default=DEFAULT_WIKI_DIR)
     parser.add_argument("--remote", default=DEFAULT_REMOTE)
+    parser.add_argument("--site-name", default=DEFAULT_SITE_NAME, help="Display name used in generated wiki pages.")
     parser.add_argument("--push", action="store_true", help="Commit and push wiki changes.")
     parser.add_argument("--dry-run", action="store_true", help="Print ready articles without writing wiki files.")
     args = parser.parse_args()
@@ -189,7 +190,7 @@ def main() -> int:
     ensure_wiki_repo(args.wiki_dir, args.remote)
     if args.push:
         align_wiki_repo_with_remote(args.wiki_dir)
-    written = write_wiki(args.wiki_dir, articles)
+    written = write_wiki(args.wiki_dir, articles, args.site_name)
     print(f"Synced ready articles: {len(articles)}")
     for path in written:
         print(path.relative_to(args.wiki_dir))
