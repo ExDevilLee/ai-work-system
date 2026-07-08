@@ -27,6 +27,7 @@ python3 scripts/sync_wiki.py --dry-run
 GitHub main
   -> GitHub Actions 同步到 GitHub Wiki
   -> GitHub Actions 镜像主仓库到 Gitee main
+  -> GitHub Actions 兜底发布到 Gitee Wiki
   -> Gitee Go 发布到 Gitee Wiki
 ```
 
@@ -71,10 +72,13 @@ python3 scripts/sync_wiki.py --dry-run
 
 ### Gitee Wiki 没有更新
 
-检查 Gitee Go 的 `Sync Gitee Wiki` 流水线。
+先检查 GitHub Actions 的 `Sync to Gitee` workflow 是否成功。该 workflow 会在镜像主仓库到 Gitee 后兜底同步 Gitee Wiki。
+
+如果 GitHub Actions 成功但 Gitee Wiki 仍未更新，再检查 Gitee Go 的 `Sync Gitee Wiki` 流水线。
 
 常见原因：
 
+- GitHub Secrets 中的 `GITEE_USERNAME` 或 `GITEE_TOKEN` 缺失、权限不足或已失效。
 - `WIKI_PUSH_TOKEN` 只创建在通用变量里，但没有关联到流水线。
 - token 权限不足或已失效。
 - 自定义变量使用了 `GITEE_` 或 `GO_` 前缀，和平台系统变量冲突。

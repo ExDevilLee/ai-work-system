@@ -36,3 +36,23 @@ jobs:
           git remote add gitee "https://${GITEE_USERNAME}:${GITEE_TOKEN}@gitee.com/${GITEE_REPO}.git"
           git push gitee main:main --force
           git push gitee --tags --force
+
+      - name: Sync Gitee Wiki fallback
+        env:
+          GITEE_USERNAME: ${{ secrets.GITEE_USERNAME }}
+          GITEE_TOKEN: ${{ secrets.GITEE_TOKEN }}
+        run: |
+          if [ -z "$GITEE_USERNAME" ] || [ -z "$GITEE_TOKEN" ]; then
+            echo "Missing Gitee credentials for Wiki sync." >&2
+            exit 1
+          fi
+
+          git config --global user.name "$GITEE_USERNAME"
+          git config --global user.email "github-actions@users.noreply.github.com"
+          git config --global url."https://${GITEE_USERNAME}:${GITEE_TOKEN}@gitee.com/".insteadOf "https://gitee.com/"
+
+          python3 -m py_compile scripts/sync_wiki.py
+          python3 scripts/sync_wiki.py --push \
+            --site-name "Gitee Wiki" \
+            --wiki-dir ".wiki/ai-work-system.gitee-wiki" \
+            --remote "https://gitee.com/ExDevilLee/ai-work-system.wiki.git"
