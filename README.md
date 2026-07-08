@@ -28,7 +28,13 @@ English version: [README-EN.md](README-EN.md)
 
 ## 已发布文章
 
+<!-- articles:index:start -->
 - [我不是在使用 AI 工具，而是在搭建长期工作系统](https://github.com/ExDevilLee/ai-work-system/wiki/%E6%88%91%E4%B8%8D%E6%98%AF%E5%9C%A8%E4%BD%BF%E7%94%A8-AI-%E5%B7%A5%E5%85%B7%EF%BC%8C%E8%80%8C%E6%98%AF%E5%9C%A8%E6%90%AD%E5%BB%BA%E9%95%BF%E6%9C%9F%E5%B7%A5%E4%BD%9C%E7%B3%BB%E7%BB%9F) — 已发布到 GitHub Wiki 和 Gitee Wiki（[Gitee Wiki](https://gitee.com/ExDevilLee/ai-work-system/wikis/%E6%88%91%E4%B8%8D%E6%98%AF%E5%9C%A8%E4%BD%BF%E7%94%A8%20AI%20%E5%B7%A5%E5%85%B7%EF%BC%8C%E8%80%8C%E6%98%AF%E5%9C%A8%E6%90%AD%E5%BB%BA%E9%95%BF%E6%9C%9F%E5%B7%A5%E4%BD%9C%E7%B3%BB%E7%BB%9F)，[源码 Markdown](content/articles/2026-07-07-long-term-ai-work-system.md)）
+<!-- articles:index:end -->
+
+## 当前草稿
+
+- [为什么 AI 总是失忆？](content/articles/2026-07-08-why-ai-keeps-forgetting.md) — 大纲草稿阶段
 
 ## 发布原则
 
@@ -47,10 +53,12 @@ Markdown 是内容源头。
 ## 发布工作流
 
 当前约定见 [docs/publishing-workflow.md](docs/publishing-workflow.md)。
+日常发布检查见 [docs/publishing-runbook.md](docs/publishing-runbook.md)。
 
 第一阶段先接入 GitHub Wiki 和 Gitee Wiki：
 
 ```bash
+python3 scripts/update_readme_index.py
 python3 scripts/sync_wiki.py
 ```
 

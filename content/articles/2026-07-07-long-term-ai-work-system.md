@@ -1,5 +1,6 @@
 ---
 title: 我不是在使用 AI 工具，而是在搭建长期工作系统
+title_en: I Am Not Just Using AI Tools; I Am Building A Long-Term Work System
 date: 2026-07-07
 status: ready
 series: long-term-ai-work-system

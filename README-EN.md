@@ -22,7 +22,13 @@ The core theme:
 
 ## Published Articles
 
+<!-- articles:index:start -->
 - [I Am Not Just Using AI Tools; I Am Building A Long-Term Work System](https://github.com/ExDevilLee/ai-work-system/wiki/%E6%88%91%E4%B8%8D%E6%98%AF%E5%9C%A8%E4%BD%BF%E7%94%A8-AI-%E5%B7%A5%E5%85%B7%EF%BC%8C%E8%80%8C%E6%98%AF%E5%9C%A8%E6%90%AD%E5%BB%BA%E9%95%BF%E6%9C%9F%E5%B7%A5%E4%BD%9C%E7%B3%BB%E7%BB%9F) — published to GitHub Wiki and Gitee Wiki ([Gitee Wiki](https://gitee.com/ExDevilLee/ai-work-system/wikis/%E6%88%91%E4%B8%8D%E6%98%AF%E5%9C%A8%E4%BD%BF%E7%94%A8%20AI%20%E5%B7%A5%E5%85%B7%EF%BC%8C%E8%80%8C%E6%98%AF%E5%9C%A8%E6%90%AD%E5%BB%BA%E9%95%BF%E6%9C%9F%E5%B7%A5%E4%BD%9C%E7%B3%BB%E7%BB%9F), [source Markdown](content/articles/2026-07-07-long-term-ai-work-system.md))
+<!-- articles:index:end -->
+
+## Current Drafts
+
+- [Why Does AI Keep Forgetting?](content/articles/2026-07-08-why-ai-keeps-forgetting.md) — outline draft
 
 ## Publishing Principle
 
@@ -39,10 +45,12 @@ Future publishing targets may include:
 ## Publishing Workflow
 
 Current workflow notes: [docs/publishing-workflow.md](docs/publishing-workflow.md).
+Daily publishing checklist: [docs/publishing-runbook.md](docs/publishing-runbook.md).
 
 The first display layers are GitHub Wiki and Gitee Wiki:
 
 ```bash
+python3 scripts/update_readme_index.py
 python3 scripts/sync_wiki.py
 ```
 

@@ -23,9 +23,15 @@ content/articles/*.md
 
 - `draft`：草稿阶段，不同步到展示层。
 - `review`：发布前审阅阶段，不默认同步到展示层。
-- `ready`：可发布稿阶段，可以同步到展示层。
+- `ready`：发布源稿阶段，可以同步到展示层；推送到 `main` 后会由 CI 发布或刷新到 Wiki。
 
-第一阶段只同步 `status: ready` 的文章到 GitHub Wiki。
+第一阶段只同步 `status: ready` 的文章到 GitHub Wiki 和 Gitee Wiki。
+
+`status` 描述的是主仓库源稿是否可以进入自动发布链路，不直接等同于 README 里的展示分类：
+
+- README 的 `已发布文章 / Published Articles` 只展示 `status: ready` 的文章，并优先链接到 Wiki 阅读页。
+- README 的草稿入口只展示仍在写作中的文章，链接回主仓库源码 Markdown。
+- 已经发布过的文章如果继续修改，仍保持 `status: ready`；重新 push 后会覆盖刷新 Wiki 页面。
 
 ## Wiki 定位
 
@@ -56,11 +62,13 @@ GitHub Wiki 是当前轻量展示层，不是创作源头。
 当前脚本：
 
 ```bash
+python3 scripts/update_readme_index.py
 python3 scripts/sync_wiki.py
 ```
 
 默认行为：
 
+- `scripts/update_readme_index.py` 根据 frontmatter 生成 README 和 README-EN 的 `已发布文章 / Published Articles` 区块。
 - 生成或更新本地 Wiki working copy：`.wiki/ai-work-system.wiki/`
 - 生成 `Home.md`
 - 生成 `_Sidebar.md`
