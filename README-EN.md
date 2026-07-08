@@ -31,6 +31,10 @@ Article titles link to the GitHub Wiki reading pages by default; Gitee Wiki stay
 Article bodies are currently written in Chinese first. English titles are provided for navigation; full English translations may be added selectively.
 <!-- articles:index:end -->
 
+## Work In Progress
+
+- [Why Does AI Writing Feel Less Artificial Inside A Long-Term Work System?](content/articles/2026-07-08-why-ai-writing-feels-human.md) — outline draft
+
 ## Publishing Principle
 
 Markdown is the source of truth.

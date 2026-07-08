@@ -35,6 +35,10 @@ English version: [README-EN.md](README-EN.md)
 文章标题默认链接到 GitHub Wiki 阅读页；Gitee Wiki 保持同步展示，源码 Markdown 可从 Wiki 页面底部的来源入口进入。
 <!-- articles:index:end -->
 
+## 当前写作中
+
+- [为什么有了长期工作系统后，AI 写作反而不显 AI 味？](content/articles/2026-07-08-why-ai-writing-feels-human.md) — 大纲草稿阶段
+
 ## 发布原则
 
 Markdown 是内容源头。
