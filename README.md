@@ -44,6 +44,18 @@ Markdown 是内容源头。
 
 第一阶段会优先保证个人网站自动部署；微信公众号等平台先采用人工确认或半自动发布，避免误发。
 
+## 发布工作流
+
+当前约定见 [docs/publishing-workflow.md](docs/publishing-workflow.md)。
+
+第一阶段先接入 GitHub Wiki：
+
+```bash
+python3 scripts/sync_wiki.py
+```
+
+脚本只同步 `status: ready` 的文章。默认只更新本地 Wiki working copy；发布到远端 Wiki 时显式加 `--push`。
+
 ## 授权协议
 
 除非另有说明，本仓库内容采用 [Creative Commons Attribution 4.0 International License](LICENSE) 授权。

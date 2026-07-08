@@ -36,6 +36,18 @@ Future publishing targets may include:
 - Short-form social posts
 - Video outlines
 
+## Publishing Workflow
+
+Current workflow notes: [docs/publishing-workflow.md](docs/publishing-workflow.md).
+
+The first display layer is GitHub Wiki:
+
+```bash
+python3 scripts/sync_wiki.py
+```
+
+The script only syncs articles with `status: ready`. By default it only updates a local wiki working copy; use `--push` to publish to the remote Wiki.
+
 ## License
 
 Unless otherwise noted, the content in this repository is licensed under the [Creative Commons Attribution 4.0 International License](LICENSE).

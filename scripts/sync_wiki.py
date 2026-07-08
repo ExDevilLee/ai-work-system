@@ -1,0 +1,190 @@
+#!/usr/bin/env python3
+"""Sync ready articles from the main repository into the GitHub Wiki repo."""
+
+from __future__ import annotations
+
+import argparse
+import re
+import shutil
+import subprocess
+import sys
+from pathlib import Path
+
+
+REPO_ROOT = Path(__file__).resolve().parents[1]
+ARTICLES_DIR = REPO_ROOT / "content" / "articles"
+DEFAULT_WIKI_DIR = REPO_ROOT / ".wiki" / "ai-work-system.wiki"
+DEFAULT_REMOTE = "https://github.com/ExDevilLee/ai-work-system.wiki.git"
+
+
+def run(cmd: list[str], cwd: Path | None = None, check: bool = True) -> subprocess.CompletedProcess[str]:
+    return subprocess.run(
+        cmd,
+        cwd=str(cwd) if cwd else None,
+        check=check,
+        text=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+    )
+
+
+def parse_frontmatter(path: Path) -> tuple[dict[str, str], str]:
+    text = path.read_text(encoding="utf-8")
+    if not text.startswith("---\n"):
+        return {}, text
+
+    end = text.find("\n---\n", 4)
+    if end == -1:
+        return {}, text
+
+    raw = text[4:end]
+    body = text[end + len("\n---\n") :]
+    metadata: dict[str, str] = {}
+    for line in raw.splitlines():
+        if ":" not in line or line.startswith(" "):
+            continue
+        key, value = line.split(":", 1)
+        metadata[key.strip()] = value.strip().strip('"').strip("'")
+    return metadata, body.lstrip()
+
+
+def wiki_page_name(title: str) -> str:
+    name = re.sub(r"[\\/:*?\"<>|#\[\]]+", "-", title).strip()
+    name = re.sub(r"\s+", " ", name)
+    return name or "Untitled"
+
+
+def ready_articles() -> list[dict[str, str | Path]]:
+    articles: list[dict[str, str | Path]] = []
+    for path in sorted(ARTICLES_DIR.glob("*.md")):
+        metadata, body = parse_frontmatter(path)
+        if metadata.get("status") != "ready":
+            continue
+        title = metadata.get("title") or path.stem
+        articles.append(
+            {
+                "path": path,
+                "title": title,
+                "summary": metadata.get("summary", ""),
+                "body": body,
+                "page": wiki_page_name(title),
+            }
+        )
+    return articles
+
+
+def ensure_wiki_repo(wiki_dir: Path, remote: str) -> None:
+    if (wiki_dir / ".git").exists():
+        return
+
+    wiki_dir.parent.mkdir(parents=True, exist_ok=True)
+    clone = run(["git", "clone", remote, str(wiki_dir)], check=False)
+    if clone.returncode == 0:
+        return
+
+    wiki_dir.mkdir(parents=True, exist_ok=True)
+    run(["git", "init"], cwd=wiki_dir)
+    run(["git", "branch", "-M", "master"], cwd=wiki_dir)
+    run(["git", "remote", "add", "origin", remote], cwd=wiki_dir)
+
+
+def render_article(article: dict[str, str | Path]) -> str:
+    source = Path(article["path"]).relative_to(REPO_ROOT)
+    return (
+        f"{article['body'].rstrip()}\n\n"
+        "---\n\n"
+        f"Source: `{source}`\n"
+    )
+
+
+def write_wiki(wiki_dir: Path, articles: list[dict[str, str | Path]]) -> list[Path]:
+    written: list[Path] = []
+
+    home_lines = [
+        "# AI Work System",
+        "",
+        "这里是 `ai-work-system` 的 GitHub Wiki 展示层。",
+        "",
+        "内容源头在主仓库 `content/articles/`；Wiki 只同步 `status: ready` 的文章。",
+        "",
+        "## Articles",
+        "",
+    ]
+
+    sidebar_lines = ["# Articles", ""]
+
+    for article in articles:
+        page = str(article["page"])
+        title = str(article["title"])
+        summary = str(article["summary"])
+        filename = wiki_dir / f"{page}.md"
+        filename.write_text(render_article(article), encoding="utf-8")
+        written.append(filename)
+
+        if summary:
+            home_lines.append(f"- [[{title}|{page}]] - {summary}")
+        else:
+            home_lines.append(f"- [[{title}|{page}]]")
+        sidebar_lines.append(f"- [[{title}|{page}]]")
+
+    home_path = wiki_dir / "Home.md"
+    sidebar_path = wiki_dir / "_Sidebar.md"
+    home_path.write_text("\n".join(home_lines).rstrip() + "\n", encoding="utf-8")
+    sidebar_path.write_text("\n".join(sidebar_lines).rstrip() + "\n", encoding="utf-8")
+    written.extend([home_path, sidebar_path])
+    return written
+
+
+def commit_and_push(wiki_dir: Path) -> None:
+    run(["git", "add", "."], cwd=wiki_dir)
+    status = run(["git", "status", "--short"], cwd=wiki_dir).stdout.strip()
+    if status:
+        run(["git", "commit", "-m", "Sync ready articles"], cwd=wiki_dir)
+    else:
+        print("No local wiki file changes.")
+
+    push = run(["git", "push", "origin", "HEAD:master"], cwd=wiki_dir, check=False)
+    if push.returncode != 0:
+        sys.stderr.write(push.stderr)
+        if "Repository not found" in push.stderr:
+            sys.stderr.write(
+                "\nGitHub Wiki repo was not found. If this is the first sync, "
+                "create the first Wiki page in the GitHub web UI, then run this script again.\n"
+            )
+        raise SystemExit(push.returncode)
+    if push.stdout:
+        print(push.stdout, end="")
+    if push.stderr:
+        print(push.stderr, end="", file=sys.stderr)
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(description="Sync ready articles to GitHub Wiki.")
+    parser.add_argument("--wiki-dir", type=Path, default=DEFAULT_WIKI_DIR)
+    parser.add_argument("--remote", default=DEFAULT_REMOTE)
+    parser.add_argument("--push", action="store_true", help="Commit and push wiki changes.")
+    parser.add_argument("--dry-run", action="store_true", help="Print ready articles without writing wiki files.")
+    args = parser.parse_args()
+
+    articles = ready_articles()
+    if args.dry_run:
+        for article in articles:
+            print(f"{article['page']}: {article['path']}")
+        print(f"Ready articles: {len(articles)}")
+        return 0
+
+    ensure_wiki_repo(args.wiki_dir, args.remote)
+    written = write_wiki(args.wiki_dir, articles)
+    print(f"Synced ready articles: {len(articles)}")
+    for path in written:
+        print(path.relative_to(args.wiki_dir))
+
+    if args.push:
+        commit_and_push(args.wiki_dir)
+    else:
+        print("Local wiki files updated. Re-run with --push to publish.")
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())
