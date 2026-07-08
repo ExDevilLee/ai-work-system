@@ -38,6 +38,7 @@ The next practical topic should return to the question left by the second articl
 - What a non-resetting AI assistant can actually help with.
 - From prompt to workflow: turning AI into a personal work system.
 - After long-term human-AI collaboration, the real change may be work style, not just efficiency.
+- [MORE](docs/topic-pool.md)
 
 ## Published Articles
 
