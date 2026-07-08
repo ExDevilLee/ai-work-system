@@ -2,7 +2,7 @@
 title: 为什么 AI 总是失忆？
 title_en: Why Does AI Keep Forgetting?
 date: 2026-07-08
-status: review
+status: ready
 series: long-term-ai-work-system
 lang: zh
 summary: 解释为什么 AI 协作经常像从零开始，以及为什么长期协作需要把关键上下文沉淀到聊天窗口之外。
