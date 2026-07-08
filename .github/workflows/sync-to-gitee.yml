@@ -55,4 +55,5 @@ jobs:
           python3 scripts/sync_wiki.py --push \
             --site-name "Gitee Wiki" \
             --wiki-dir ".wiki/ai-work-system.gitee-wiki" \
-            --remote "https://gitee.com/ExDevilLee/ai-work-system.wiki.git"
+            --remote "https://gitee.com/ExDevilLee/ai-work-system.wiki.git" \
+            --wiki-base-url "https://gitee.com/ExDevilLee/ai-work-system/wikis"

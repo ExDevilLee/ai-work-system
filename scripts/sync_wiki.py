@@ -8,6 +8,7 @@ import re
 import subprocess
 import sys
 from pathlib import Path
+from urllib.parse import quote
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
@@ -15,6 +16,7 @@ ARTICLES_DIR = REPO_ROOT / "content" / "articles"
 DEFAULT_WIKI_DIR = REPO_ROOT / ".wiki" / "ai-work-system.wiki"
 DEFAULT_REMOTE = "https://github.com/ExDevilLee/ai-work-system.wiki.git"
 DEFAULT_SITE_NAME = "GitHub Wiki"
+DEFAULT_WIKI_BASE_URL = "https://github.com/ExDevilLee/ai-work-system/wiki"
 
 
 def run(cmd: list[str], cwd: Path | None = None, check: bool = True) -> subprocess.CompletedProcess[str]:
@@ -52,6 +54,11 @@ def wiki_page_name(title: str) -> str:
     name = re.sub(r"[\\/:*?\"<>|#\[\]]+", "-", title).strip()
     name = re.sub(r"\s+", " ", name)
     return name or "Untitled"
+
+
+def wiki_page_url(page: str, base_url: str) -> str:
+    url_page = page.replace(" ", "-") if "github.com" in base_url else page
+    return f"{base_url.rstrip('/')}/{quote(url_page)}"
 
 
 def ready_articles() -> list[dict[str, str | Path]]:
@@ -110,7 +117,12 @@ def render_article(article: dict[str, str | Path]) -> str:
     )
 
 
-def write_wiki(wiki_dir: Path, articles: list[dict[str, str | Path]], site_name: str) -> list[Path]:
+def write_wiki(
+    wiki_dir: Path,
+    articles: list[dict[str, str | Path]],
+    site_name: str,
+    wiki_base_url: str,
+) -> list[Path]:
     written: list[Path] = []
 
     home_lines = [
@@ -120,25 +132,26 @@ def write_wiki(wiki_dir: Path, articles: list[dict[str, str | Path]], site_name:
         "",
         "内容源头在主仓库 `content/articles/`；Wiki 只同步 `status: ready` 的文章。",
         "",
-        "## Articles",
+        "## 文章",
         "",
     ]
 
-    sidebar_lines = ["# Articles", ""]
+    sidebar_lines = ["# 文章", ""]
 
-    for article in articles:
+    for index, article in enumerate(articles, start=1):
         page = str(article["page"])
         title = str(article["title"])
         summary = str(article["summary"])
+        url = wiki_page_url(page, wiki_base_url)
         filename = wiki_dir / f"{page}.md"
         filename.write_text(render_article(article), encoding="utf-8")
         written.append(filename)
 
+        home_lines.append(f"{index}. [{title}]({url})")
         if summary:
-            home_lines.append(f"- [[{title}|{page}]] - {summary}")
-        else:
-            home_lines.append(f"- [[{title}|{page}]]")
-        sidebar_lines.append(f"- [[{title}|{page}]]")
+            home_lines.append(f"   {summary}")
+        home_lines.append("")
+        sidebar_lines.append(f"- [{title}]({url})")
 
     home_path = wiki_dir / "Home.md"
     sidebar_path = wiki_dir / "_Sidebar.md"
@@ -176,6 +189,11 @@ def main() -> int:
     parser.add_argument("--wiki-dir", type=Path, default=DEFAULT_WIKI_DIR)
     parser.add_argument("--remote", default=DEFAULT_REMOTE)
     parser.add_argument("--site-name", default=DEFAULT_SITE_NAME, help="Display name used in generated wiki pages.")
+    parser.add_argument(
+        "--wiki-base-url",
+        default=DEFAULT_WIKI_BASE_URL,
+        help="Base URL used for generated Markdown links.",
+    )
     parser.add_argument("--push", action="store_true", help="Commit and push wiki changes.")
     parser.add_argument("--dry-run", action="store_true", help="Print ready articles without writing wiki files.")
     args = parser.parse_args()
@@ -190,7 +208,7 @@ def main() -> int:
     ensure_wiki_repo(args.wiki_dir, args.remote)
     if args.push:
         align_wiki_repo_with_remote(args.wiki_dir)
-    written = write_wiki(args.wiki_dir, articles, args.site_name)
+    written = write_wiki(args.wiki_dir, articles, args.site_name, args.wiki_base_url)
     print(f"Synced ready articles: {len(articles)}")
     for path in written:
         print(path.relative_to(args.wiki_dir))

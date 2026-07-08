@@ -75,6 +75,7 @@ python3 scripts/sync_wiki.py
 - 生成 `Home.md`
 - 生成 `_Sidebar.md`
 - 为每篇 `ready` 文章生成一个 Wiki 页面
+- Home 和 Sidebar 使用标准 Markdown 链接，不依赖 GitHub 专属 `[[title|page]]` Wiki 语法，避免 Gitee Wiki 渲染成原始文本。
 - 不自动 push
 
 发布到远端 Wiki 时显式执行：
@@ -134,7 +135,8 @@ Gitee Wiki 使用同一个同步脚本，但指定不同远端和展示层名称
 python3 scripts/sync_wiki.py --push \
   --site-name "Gitee Wiki" \
   --wiki-dir ".wiki/ai-work-system.gitee-wiki" \
-  --remote "https://gitee.com/ExDevilLee/ai-work-system.wiki.git"
+  --remote "https://gitee.com/ExDevilLee/ai-work-system.wiki.git" \
+  --wiki-base-url "https://gitee.com/ExDevilLee/ai-work-system/wikis"
 ```
 
 ## 后续扩展
