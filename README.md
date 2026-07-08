@@ -39,7 +39,7 @@ English version: [README-EN.md](README-EN.md)
 
 ## 当前写作中
 
-- [为什么有了长期工作系统后，AI 写作反而不显 AI 味？](content/articles/2026-07-08-why-ai-writing-feels-human.md) — 初稿阶段
+- [为什么有了长期工作系统后，AI 写作反而不显 AI 味？](content/articles/2026-07-08-why-ai-writing-feels-human.md) — 打磨阶段
 
 ## 发布原则
 

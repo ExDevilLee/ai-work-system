@@ -35,7 +35,7 @@ Article bodies are currently written in Chinese first. English titles are provid
 
 ## Work In Progress
 
-- [Why Does AI Writing Feel Less Artificial Inside A Long-Term Work System?](content/articles/2026-07-08-why-ai-writing-feels-human.md) — first draft
+- [Why Does AI Writing Feel Less Artificial Inside A Long-Term Work System?](content/articles/2026-07-08-why-ai-writing-feels-human.md) — polishing draft
 
 ## Publishing Principle
 
