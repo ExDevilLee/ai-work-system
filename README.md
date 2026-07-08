@@ -34,7 +34,7 @@ English version: [README-EN.md](README-EN.md)
 
 ## 当前草稿
 
-- [为什么 AI 总是失忆？](content/articles/2026-07-08-why-ai-keeps-forgetting.md) — 初稿阶段
+- [为什么 AI 总是失忆？](content/articles/2026-07-08-why-ai-keeps-forgetting.md) — 打磨阶段
 
 ## 发布原则
 

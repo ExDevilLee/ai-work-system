@@ -28,7 +28,7 @@ The core theme:
 
 ## Current Drafts
 
-- [Why Does AI Keep Forgetting?](content/articles/2026-07-08-why-ai-keeps-forgetting.md) — first draft
+- [Why Does AI Keep Forgetting?](content/articles/2026-07-08-why-ai-keeps-forgetting.md) — polishing draft
 
 ## Publishing Principle
 
