@@ -29,7 +29,7 @@ The core theme:
 - [Why Does AI Keep Forgetting?](https://github.com/ExDevilLee/ai-work-system/wiki/02-%E4%B8%BA%E4%BB%80%E4%B9%88-AI-%E6%80%BB%E6%98%AF%E5%A4%B1%E5%BF%86%EF%BC%9F)
 - [Why Does AI Writing Feel Less Artificial Inside A Long-Term Work System?](https://github.com/ExDevilLee/ai-work-system/wiki/03-%E4%B8%BA%E4%BB%80%E4%B9%88%E6%9C%89%E4%BA%86%E9%95%BF%E6%9C%9F%E5%B7%A5%E4%BD%9C%E7%B3%BB%E7%BB%9F%E5%90%8E%EF%BC%8CAI-%E5%86%99%E4%BD%9C%E5%8F%8D%E8%80%8C%E4%B8%8D%E6%98%BE-AI-%E5%91%B3%EF%BC%9F)
 
-Article titles link to the GitHub Wiki reading pages by default; Gitee Wiki stays in sync, and source Markdown is available from each Wiki page's source link.
+Article titles link to the GitHub Wiki reading pages by default; [Gitee Wiki](https://gitee.com/ExDevilLee/ai-work-system/wikis/Home) stays in sync, and source Markdown is available from each Wiki page's source link.
 
 Article bodies are currently written in Chinese first. English titles are provided for navigation; full English translations may be added selectively.
 <!-- articles:index:end -->

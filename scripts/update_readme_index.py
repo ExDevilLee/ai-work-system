@@ -12,6 +12,7 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 ARTICLES_DIR = REPO_ROOT / "content" / "articles"
 GITHUB_WIKI_BASE = "https://github.com/ExDevilLee/ai-work-system/wiki"
 GITEE_WIKI_BASE = "https://gitee.com/ExDevilLee/ai-work-system/wikis"
+GITEE_WIKI_HOME = f"{GITEE_WIKI_BASE}/Home"
 
 
 def parse_frontmatter(path: Path) -> dict[str, str]:
@@ -94,13 +95,13 @@ def main() -> int:
         zh_lines.extend(
             [
                 "",
-                "文章标题默认链接到 GitHub Wiki 阅读页；Gitee Wiki 保持同步展示，源码 Markdown 可从 Wiki 页面底部的来源入口进入。",
+                f"文章标题默认链接到 GitHub Wiki 阅读页；[Gitee Wiki]({GITEE_WIKI_HOME}) 保持同步展示，源码 Markdown 可从 Wiki 页面底部的来源入口进入。",
             ]
         )
         en_lines.extend(
             [
                 "",
-                "Article titles link to the GitHub Wiki reading pages by default; Gitee Wiki stays in sync, and source Markdown is available from each Wiki page's source link.",
+                f"Article titles link to the GitHub Wiki reading pages by default; [Gitee Wiki]({GITEE_WIKI_HOME}) stays in sync, and source Markdown is available from each Wiki page's source link.",
                 "",
                 "Article bodies are currently written in Chinese first. English titles are provided for navigation; full English translations may be added selectively.",
             ]
