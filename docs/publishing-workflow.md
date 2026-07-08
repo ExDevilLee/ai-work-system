@@ -79,6 +79,24 @@ python3 scripts/sync_wiki.py --push
 python3 scripts/sync_wiki.py --push
 ```
 
+## 自动触发
+
+仓库已通过 GitHub Actions 自动触发 Wiki 同步：
+
+```text
+.github/workflows/sync-wiki.yml
+```
+
+触发条件：
+
+- `main` 分支上 `content/articles/**` 有变化。
+- `main` 分支上 `scripts/sync_wiki.py` 有变化。
+- 手动在 GitHub Actions 页面运行 `Sync Wiki`。
+
+自动同步发生在主仓库 push 成功之后，因此日常只需要维护主仓库 Markdown。只要文章是 `status: ready`，推送到 `main` 后 workflow 会自动运行 `python3 scripts/sync_wiki.py --push`，刷新 Wiki 的 `Home.md`、`_Sidebar.md` 和文章页面。
+
+如果 GitHub 默认 `GITHUB_TOKEN` 无法写入 Wiki 仓库，需要在仓库 Secrets 中添加具备 Wiki 写入权限的 `WIKI_PUSH_TOKEN`，workflow 会优先使用该 token。
+
 ## 后续扩展
 
 未来可以继续增加展示层：
