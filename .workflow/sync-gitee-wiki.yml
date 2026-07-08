@@ -23,10 +23,10 @@ stages:
           - |
             WIKI_USERNAME="${WIKI_PUSH_USERNAME:-ExDevilLee}"
             WIKI_EMAIL="${WIKI_PUSH_EMAIL:-gitee-go@users.noreply.gitee.com}"
-            WIKI_TOKEN="${WIKI_PUSH_TOKEN:-${GITEE_TOKEN:-}}"
+            WIKI_TOKEN="${WIKI_PUSH_TOKEN}"
 
             if [ -z "$WIKI_TOKEN" ]; then
-              echo "Missing WIKI_PUSH_TOKEN. Add it as a Gitee Go pipeline variable or secret." >&2
+              echo "Missing WIKI_PUSH_TOKEN. Add it as a Gitee Go common variable, enable secret text, and associate it with this pipeline." >&2
               exit 1
             fi
             git config --global user.name "$WIKI_USERNAME"

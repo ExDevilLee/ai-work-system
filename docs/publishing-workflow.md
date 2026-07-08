@@ -123,6 +123,8 @@ Gitee Go 需要配置流水线变量或密钥：
 - `WIKI_PUSH_USERNAME`：可选，默认 `ExDevilLee`。
 - `WIKI_PUSH_EMAIL`：可选，默认 `gitee-go@users.noreply.gitee.com`。
 
+在 Gitee Go 中，先到 `通用变量` 创建 `WIKI_PUSH_TOKEN`，并勾选 `密文`；然后进入 `Sync Gitee Wiki` 流水线编辑页，把该通用变量关联到流水线。只创建通用变量但不关联流水线时，构建环境可能拿不到该变量。
+
 不要使用 `GITEE_` 或 `GO_` 作为自定义变量前缀；这些前缀在 Gitee Go 中属于系统变量命名空间，容易和平台内置参数冲突。
 
 Gitee Wiki 使用同一个同步脚本，但指定不同远端和展示层名称：
