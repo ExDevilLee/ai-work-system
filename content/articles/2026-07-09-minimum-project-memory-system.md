@@ -2,7 +2,7 @@
 title: 如果要给 AI 建一个最小可用的项目记忆系统，先写哪些文件？
 title_en: What Files Should Come First In A Minimum Viable Project Memory System For AI?
 date: 2026-07-09
-status: review
+status: ready
 series: long-term-ai-work-system
 lang: zh
 summary: 从真实协作出发，拆解一个最小可用的项目记忆系统应该先解决什么问题，以及 README、AGENTS.md、状态记录和发布规则分别承担什么职责。
@@ -13,8 +13,6 @@ tags:
 ---
 
 # 如果要给 AI 建一个最小可用的项目记忆系统，先写哪些文件？
-
-> 当前状态：review 阶段。本文先给第一位读者真实阅读，暂不发布到 Wiki。
 
 上一篇文章讲到，AI 写作之所以不那么显 AI 味，不是因为它突然更会模仿人，而是因为它站在了一个有上下文、有规则、有反馈、有工作痕迹的系统里。
 

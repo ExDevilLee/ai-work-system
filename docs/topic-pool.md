@@ -7,13 +7,7 @@
 1. [我不是在使用 AI 工具，而是在搭建长期工作系统](https://github.com/ExDevilLee/ai-work-system/wiki/01-%E6%88%91%E4%B8%8D%E6%98%AF%E5%9C%A8%E4%BD%BF%E7%94%A8-AI-%E5%B7%A5%E5%85%B7%EF%BC%8C%E8%80%8C%E6%98%AF%E5%9C%A8%E6%90%AD%E5%BB%BA%E9%95%BF%E6%9C%9F%E5%B7%A5%E4%BD%9C%E7%B3%BB%E7%BB%9F)
 2. [为什么 AI 总是失忆？](https://github.com/ExDevilLee/ai-work-system/wiki/02-%E4%B8%BA%E4%BB%80%E4%B9%88-AI-%E6%80%BB%E6%98%AF%E5%A4%B1%E5%BF%86%EF%BC%9F)
 3. [为什么有了长期工作系统后，AI 写作反而不显 AI 味？](https://github.com/ExDevilLee/ai-work-system/wiki/03-%E4%B8%BA%E4%BB%80%E4%B9%88%E6%9C%89%E4%BA%86%E9%95%BF%E6%9C%9F%E5%B7%A5%E4%BD%9C%E7%B3%BB%E7%BB%9F%E5%90%8E%EF%BC%8CAI-%E5%86%99%E4%BD%9C%E5%8F%8D%E8%80%8C%E4%B8%8D%E6%98%BE-AI-%E5%91%B3%EF%BC%9F)
-
-## 正在推进
-
-- 如果要给 AI 建一个最小可用的项目记忆系统，先写哪些文件？
-  - 当前处于 review 阶段。
-  - 承接第二篇末尾留下的问题。
-  - 可以从 `README`、`AGENTS.md`、发布规则、文章状态和本地工作日志这些最小文件讲起。
+4. [如果要给 AI 建一个最小可用的项目记忆系统，先写哪些文件？](https://github.com/ExDevilLee/ai-work-system/wiki/04-%E5%A6%82%E6%9E%9C%E8%A6%81%E7%BB%99-AI-%E5%BB%BA%E4%B8%80%E4%B8%AA%E6%9C%80%E5%B0%8F%E5%8F%AF%E7%94%A8%E7%9A%84%E9%A1%B9%E7%9B%AE%E8%AE%B0%E5%BF%86%E7%B3%BB%E7%BB%9F%EF%BC%8C%E5%85%88%E5%86%99%E5%93%AA%E4%BA%9B%E6%96%87%E4%BB%B6%EF%BC%9F)
 
 ## 近期优先
 
