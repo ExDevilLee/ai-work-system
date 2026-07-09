@@ -8,11 +8,14 @@
 2. [为什么 AI 总是失忆？](https://github.com/ExDevilLee/ai-work-system/wiki/02-%E4%B8%BA%E4%BB%80%E4%B9%88-AI-%E6%80%BB%E6%98%AF%E5%A4%B1%E5%BF%86%EF%BC%9F)
 3. [为什么有了长期工作系统后，AI 写作反而不显 AI 味？](https://github.com/ExDevilLee/ai-work-system/wiki/03-%E4%B8%BA%E4%BB%80%E4%B9%88%E6%9C%89%E4%BA%86%E9%95%BF%E6%9C%9F%E5%B7%A5%E4%BD%9C%E7%B3%BB%E7%BB%9F%E5%90%8E%EF%BC%8CAI-%E5%86%99%E4%BD%9C%E5%8F%8D%E8%80%8C%E4%B8%8D%E6%98%BE-AI-%E5%91%B3%EF%BC%9F)
 
-## 近期优先
+## 正在推进
 
-- 最小可用项目记忆系统：哪些文件先出现，哪些规则先写下来。
+- 如果要给 AI 建一个最小可用的项目记忆系统，先写哪些文件？
+  - 当前处于 review 阶段。
   - 承接第二篇末尾留下的问题。
   - 可以从 `README`、`AGENTS.md`、发布规则、文章状态和本地工作日志这些最小文件讲起。
+
+## 近期优先
 
 - 为什么 AI 协作需要一份给 Agent 看的 README。
   - 可以解释 `AGENTS.md`、`CLAUDE.md` 这类 agent rule 文件的作用。

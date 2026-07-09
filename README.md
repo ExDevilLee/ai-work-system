@@ -28,11 +28,10 @@ English version: [README-EN.md](README-EN.md)
 2. [为什么 AI 总是失忆？](https://github.com/ExDevilLee/ai-work-system/wiki/02-%E4%B8%BA%E4%BB%80%E4%B9%88-AI-%E6%80%BB%E6%98%AF%E5%A4%B1%E5%BF%86%EF%BC%9F)
 3. [为什么有了长期工作系统后，AI 写作反而不显 AI 味？](https://github.com/ExDevilLee/ai-work-system/wiki/03-%E4%B8%BA%E4%BB%80%E4%B9%88%E6%9C%89%E4%BA%86%E9%95%BF%E6%9C%9F%E5%B7%A5%E4%BD%9C%E7%B3%BB%E7%BB%9F%E5%90%8E%EF%BC%8CAI-%E5%86%99%E4%BD%9C%E5%8F%8D%E8%80%8C%E4%B8%8D%E6%98%BE-AI-%E5%91%B3%EF%BC%9F)
 
-下一篇适合接回第二篇末尾留下的问题：如果要给 AI 建一个最小可用的项目记忆系统，哪些文件应该先出现，哪些规则应该先写下来。
+当前 review 稿正在接回第二篇末尾留下的问题：如果要给 AI 建一个最小可用的项目记忆系统，哪些文件应该先出现，哪些规则应该先写下来。
 
 ## 后续选题池
 
-- 最小可用项目记忆系统：哪些文件先出现，哪些规则先写下来。
 - 一个不会从零开始的 AI 助手，实际能帮我做什么。
 - 从 prompt 到 workflow：如何把 AI 变成个人工作系统。
 - 人和 AI 长期协作后，真正改变的不是效率，而是工作方式。
@@ -50,7 +49,7 @@ English version: [README-EN.md](README-EN.md)
 
 ## 当前写作中
 
-暂无正在公开推进的草稿。
+- [如果要给 AI 建一个最小可用的项目记忆系统，先写哪些文件？](content/articles/2026-07-09-minimum-project-memory-system.md) — review 阶段
 
 ## 发布原则
 
