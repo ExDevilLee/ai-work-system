@@ -34,8 +34,9 @@ If you are new to this project, start with these articles:
 2. [Why Does AI Keep Forgetting?](https://github.com/ExDevilLee/ai-work-system/wiki/02-%E4%B8%BA%E4%BB%80%E4%B9%88-AI-%E6%80%BB%E6%98%AF%E5%A4%B1%E5%BF%86%EF%BC%9F)
 3. [Why Does AI Writing Feel Less Artificial Inside A Long-Term Work System?](https://github.com/ExDevilLee/ai-work-system/wiki/03-%E4%B8%BA%E4%BB%80%E4%B9%88%E6%9C%89%E4%BA%86%E9%95%BF%E6%9C%9F%E5%B7%A5%E4%BD%9C%E7%B3%BB%E7%BB%9F%E5%90%8E%EF%BC%8CAI-%E5%86%99%E4%BD%9C%E5%8F%8D%E8%80%8C%E4%B8%8D%E6%98%BE-AI-%E5%91%B3%EF%BC%9F)
 4. [What Files Should Come First In A Minimum Viable Project Memory System For AI?](https://github.com/ExDevilLee/ai-work-system/wiki/04-%E5%A6%82%E6%9E%9C%E8%A6%81%E7%BB%99-AI-%E5%BB%BA%E4%B8%80%E4%B8%AA%E6%9C%80%E5%B0%8F%E5%8F%AF%E7%94%A8%E7%9A%84%E9%A1%B9%E7%9B%AE%E8%AE%B0%E5%BF%86%E7%B3%BB%E7%BB%9F%EF%BC%8C%E5%85%88%E5%86%99%E5%93%AA%E4%BA%9B%E6%96%87%E4%BB%B6%EF%BC%9F)
+5. [From Chat History To Project Rules: When Is An Experience Worth Preserving?](https://github.com/ExDevilLee/ai-work-system/wiki/05-%E4%BB%8E%E8%81%8A%E5%A4%A9%E8%AE%B0%E5%BD%95%E5%88%B0%E9%A1%B9%E7%9B%AE%E8%A7%84%E5%88%99%EF%BC%9A%E4%B8%80%E6%AC%A1%E7%BB%8F%E9%AA%8C%E4%BB%80%E4%B9%88%E6%97%B6%E5%80%99%E5%80%BC%E5%BE%97%E6%B2%89%E6%B7%80%EF%BC%9F)
 
-The fourth article returns to the question left by the second article and starts turning the series toward practical project memory.
+The fourth article turns the series toward practical project memory. The fifth explains how an observation becomes a project rule and leads into workflow design.
 
 ## Future Topic Pool
 
@@ -51,6 +52,7 @@ The fourth article returns to the question left by the second article and starts
 - [Why Does AI Keep Forgetting?](https://github.com/ExDevilLee/ai-work-system/wiki/02-%E4%B8%BA%E4%BB%80%E4%B9%88-AI-%E6%80%BB%E6%98%AF%E5%A4%B1%E5%BF%86%EF%BC%9F)
 - [Why Does AI Writing Feel Less Artificial Inside A Long-Term Work System?](https://github.com/ExDevilLee/ai-work-system/wiki/03-%E4%B8%BA%E4%BB%80%E4%B9%88%E6%9C%89%E4%BA%86%E9%95%BF%E6%9C%9F%E5%B7%A5%E4%BD%9C%E7%B3%BB%E7%BB%9F%E5%90%8E%EF%BC%8CAI-%E5%86%99%E4%BD%9C%E5%8F%8D%E8%80%8C%E4%B8%8D%E6%98%BE-AI-%E5%91%B3%EF%BC%9F)
 - [What Files Should Come First In A Minimum Viable Project Memory System For AI?](https://github.com/ExDevilLee/ai-work-system/wiki/04-%E5%A6%82%E6%9E%9C%E8%A6%81%E7%BB%99-AI-%E5%BB%BA%E4%B8%80%E4%B8%AA%E6%9C%80%E5%B0%8F%E5%8F%AF%E7%94%A8%E7%9A%84%E9%A1%B9%E7%9B%AE%E8%AE%B0%E5%BF%86%E7%B3%BB%E7%BB%9F%EF%BC%8C%E5%85%88%E5%86%99%E5%93%AA%E4%BA%9B%E6%96%87%E4%BB%B6%EF%BC%9F)
+- [From Chat History To Project Rules: When Is An Experience Worth Preserving?](https://github.com/ExDevilLee/ai-work-system/wiki/05-%E4%BB%8E%E8%81%8A%E5%A4%A9%E8%AE%B0%E5%BD%95%E5%88%B0%E9%A1%B9%E7%9B%AE%E8%A7%84%E5%88%99%EF%BC%9A%E4%B8%80%E6%AC%A1%E7%BB%8F%E9%AA%8C%E4%BB%80%E4%B9%88%E6%97%B6%E5%80%99%E5%80%BC%E5%BE%97%E6%B2%89%E6%B7%80%EF%BC%9F)
 
 Article titles link to the GitHub Wiki reading pages by default; [Gitee Wiki](https://gitee.com/ExDevilLee/ai-work-system/wikis/Home) stays in sync, and source Markdown is available from each Wiki page's source link.
 
@@ -59,7 +61,7 @@ Article bodies are currently written in Chinese first. English titles are provid
 
 ## Work In Progress
 
-- [From Chat History To Project Rules: When Is An Experience Worth Preserving?](content/articles/2026-07-10-when-experience-becomes-project-rule.md) (review stage; article in Chinese)
+No public draft is currently in progress.
 
 ## Publishing Principle
 

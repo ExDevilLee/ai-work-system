@@ -32,13 +32,14 @@ English version: [README-EN.md](README-EN.md)
 2. [为什么 AI 总是失忆？](https://github.com/ExDevilLee/ai-work-system/wiki/02-%E4%B8%BA%E4%BB%80%E4%B9%88-AI-%E6%80%BB%E6%98%AF%E5%A4%B1%E5%BF%86%EF%BC%9F)
 3. [为什么有了长期工作系统后，AI 写作反而不显 AI 味？](https://github.com/ExDevilLee/ai-work-system/wiki/03-%E4%B8%BA%E4%BB%80%E4%B9%88%E6%9C%89%E4%BA%86%E9%95%BF%E6%9C%9F%E5%B7%A5%E4%BD%9C%E7%B3%BB%E7%BB%9F%E5%90%8E%EF%BC%8CAI-%E5%86%99%E4%BD%9C%E5%8F%8D%E8%80%8C%E4%B8%8D%E6%98%BE-AI-%E5%91%B3%EF%BC%9F)
 4. [如果要给 AI 建一个最小可用的项目记忆系统，先写哪些文件？](https://github.com/ExDevilLee/ai-work-system/wiki/04-%E5%A6%82%E6%9E%9C%E8%A6%81%E7%BB%99-AI-%E5%BB%BA%E4%B8%80%E4%B8%AA%E6%9C%80%E5%B0%8F%E5%8F%AF%E7%94%A8%E7%9A%84%E9%A1%B9%E7%9B%AE%E8%AE%B0%E5%BF%86%E7%B3%BB%E7%BB%9F%EF%BC%8C%E5%85%88%E5%86%99%E5%93%AA%E4%BA%9B%E6%96%87%E4%BB%B6%EF%BC%9F)
+5. [从聊天记录到项目规则：一次经验什么时候值得沉淀？](https://github.com/ExDevilLee/ai-work-system/wiki/05-%E4%BB%8E%E8%81%8A%E5%A4%A9%E8%AE%B0%E5%BD%95%E5%88%B0%E9%A1%B9%E7%9B%AE%E8%A7%84%E5%88%99%EF%BC%9A%E4%B8%80%E6%AC%A1%E7%BB%8F%E9%AA%8C%E4%BB%80%E4%B9%88%E6%97%B6%E5%80%99%E5%80%BC%E5%BE%97%E6%B2%89%E6%B7%80%EF%BC%9F)
 
-第四篇已经接回第二篇末尾留下的问题，开始进入最小可用项目记忆系统的实践层。
+第四篇接回第二篇末尾留下的问题，进入最小可用项目记忆系统的实践层；第五篇继续讨论经验如何从临时观察进入项目规则，并把主线引向工作流。
 
 ## 后续选题池
 
 - 一个不会从零开始的 AI 助手，实际能帮我做什么。
-- 从 prompt 到 workflow：如何把 AI 变成个人工作系统。
+- 从提示词（prompt）到工作流（workflow）：如何把 AI 变成个人工作系统。
 - 人和 AI 长期协作后，真正改变的不是效率，而是工作方式。
 - [MORE](docs/topic-pool.md)
 
@@ -49,13 +50,14 @@ English version: [README-EN.md](README-EN.md)
 - [为什么 AI 总是失忆？](https://github.com/ExDevilLee/ai-work-system/wiki/02-%E4%B8%BA%E4%BB%80%E4%B9%88-AI-%E6%80%BB%E6%98%AF%E5%A4%B1%E5%BF%86%EF%BC%9F)
 - [为什么有了长期工作系统后，AI 写作反而不显 AI 味？](https://github.com/ExDevilLee/ai-work-system/wiki/03-%E4%B8%BA%E4%BB%80%E4%B9%88%E6%9C%89%E4%BA%86%E9%95%BF%E6%9C%9F%E5%B7%A5%E4%BD%9C%E7%B3%BB%E7%BB%9F%E5%90%8E%EF%BC%8CAI-%E5%86%99%E4%BD%9C%E5%8F%8D%E8%80%8C%E4%B8%8D%E6%98%BE-AI-%E5%91%B3%EF%BC%9F)
 - [如果要给 AI 建一个最小可用的项目记忆系统，先写哪些文件？](https://github.com/ExDevilLee/ai-work-system/wiki/04-%E5%A6%82%E6%9E%9C%E8%A6%81%E7%BB%99-AI-%E5%BB%BA%E4%B8%80%E4%B8%AA%E6%9C%80%E5%B0%8F%E5%8F%AF%E7%94%A8%E7%9A%84%E9%A1%B9%E7%9B%AE%E8%AE%B0%E5%BF%86%E7%B3%BB%E7%BB%9F%EF%BC%8C%E5%85%88%E5%86%99%E5%93%AA%E4%BA%9B%E6%96%87%E4%BB%B6%EF%BC%9F)
+- [从聊天记录到项目规则：一次经验什么时候值得沉淀？](https://github.com/ExDevilLee/ai-work-system/wiki/05-%E4%BB%8E%E8%81%8A%E5%A4%A9%E8%AE%B0%E5%BD%95%E5%88%B0%E9%A1%B9%E7%9B%AE%E8%A7%84%E5%88%99%EF%BC%9A%E4%B8%80%E6%AC%A1%E7%BB%8F%E9%AA%8C%E4%BB%80%E4%B9%88%E6%97%B6%E5%80%99%E5%80%BC%E5%BE%97%E6%B2%89%E6%B7%80%EF%BC%9F)
 
 文章标题默认链接到 GitHub Wiki 阅读页；[Gitee Wiki](https://gitee.com/ExDevilLee/ai-work-system/wikis/Home) 保持同步展示，源码 Markdown 可从 Wiki 页面底部的来源入口进入。
 <!-- articles:index:end -->
 
 ## 当前写作中
 
-- [从聊天记录到项目规则：一次经验什么时候值得沉淀？](content/articles/2026-07-10-when-experience-becomes-project-rule.md)（审阅阶段）
+暂无正在公开推进的草稿。
 
 ## 发布原则
 
