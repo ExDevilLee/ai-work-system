@@ -21,13 +21,15 @@ project/
 
 三个文件各自只回答一类问题：README 说明“这是什么”，AGENTS 说明“应该怎么做”，PROJECT-STATE 说明“现在做到哪里”。
 
+不同 AI 智能体工具默认读取的规则文件名可能不同。Codex App 和 Codex CLI 通常使用 `AGENTS.md`，Claude Code 通常使用 `CLAUDE.md`。使用模板前先确认当前工具的规则入口；如果需要改名，文件职责和内容不需要随之改变。
+
 ## 使用方法
 
 1. 将 [`project/`](project/) 中的三个文件复制到你的项目根目录。
 2. 搜索 `{...}` 形式的占位内容，替换成项目的真实信息。
 3. 删除不适用的示例，不要为了显得完整而保留空规则。
-4. 让 AI 每次进入项目时按 `README.md`、`AGENTS.md`、`PROJECT-STATE.md` 的顺序读取。
-5. 完成一个阶段后更新 `PROJECT-STATE.md`；只有经过验证、未来会重复影响工作的经验，才写入 `AGENTS.md`。
+4. 确认所用工具的规则文件名，并让规则入口要求 AI 继续读取 `README.md` 和 `PROJECT-STATE.md`。
+5. 完成一个阶段后更新 `PROJECT-STATE.md`；只有经过验证、未来会重复影响工作的经验，才写入规则入口。
 
 可以用下面的命令检查是否还有未替换的占位内容：
 
