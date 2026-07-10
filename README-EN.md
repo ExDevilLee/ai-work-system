@@ -22,6 +22,10 @@ The core theme:
 - A lightweight static-site publishing pipeline.
 - Platform-specific exports for personal websites and other publishing channels.
 
+## Reusable Templates
+
+- [Minimum Project Memory Template](templates/minimum-project-memory/README.md): establish a minimum long-term collaboration context with a project README, an AI rule entry point, and `PROJECT-STATE.md`.
+
 ## Recommended Reading Order
 
 If you are new to this project, start with these articles:

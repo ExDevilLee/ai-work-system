@@ -20,6 +20,10 @@ English version: [README-EN.md](README-EN.md)
 
 > 从一次性 AI 聊天，走向有记忆、有流程、有证据、有复盘的长期 AI 工作系统。
 
+## 可复用模板
+
+- [最小项目记忆模板](templates/minimum-project-memory/README.md)：用 `README.md`、AI 规则入口和 `PROJECT-STATE.md`，为一个项目建立最小可用的长期协作上下文。
+
 ## 推荐阅读顺序
 
 如果你是第一次看到这个项目，建议按下面的顺序阅读：
