@@ -56,7 +56,7 @@ The fourth article turns the series toward practical project memory. The fifth e
 - [From Chat History To Project Rules: When Is An Experience Worth Preserving?](https://github.com/ExDevilLee/ai-work-system/wiki/05-%E4%BB%8E%E8%81%8A%E5%A4%A9%E8%AE%B0%E5%BD%95%E5%88%B0%E9%A1%B9%E7%9B%AE%E8%A7%84%E5%88%99%EF%BC%9A%E4%B8%80%E6%AC%A1%E7%BB%8F%E9%AA%8C%E4%BB%80%E4%B9%88%E6%97%B6%E5%80%99%E5%80%BC%E5%BE%97%E6%B2%89%E6%B7%80%EF%BC%9F)
 - [From Prompts To Workflows: How Can AI Stop Waiting For Reminders?](https://github.com/ExDevilLee/ai-work-system/wiki/06-%E4%BB%8E%E6%8F%90%E7%A4%BA%E8%AF%8D%E5%88%B0%E5%B7%A5%E4%BD%9C%E6%B5%81%EF%BC%9A%E6%80%8E%E4%B9%88%E8%AE%A9-AI-%E4%B8%8D%E5%86%8D%E6%AF%8F%E6%AC%A1%E7%AD%89%E4%BD%A0%E6%8F%90%E9%86%92%EF%BC%9F)
 
-Article titles link to the GitHub Wiki reading pages by default; [Gitee Wiki](https://gitee.com/ExDevilLee/ai-work-system/wikis/Home) stays in sync, and source Markdown is available from each Wiki page's source link.
+Article titles link to the GitHub Wiki reading pages by default; [Gitee Wiki](https://gitee.com/ExDevilLee/ai-work-system/wikis/Home) stays in sync, while the [AI Long-Term Work System collection on MoWen](https://note.mowen.cn/detail/CGAIy3ZJS0VwC6wlH3je-) embeds every article in reverse chronological order. Source Markdown is available from each Wiki page's source link.
 
 Article bodies are currently written in Chinese first. English titles are provided for navigation; full English translations may be added selectively.
 <!-- articles:index:end -->

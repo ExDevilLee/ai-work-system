@@ -28,9 +28,29 @@ GitHub main
   -> GitHub Actions 同步到 GitHub Wiki
   -> GitHub Actions 镜像主仓库到 Gitee main
   -> GitHub Actions 发布到 Gitee Wiki
+  -> GitHub Actions 发布到墨问并重建《AI 长期工作系统》目录
 ```
 
 9. 打开 GitHub Wiki 和 Gitee Wiki 检查文章阅读页。
+10. 打开[墨问《AI 长期工作系统》](https://note.mowen.cn/detail/CGAIy3ZJS0VwC6wlH3je-)检查新文章是否位于目录最上方。
+
+## 墨问首次配置
+
+在 GitHub 仓库的 `Settings -> Secrets and variables -> Actions` 中添加：
+
+- Name：`MOWEN_API_KEY`
+- Secret：墨问开放平台 API Key，只填写 Key 本身，不填写完整 MCP URL。
+
+本地只验证转换，不访问远端：
+
+```bash
+python3 -m pip install -r requirements-mowen.txt
+npm ci --ignore-scripts
+python3 -m unittest tests.test_sync_mowen -v
+python3 scripts/sync_mowen.py
+```
+
+不要把 API Key 放进命令参数、配置样例、终端截图或提交记录。
 
 ## 快速排障
 
@@ -84,3 +104,22 @@ python3 scripts/sync_wiki.py --dry-run
 不要直接修改 Wiki 页面。
 
 回到主仓库修改 `content/articles/*.md`，保持源文为唯一内容源头，然后重新 push 触发同步。
+
+### 墨问文章或目录没有更新
+
+检查 `Sync MoWen` workflow，并确认仓库 Secret `MOWEN_API_KEY` 存在且有效。
+
+常见原因：
+
+- 文章不是 `status: ready`。
+- `publishing/mowen-notes.json` 缺少已有笔记 ID，或包含错误 ID。
+- 封面尚未推送到 `main`，导致 `UploadViaURL` 无法读取公开图片 URL。
+- workflow 创建了私密笔记，但在映射提交前中断。
+
+发生中断时先运行：
+
+```bash
+mocli note mine --filter priv --recent 1d --count 20
+```
+
+确认是否已有同名私密笔记，再修正映射后重跑；不要直接再次创建公开笔记。

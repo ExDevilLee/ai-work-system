@@ -9,6 +9,8 @@
 ```text
 content/articles/*.md
   -> GitHub Wiki
+  -> Gitee Wiki
+  -> 墨问《AI 长期工作系统》
   -> 未来个人网站
   -> 未来微信公众号 / 知乎 / 其他平台
 ```
@@ -27,7 +29,7 @@ content/articles/*.md
 - `review`：发布前审阅阶段，不默认同步到展示层。
 - `ready`：发布源稿阶段，可以同步到展示层；推送到 `main` 后会由 CI 发布或刷新到 Wiki。
 
-第一阶段只同步 `status: ready` 的文章到 GitHub Wiki 和 Gitee Wiki。
+当前只同步 `status: ready` 的文章到 GitHub Wiki、Gitee Wiki 和墨问。
 
 `status` 描述的是主仓库源稿是否可以进入自动发布链路，不直接等同于 README 里的展示分类：
 
@@ -139,6 +141,31 @@ python3 scripts/sync_wiki.py --push \
   --remote "https://gitee.com/ExDevilLee/ai-work-system.wiki.git" \
   --wiki-base-url "https://gitee.com/ExDevilLee/ai-work-system/wikis"
 ```
+
+## 墨问同步
+
+墨问由 `.github/workflows/sync-mowen.yml` 独立发布，入口脚本为：
+
+```bash
+python3 scripts/sync_mowen.py
+python3 scripts/sync_mowen.py --register-private
+python3 scripts/sync_mowen.py --publish \
+  --cover-url "https://raw.githubusercontent.com/ExDevilLee/ai-work-system/main/assets/mowen/ai-work-system-cover.jpg"
+```
+
+默认命令只完成所有 `ready` 文章的 Markdown 转换验证，不访问墨问。`--register-private` 只为缺少映射的新文章创建私密笔记，不覆盖已经公开的文章；`--publish` 会覆盖更新所有已映射文章、设为公开，并最后重建《AI 长期工作系统》目录。
+
+墨问目录规则：
+
+- 标题固定为《AI 长期工作系统》。
+- 正文包含项目介绍、封面和所有文章的原生笔记卡片。
+- 文章按日期倒序排列；最新文章显示在最上方。
+- `publishing/mowen-notes.json` 保存文章和目录的墨问笔记 ID，保证重跑时编辑原笔记而不是重复创建。
+- `assets/mowen/ai-work-system-cover.jpg` 是仓库管理的封面源文件；脚本按文件哈希决定是否重新上传。
+
+GitHub Actions 需要仓库 Secret `MOWEN_API_KEY`。Secret 只通过环境变量传给官方 MCP 接口，不写入仓库或日志。
+
+新文章首次发布时，workflow 会先私密创建笔记并更新映射，再公开文章和目录。若任务在创建后、映射提交前中断，可能遗留私密重复笔记；恢复前先使用 `mocli note mine --filter priv` 核对，再补回或修正映射。
 
 ## 后续扩展
 

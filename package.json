@@ -1,0 +1,7 @@
+{
+  "name": "ai-work-system-publishing",
+  "private": true,
+  "dependencies": {
+    "md-to-mowen": "1.9.1"
+  }
+}

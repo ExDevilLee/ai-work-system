@@ -8,3 +8,4 @@
 - 本地推进步骤可以记录到 `WORKLOG.md`，供新会话参考；该文件只作为本地工作日志，不提交。文件过大时，按时间线清理旧记录，保留最近和仍有行动价值的内容。
 - `content/articles/*.md` 是唯一内容源头；GitHub Wiki、个人网站、公众号等都只是展示层或分发层，不反向修改源文。
 - GitHub Wiki 只同步 `status: ready` 的文章；已发布文章如果主仓库源文更新，重新运行同步脚本覆盖更新 Wiki。
+- 墨问也只同步 `status: ready` 的文章；`publishing/mowen-notes.json` 是源文件与墨问笔记 ID 的持久映射，新文章发布后必须按时间倒序重建《AI 长期工作系统》目录笔记。

@@ -13,6 +13,7 @@ ARTICLES_DIR = REPO_ROOT / "content" / "articles"
 GITHUB_WIKI_BASE = "https://github.com/ExDevilLee/ai-work-system/wiki"
 GITEE_WIKI_BASE = "https://gitee.com/ExDevilLee/ai-work-system/wikis"
 GITEE_WIKI_HOME = f"{GITEE_WIKI_BASE}/Home"
+MOWEN_DIRECTORY_URL = "https://note.mowen.cn/detail/CGAIy3ZJS0VwC6wlH3je-"
 
 
 def parse_frontmatter(path: Path) -> dict[str, str]:
@@ -95,13 +96,13 @@ def main() -> int:
         zh_lines.extend(
             [
                 "",
-                f"文章标题默认链接到 GitHub Wiki 阅读页；[Gitee Wiki]({GITEE_WIKI_HOME}) 保持同步展示，源码 Markdown 可从 Wiki 页面底部的来源入口进入。",
+                f"文章标题默认链接到 GitHub Wiki 阅读页；[Gitee Wiki]({GITEE_WIKI_HOME}) 保持同步展示，[墨问《AI 长期工作系统》]({MOWEN_DIRECTORY_URL}) 按时间倒序内嵌全部文章。源码 Markdown 可从 Wiki 页面底部的来源入口进入。",
             ]
         )
         en_lines.extend(
             [
                 "",
-                f"Article titles link to the GitHub Wiki reading pages by default; [Gitee Wiki]({GITEE_WIKI_HOME}) stays in sync, and source Markdown is available from each Wiki page's source link.",
+                f"Article titles link to the GitHub Wiki reading pages by default; [Gitee Wiki]({GITEE_WIKI_HOME}) stays in sync, while the [AI Long-Term Work System collection on MoWen]({MOWEN_DIRECTORY_URL}) embeds every article in reverse chronological order. Source Markdown is available from each Wiki page's source link.",
                 "",
                 "Article bodies are currently written in Chinese first. English titles are provided for navigation; full English translations may be added selectively.",
             ]
