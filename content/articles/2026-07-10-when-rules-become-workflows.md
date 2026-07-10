@@ -2,7 +2,7 @@
 title: "从提示词到工作流：怎么让 AI 不再每次等你提醒？"
 title_en: "From Prompts To Workflows: How Can AI Stop Waiting For Reminders?"
 date: 2026-07-10
-status: review
+status: ready
 series: long-term-ai-work-system
 lang: zh
 summary: 从真实发布链路出发，解释提示词、项目规则、工作流、脚本和持续集成分别解决什么问题，以及哪些判断仍然应该留给人。
