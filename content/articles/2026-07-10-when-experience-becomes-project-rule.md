@@ -1,6 +1,6 @@
 ---
 title: 从聊天记录到项目规则：一次经验什么时候值得沉淀？
-title_en: From Chat History To Project Rules: When Is An Experience Worth Preserving?
+title_en: "From Chat History To Project Rules: When Is An Experience Worth Preserving?"
 date: 2026-07-10
 status: ready
 series: long-term-ai-work-system
