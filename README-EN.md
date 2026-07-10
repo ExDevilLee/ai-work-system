@@ -55,7 +55,7 @@ Article bodies are currently written in Chinese first. English titles are provid
 
 ## Work In Progress
 
-No public draft is currently in progress.
+- [From Chat History To Project Rules: When Is An Experience Worth Preserving?](content/articles/2026-07-10-when-experience-becomes-project-rule.md) (outline stage; article in Chinese)
 
 ## Publishing Principle
 
