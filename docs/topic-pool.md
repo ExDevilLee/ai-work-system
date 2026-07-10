@@ -10,11 +10,13 @@
 4. [如果要给 AI 建一个最小可用的项目记忆系统，先写哪些文件？](https://github.com/ExDevilLee/ai-work-system/wiki/04-%E5%A6%82%E6%9E%9C%E8%A6%81%E7%BB%99-AI-%E5%BB%BA%E4%B8%80%E4%B8%AA%E6%9C%80%E5%B0%8F%E5%8F%AF%E7%94%A8%E7%9A%84%E9%A1%B9%E7%9B%AE%E8%AE%B0%E5%BF%86%E7%B3%BB%E7%BB%9F%EF%BC%8C%E5%85%88%E5%86%99%E5%93%AA%E4%BA%9B%E6%96%87%E4%BB%B6%EF%BC%9F)
 5. [从聊天记录到项目规则：一次经验什么时候值得沉淀？](https://github.com/ExDevilLee/ai-work-system/wiki/05-%E4%BB%8E%E8%81%8A%E5%A4%A9%E8%AE%B0%E5%BD%95%E5%88%B0%E9%A1%B9%E7%9B%AE%E8%A7%84%E5%88%99%EF%BC%9A%E4%B8%80%E6%AC%A1%E7%BB%8F%E9%AA%8C%E4%BB%80%E4%B9%88%E6%97%B6%E5%80%99%E5%80%BC%E5%BE%97%E6%B2%89%E6%B7%80%EF%BC%9F)
 
-## 近期优先
+## 正在推进
 
-- 从提示词（prompt）到工作流（workflow）：如何把 AI 变成个人工作系统。
-  - 承接第五篇结尾“规则什么时候应该继续变成工作流”的问题。
-  - 重点解释一次性指令如何逐步变成规则、操作步骤、脚本和验证链路。
+- [从提示词到工作流：怎么让 AI 不再每次等你提醒？](../content/articles/2026-07-10-from-prompts-to-workflows.md)
+  - 当前处于发布前审阅阶段。
+  - 它承接第五篇结尾的问题，并把主线从“规则如何形成”推进到“规则如何成为可重复执行的工作流”。
+
+## 近期优先
 
 - AI 工作系统为什么需要审阅，而不只是生成。
   - 可以承接文章审美、README 入口、跨平台展示和发布链路中的真实审阅。

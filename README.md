@@ -39,7 +39,7 @@ English version: [README-EN.md](README-EN.md)
 ## 后续选题池
 
 - 一个不会从零开始的 AI 助手，实际能帮我做什么。
-- 从提示词（prompt）到工作流（workflow）：如何把 AI 变成个人工作系统。
+- AI 工作系统为什么需要审阅，而不只是生成。
 - 人和 AI 长期协作后，真正改变的不是效率，而是工作方式。
 - [MORE](docs/topic-pool.md)
 
@@ -57,7 +57,7 @@ English version: [README-EN.md](README-EN.md)
 
 ## 当前写作中
 
-暂无正在公开推进的草稿。
+- [从提示词到工作流：怎么让 AI 不再每次等你提醒？](content/articles/2026-07-10-from-prompts-to-workflows.md)（审阅阶段）
 
 ## 发布原则
 

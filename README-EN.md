@@ -41,7 +41,7 @@ The fourth article turns the series toward practical project memory. The fifth e
 ## Future Topic Pool
 
 - What a non-resetting AI assistant can actually help with.
-- From prompt to workflow: turning AI into a personal work system.
+- Why an AI work system needs review, not just generation.
 - After long-term human-AI collaboration, the real change may be work style, not just efficiency.
 - [MORE](docs/topic-pool.md)
 
@@ -61,7 +61,7 @@ Article bodies are currently written in Chinese first. English titles are provid
 
 ## Work In Progress
 
-No public draft is currently in progress.
+- [From Prompts To Workflows: How Can AI Stop Waiting For Reminders?](content/articles/2026-07-10-from-prompts-to-workflows.md) (review stage; article in Chinese)
 
 ## Publishing Principle
 
