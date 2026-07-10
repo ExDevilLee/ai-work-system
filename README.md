@@ -51,7 +51,7 @@ English version: [README-EN.md](README-EN.md)
 
 ## 当前写作中
 
-- [从聊天记录到项目规则：一次经验什么时候值得沉淀？](content/articles/2026-07-10-when-experience-becomes-project-rule.md)（大纲阶段）
+- [从聊天记录到项目规则：一次经验什么时候值得沉淀？](content/articles/2026-07-10-when-experience-becomes-project-rule.md)（初稿阶段）
 
 ## 发布原则
 
