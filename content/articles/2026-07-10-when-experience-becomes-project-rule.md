@@ -2,7 +2,7 @@
 title: 从聊天记录到项目规则：一次经验什么时候值得沉淀？
 title_en: From Chat History To Project Rules: When Is An Experience Worth Preserving?
 date: 2026-07-10
-status: draft
+status: review
 series: long-term-ai-work-system
 lang: zh
 summary: 讨论一次真实经验需要经过哪些判断，才值得从临时观察进入项目规则、工作流或自动化脚本。
@@ -18,7 +18,7 @@ tags:
 
 > 这件事以后还会重复吗？如果会，它应该沉淀到哪里？
 
-写完那篇文章以后，我真的做了一套最小项目记忆模板。里面只有三个项目文件：`README.md`、`AGENTS.md` 和 `PROJECT-STATE.md`，分别回答“项目是什么”“AI 应该怎么做”“现在做到哪里”。
+写完那篇文章以后，我真的做了一套[最小项目记忆模板](https://github.com/ExDevilLee/ai-work-system/tree/main/templates/minimum-project-memory)。里面只有三个项目文件：`README.md`、`AGENTS.md` 和 `PROJECT-STATE.md`，分别回答“项目是什么”“AI 应该怎么做”“现在做到哪里”。
 
 文件有了，下一个问题马上就出现了：什么内容有资格写进去？
 
