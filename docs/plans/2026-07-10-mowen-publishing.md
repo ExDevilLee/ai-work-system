@@ -42,7 +42,7 @@
 - [ ] 固定 `md-to-mowen@1.9.1`，先去除 frontmatter，再生成 NoteAtom。
 - [ ] 校验生成正文不包含 YAML 元信息，并保留标题、段落、链接、列表、引用和代码块。
 - [ ] 准备无文字的编辑型封面并保存到 `assets/mowen/`。
-- [ ] 通过墨问 `UploadViaURL` 上传封面；目录正文首部插入返回的图片 UUID。
+- [ ] 通过墨问 `UploadViaURL` 从 Gitee 同步镜像上传封面；上传前核对远端内容哈希，目录正文首部插入返回的图片 UUID。
 
 ## Task 4：私密验证与公开发布
 

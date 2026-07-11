@@ -1,32 +1,49 @@
 {
   "articles": {
     "content/articles/2026-07-07-long-term-ai-work-system.md": {
+      "content_sha256": "e240f92ae3a338d23e2d08bbcc0006c162792bf6b18fe5faba89b99af48f6e76",
       "note_id": "ZTUrdIvtYYKjeaQ0QwdUh",
+      "published": true,
       "url": "https://note.mowen.cn/detail/ZTUrdIvtYYKjeaQ0QwdUh"
     },
     "content/articles/2026-07-08-why-ai-keeps-forgetting.md": {
+      "content_sha256": "d42d0ad0ff36189aa2b70b0b0a0908f879e43f176c95aacae75aaee9435bd6a1",
       "note_id": "wBYkbGGt0mVziiU43btON",
+      "published": true,
       "url": "https://note.mowen.cn/detail/wBYkbGGt0mVziiU43btON"
     },
     "content/articles/2026-07-08-why-ai-writing-feels-human.md": {
+      "content_sha256": "843379e3d025964c3e19da4a25007d982d6d288034a89fc03e60c5f72aa73f85",
       "note_id": "pLXNhHE2jjupLWuMw2xtG",
+      "published": true,
       "url": "https://note.mowen.cn/detail/pLXNhHE2jjupLWuMw2xtG"
     },
     "content/articles/2026-07-09-minimum-project-memory-system.md": {
+      "content_sha256": "48da6d17405efd021bf42abc2596984ffa1d2c5797ad8b95a35413bb5f7361d6",
       "note_id": "ToF6TDiOGdYMHtkf30EX6",
+      "published": true,
       "url": "https://note.mowen.cn/detail/ToF6TDiOGdYMHtkf30EX6"
     },
     "content/articles/2026-07-10-when-experience-becomes-project-rule.md": {
+      "content_sha256": "8b314d4e7916cf88277c4e97f561e3c9dce38e9855e26dc7c951d17ca8901c29",
       "note_id": "cL1xrW4Lg9ojYpVtNmCze",
+      "published": true,
       "url": "https://note.mowen.cn/detail/cL1xrW4Lg9ojYpVtNmCze"
     },
     "content/articles/2026-07-10-when-rules-become-workflows.md": {
+      "content_sha256": "9320a1e9237978ffb38d017982512de93437240d2118d5c7f2c77bd482281c92",
       "note_id": "ZjiI83WfGXjGd7sKfrivI",
+      "published": true,
       "url": "https://note.mowen.cn/detail/ZjiI83WfGXjGd7sKfrivI"
     }
   },
   "directory": {
+    "cover_sha256": "b378829b08ff549181e4466f5909217adb8e54793f877a81ff1e5bea191c9949",
+    "cover_source_url": "https://gitee.com/ExDevilLee/ai-work-system/raw/main/assets/mowen/ai-work-system-cover.jpg",
+    "cover_uuid": "4Rmp_Zyq9_KQ4V5Q1KvVr-TMP",
+    "content_sha256": "132b0e4a53b9a3f34aab2f4096a34477dd8aa2e2e508524f76b5d4f744731f3f",
     "note_id": "CGAIy3ZJS0VwC6wlH3je-",
+    "published": true,
     "url": "https://note.mowen.cn/detail/CGAIy3ZJS0VwC6wlH3je-"
   },
   "version": 1

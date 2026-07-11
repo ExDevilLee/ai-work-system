@@ -7,9 +7,11 @@ from pathlib import Path
 
 from scripts.sync_mowen import (
     Article,
+    build_numbered_article_body,
     build_directory_document,
     convert_article,
     discover_ready_articles,
+    document_sha256,
     ensure_cover_uploaded,
     load_mapping,
     save_mapping,
@@ -79,6 +81,24 @@ class SyncMowenTest(unittest.TestCase):
 
             self.assertEqual([item.title for item in articles], ["同日较新", "同日较早", "旧文章"])
             self.assertEqual(articles[0].source, "content/articles/2026-07-10-zulu.md")
+            self.assertEqual([item.sequence for item in articles], [3, 2, 1])
+
+    def test_numbered_article_body_uses_series_order_without_changing_source(self) -> None:
+        article = Article(
+            Path("article.md"),
+            "content/articles/article.md",
+            "文章标题",
+            "2026-07-10",
+            "摘要",
+            ["AI"],
+            "引言\n\n# 旧标题\n\n正文\n",
+            sequence=7,
+        )
+
+        numbered = build_numbered_article_body(article)
+
+        self.assertEqual(numbered, "引言\n\n# 07-文章标题\n\n正文\n")
+        self.assertEqual(article.body, "引言\n\n# 旧标题\n\n正文\n")
 
     def test_directory_document_embeds_notes_newest_first(self) -> None:
         articles = [
@@ -103,6 +123,23 @@ class SyncMowenTest(unittest.TestCase):
             if atom.get("type") == "note"
         ]
         self.assertEqual(note_ids, ["new-id", "old-id"])
+        self.assertEqual(
+            document["content"][-2]["content"][0],
+            {"type": "text", "text": "首发地址："},
+        )
+        self.assertEqual(
+            document["content"][-1]["content"][0],
+            {
+                "type": "text",
+                "text": "https://github.com/ExDevilLee/ai-work-system/wiki",
+                "marks": [
+                    {
+                        "type": "link",
+                        "attrs": {"href": "https://github.com/ExDevilLee/ai-work-system/wiki"},
+                    }
+                ],
+            },
+        )
 
     def test_mapping_is_written_atomically_and_round_trips(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
@@ -137,6 +174,59 @@ class SyncMowenTest(unittest.TestCase):
         self.assertEqual(mapping["articles"]["content/articles/new.md"]["note_id"], "new-note-1")
         self.assertEqual([call[0] for call in client.calls], ["create", "public", "edit", "public"])
 
+    def test_sync_skips_unchanged_published_article(self) -> None:
+        article = Article(Path("article.md"), "content/articles/article.md", "文章", "2026-07-10", "", ["AI"], "# 文章")
+        document = {"type": "doc", "content": [{"type": "paragraph"}]}
+        mapping = {
+            "version": 1,
+            "directory": {},
+            "articles": {
+                article.source: {
+                    "note_id": "article-id",
+                    "content_sha256": document_sha256(document),
+                    "published": True,
+                }
+            },
+        }
+        client = FakeMowenClient()
+
+        sync_articles(
+            [article],
+            mapping,
+            client,
+            converter=lambda _: document,
+            publish=True,
+        )
+
+        self.assertEqual(client.calls, [])
+
+    def test_sync_only_publishes_unchanged_private_article(self) -> None:
+        article = Article(Path("article.md"), "content/articles/article.md", "文章", "2026-07-10", "", ["AI"], "# 文章")
+        document = {"type": "doc", "content": [{"type": "paragraph"}]}
+        mapping = {
+            "version": 1,
+            "directory": {},
+            "articles": {
+                article.source: {
+                    "note_id": "article-id",
+                    "content_sha256": document_sha256(document),
+                    "published": False,
+                }
+            },
+        }
+        client = FakeMowenClient()
+
+        sync_articles(
+            [article],
+            mapping,
+            client,
+            converter=lambda _: document,
+            publish=True,
+        )
+
+        self.assertEqual(client.calls, [("public", "article-id")])
+        self.assertTrue(mapping["articles"][article.source]["published"])
+
     def test_register_mode_does_not_edit_existing_public_notes(self) -> None:
         articles = [
             Article(Path("new.md"), "content/articles/new.md", "新文章", "2026-07-10", "", ["AI"], "# 新文章"),
@@ -169,6 +259,7 @@ class SyncMowenTest(unittest.TestCase):
             "摘要",
             ["AI"],
             "# 文章标题\n\n正文\n",
+            sequence=4,
         )
         observed: dict[str, object] = {}
 
@@ -185,7 +276,7 @@ class SyncMowenTest(unittest.TestCase):
 
         document = convert_article(article, runner=fake_runner)
 
-        self.assertEqual(observed["input"], "# 文章标题\n\n正文\n")
+        self.assertEqual(observed["input"], "# 04-文章标题\n\n正文\n")
         self.assertNotIn("title:", str(observed["input"]))
         self.assertIn("--dry-run", observed["command"])
         self.assertEqual(document["type"], "doc")
@@ -224,6 +315,23 @@ class SyncMowenTest(unittest.TestCase):
 
         self.assertEqual(client.calls, [])
 
+    def test_unchanged_published_directory_is_not_edited(self) -> None:
+        article = Article(Path("new.md"), "content/articles/new.md", "新文章", "2026-07-10", "", ["AI"], "# 新文章")
+        mapping = {
+            "version": 1,
+            "directory": {"note_id": "directory-id"},
+            "articles": {"content/articles/new.md": {"note_id": "article-id"}},
+        }
+        document = build_directory_document([article], mapping)
+        mapping["directory"].update(
+            {"content_sha256": document_sha256(document), "published": True}
+        )
+        client = FakeMowenClient()
+
+        sync_directory([article], mapping, client, publish=True, cover_uuid=None)
+
+        self.assertEqual(client.calls, [])
+
     def test_cover_upload_is_reused_until_file_content_changes(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             cover = Path(tmp) / "cover.jpg"
@@ -236,12 +344,14 @@ class SyncMowenTest(unittest.TestCase):
                 "https://example.test/cover.jpg",
                 mapping,
                 client,
+                fetcher=lambda _: b"cover-v1",
             )
             second = ensure_cover_uploaded(
                 cover,
                 "https://example.test/cover.jpg",
                 mapping,
                 client,
+                fetcher=lambda _: b"cover-v1",
             )
 
             self.assertEqual(first, "cover-uuid")
@@ -249,6 +359,24 @@ class SyncMowenTest(unittest.TestCase):
             self.assertEqual([call[0] for call in client.calls], ["upload"])
             self.assertEqual(mapping["directory"]["cover_source_url"], "https://example.test/cover.jpg")
             self.assertEqual(len(mapping["directory"]["cover_sha256"]), 64)
+
+    def test_cover_upload_rejects_stale_remote_content(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            cover = Path(tmp) / "cover.jpg"
+            cover.write_bytes(b"new-cover")
+            client = FakeMowenClient()
+
+            with self.assertRaisesRegex(RuntimeError, "does not match"):
+                ensure_cover_uploaded(
+                    cover,
+                    "https://example.test/cover.jpg",
+                    {"directory": {}, "articles": {}},
+                    client,
+                    fetcher=lambda _: b"old-cover",
+                    attempts=1,
+                )
+
+            self.assertEqual(client.calls, [])
 
 
 if __name__ == "__main__":

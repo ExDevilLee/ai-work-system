@@ -10,9 +10,10 @@ import os
 import subprocess
 import sys
 import tempfile
+import time
 import urllib.error
 import urllib.request
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from pathlib import Path
 from typing import Callable
 
@@ -35,6 +36,7 @@ class Article:
     summary: str
     tags: list[str]
     body: str
+    sequence: int | None = None
 
 
 def parse_article(path: Path, repo_root: Path) -> Article:
@@ -74,7 +76,28 @@ def discover_ready_articles(repo_root: Path = REPO_ROOT) -> list[Article]:
         if metadata.get("status") != "ready":
             continue
         articles.append(parse_article(path, repo_root))
-    return sorted(articles, key=lambda item: (item.date, item.source), reverse=True)
+    ordered = sorted(articles, key=lambda item: (item.date, item.source), reverse=True)
+    sequence_by_source = {
+        article.source: sequence
+        for sequence, article in enumerate(reversed(ordered), start=1)
+    }
+    return [
+        replace(article, sequence=sequence_by_source[article.source])
+        for article in ordered
+    ]
+
+
+def build_numbered_article_body(article: Article) -> str:
+    if article.sequence is None:
+        raise ValueError(f"Missing MoWen article sequence: {article.source}")
+    numbered_title = f"{article.sequence:02d}-{article.title}"
+    lines = article.body.splitlines(keepends=True)
+    for index, line in enumerate(lines):
+        if line.startswith("# "):
+            newline = "\n" if line.endswith("\n") else ""
+            lines[index] = f"# {numbered_title}{newline}"
+            return "".join(lines)
+    return f"# {numbered_title}\n\n{article.body}"
 
 
 def text_paragraph(text: str, bold: bool = False) -> dict:
@@ -82,6 +105,30 @@ def text_paragraph(text: str, bold: bool = False) -> dict:
     if bold:
         node["marks"] = [{"type": "bold"}]
     return {"type": "paragraph", "content": [node]}
+
+
+def text_paragraph_from_parts(parts: list[str]) -> dict:
+    return {
+        "type": "paragraph",
+        "content": [{"type": "text", "text": part} for part in parts],
+    }
+
+
+def link_paragraph(label: str, url: str) -> dict:
+    content: list[dict] = []
+    if label:
+        content.append({"type": "text", "text": label})
+    content.append(
+        {
+            "type": "text",
+            "text": url,
+            "marks": [{"type": "link", "attrs": {"href": url}}],
+        }
+    )
+    return {
+        "type": "paragraph",
+        "content": content,
+    }
 
 
 def build_directory_document(
@@ -107,15 +154,12 @@ def build_directory_document(
         )
     content.extend(
         [
-            text_paragraph(
-                "这里记录我如何把 AI 从一次性聊天工具，逐步放进一个有记忆、有流程、有证据、有复盘的长期工作系统。"
+            text_paragraph_from_parts(
+                [
+                    "这里记录我如何把 AI 从一次性聊天工具，逐步放进一个有记忆、有流程、有证据、有复盘的长期工作系统。",
+                    "文章按发布时间倒序排列，最新内容在最上方；第一次阅读时，也可以从最早的一篇开始。",
+                ]
             ),
-            {"type": "paragraph"},
-            text_paragraph(
-                "文章按发布时间倒序排列，最新内容在最上方；第一次阅读时，也可以从最早的一篇开始。"
-            ),
-            {"type": "paragraph"},
-            text_paragraph("文章时间线", bold=True),
             {"type": "paragraph"},
         ]
     )
@@ -127,11 +171,16 @@ def build_directory_document(
             raise ValueError(f"Missing MoWen note mapping: {article.source}")
         content.extend(
             [
-                text_paragraph(article.date, bold=True),
                 {"type": "note", "attrs": {"uuid": note_id}},
                 {"type": "paragraph"},
             ]
         )
+    content.extend(
+        [
+            text_paragraph("首发地址："),
+            link_paragraph("", "https://github.com/ExDevilLee/ai-work-system/wiki"),
+        ]
+    )
     return {"type": "doc", "content": content}
 
 
@@ -149,6 +198,16 @@ def save_mapping(path: Path, mapping: dict) -> None:
         encoding="utf-8",
     )
     os.replace(str(temporary), str(path))
+
+
+def document_sha256(document: dict) -> str:
+    encoded = json.dumps(
+        document,
+        ensure_ascii=False,
+        sort_keys=True,
+        separators=(",", ":"),
+    ).encode("utf-8")
+    return hashlib.sha256(encoded).hexdigest()
 
 
 def run_converter(command: list[str]) -> None:
@@ -173,7 +232,7 @@ def convert_article(
         temporary = Path(tmp)
         input_path = temporary / "article.md"
         cache_path = temporary / "cache"
-        input_path.write_text(article.body, encoding="utf-8")
+        input_path.write_text(build_numbered_article_body(article), encoding="utf-8")
         command = [
             "npx",
             "--no-install",
@@ -282,6 +341,8 @@ def ensure_cover_uploaded(
     cover_url: str,
     mapping: dict,
     client: MowenClient,
+    fetcher: Callable[[str], bytes] | None = None,
+    attempts: int = 6,
 ) -> str:
     if not cover_path.exists():
         raise ValueError(f"Cover file does not exist: {cover_path}")
@@ -295,6 +356,16 @@ def ensure_cover_uploaded(
         and directory.get("cover_source_url") == cover_url
     ):
         return str(directory["cover_uuid"])
+    fetch = fetcher or download_url
+    for attempt in range(attempts):
+        remote_digest = hashlib.sha256(fetch(cover_url)).hexdigest()
+        if remote_digest == digest:
+            break
+        if attempt + 1 == attempts:
+            raise RuntimeError(
+                "Remote cover content does not match the repository asset"
+            )
+        time.sleep(10)
     uuid = client.upload_via_url(cover_url, cover_path.name)
     directory.update(
         {
@@ -304,6 +375,20 @@ def ensure_cover_uploaded(
         }
     )
     return uuid
+
+
+def download_url(url: str) -> bytes:
+    request = urllib.request.Request(
+        url,
+        headers={"User-Agent": "ai-work-system-mowen-sync/1.0"},
+    )
+    try:
+        with urllib.request.urlopen(request, timeout=30) as response:
+            return response.read()
+    except urllib.error.HTTPError as exc:
+        raise RuntimeError(f"Cover download failed with HTTP {exc.code}") from exc
+    except urllib.error.URLError as exc:
+        raise RuntimeError("Cover download failed before receiving a response") from exc
 
 
 def sync_articles(
@@ -320,17 +405,28 @@ def sync_articles(
         if entry and entry.get("note_id") and not update_existing:
             continue
         document = converter(article)
+        digest = document_sha256(document)
+        if entry and entry.get("note_id") and entry.get("content_sha256") == digest:
+            if publish and not entry.get("published"):
+                client.set_public(str(entry["note_id"]))
+                entry["published"] = True
+            continue
         if entry and entry.get("note_id"):
             note_id = str(entry["note_id"])
             client.edit_rich_note(note_id, document)
+            entry["content_sha256"] = digest
         else:
             note_id = client.create_rich_note(document, article.tags)
             article_mapping[article.source] = {
                 "note_id": note_id,
                 "url": f"https://note.mowen.cn/detail/{note_id}",
+                "content_sha256": digest,
+                "published": False,
             }
+            entry = article_mapping[article.source]
         if publish:
             client.set_public(note_id)
+            entry["published"] = True
 
 
 def sync_directory(
@@ -346,8 +442,15 @@ def sync_directory(
     if note_id and not update_existing:
         return
     document = build_directory_document(articles, mapping, cover_uuid=cover_uuid)
+    digest = document_sha256(document)
+    if note_id and directory.get("content_sha256") == digest:
+        if publish and not directory.get("published"):
+            client.set_public(str(note_id))
+            directory["published"] = True
+        return
     if note_id:
         client.edit_rich_note(str(note_id), document)
+        directory["content_sha256"] = digest
     else:
         note_id = client.create_rich_note(
             document,
@@ -357,10 +460,13 @@ def sync_directory(
             {
                 "note_id": note_id,
                 "url": f"https://note.mowen.cn/detail/{note_id}",
+                "content_sha256": digest,
+                "published": False,
             }
         )
     if publish:
         client.set_public(str(note_id))
+        directory["published"] = True
 
 
 def validate_conversions(articles: list[Article]) -> None:
