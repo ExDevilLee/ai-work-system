@@ -12,6 +12,7 @@
 6. [从提示词到工作流：怎么让 AI 不再每次等你提醒？](https://github.com/ExDevilLee/ai-work-system/wiki/06-%E4%BB%8E%E6%8F%90%E7%A4%BA%E8%AF%8D%E5%88%B0%E5%B7%A5%E4%BD%9C%E6%B5%81%EF%BC%9A%E6%80%8E%E4%B9%88%E8%AE%A9-AI-%E4%B8%8D%E5%86%8D%E6%AF%8F%E6%AC%A1%E7%AD%89%E4%BD%A0%E6%8F%90%E9%86%92%EF%BC%9F)
 
 7. [为什么 AI 工作系统需要 Review，而不只是生成？](https://github.com/ExDevilLee/ai-work-system/wiki/07-%E4%B8%BA%E4%BB%80%E4%B9%88-AI-%E5%B7%A5%E4%BD%9C%E7%B3%BB%E7%BB%9F%E9%9C%80%E8%A6%81-Review%EF%BC%8C%E8%80%8C%E4%B8%8D%E5%8F%AA%E6%98%AF%E7%94%9F%E6%88%90%EF%BC%9F)
+8. [哪些 Review 可以自动化，哪些判断必须留给人？](https://github.com/ExDevilLee/ai-work-system/wiki/08-%E5%93%AA%E4%BA%9B-Review-%E5%8F%AF%E4%BB%A5%E8%87%AA%E5%8A%A8%E5%8C%96%EF%BC%8C%E5%93%AA%E4%BA%9B%E5%88%A4%E6%96%AD%E5%BF%85%E9%A1%BB%E7%95%99%E7%BB%99%E4%BA%BA%EF%BC%9F)
 
 ## 系统边界
 
@@ -19,10 +20,6 @@
   - 可以讨论旧页面、旧规则、旧工作日志（worklog）、过期任务和重复说明如何影响 AI 判断。
 
 ## 人的角色
-
-- 为什么自动化发布之后，人反而更要保留最后判断。
-  - 可以从 GitHub Wiki / Gitee Wiki / CI 同步链路讲起。
-  - 自动化减少重复执行，但不替代体验检查和方向判断。
 
 - 当 AI 成为长期协作者，人的工作方式会怎么变。
   - 适合作为阶段性总结篇。

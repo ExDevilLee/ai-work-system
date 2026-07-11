@@ -37,7 +37,9 @@ English version: [README-EN.md](README-EN.md)
 
 7. [为什么 AI 工作系统需要 Review，而不只是生成？](https://github.com/ExDevilLee/ai-work-system/wiki/07-%E4%B8%BA%E4%BB%80%E4%B9%88-AI-%E5%B7%A5%E4%BD%9C%E7%B3%BB%E7%BB%9F%E9%9C%80%E8%A6%81-Review%EF%BC%8C%E8%80%8C%E4%B8%8D%E5%8F%AA%E6%98%AF%E7%94%9F%E6%88%90%EF%BC%9F)
 
-第四篇接回第二篇末尾留下的问题，进入最小可用项目记忆系统的实践层；第五篇讨论经验如何从临时观察进入项目规则；第六篇再把稳定规则推进为可重复执行的工作流；第七篇进一步讨论如何通过审阅和证据判断执行结果是否可以接受。
+8. [哪些 Review 可以自动化，哪些判断必须留给人？](https://github.com/ExDevilLee/ai-work-system/wiki/08-%E5%93%AA%E4%BA%9B-Review-%E5%8F%AF%E4%BB%A5%E8%87%AA%E5%8A%A8%E5%8C%96%EF%BC%8C%E5%93%AA%E4%BA%9B%E5%88%A4%E6%96%AD%E5%BF%85%E9%A1%BB%E7%95%99%E7%BB%99%E4%BA%BA%EF%BC%9F)
+
+第四篇接回第二篇末尾留下的问题，进入最小可用项目记忆系统的实践层；第五篇讨论经验如何从临时观察进入项目规则；第六篇再把稳定规则推进为可重复执行的工作流；第七篇讨论如何通过审阅和证据判断执行结果是否可以接受；第八篇进一步划分自动检查、AI Review 和人工判断的边界。
 
 ## 后续选题池
 
@@ -55,6 +57,7 @@ English version: [README-EN.md](README-EN.md)
 - [从聊天记录到项目规则：一次经验什么时候值得沉淀？](https://github.com/ExDevilLee/ai-work-system/wiki/05-%E4%BB%8E%E8%81%8A%E5%A4%A9%E8%AE%B0%E5%BD%95%E5%88%B0%E9%A1%B9%E7%9B%AE%E8%A7%84%E5%88%99%EF%BC%9A%E4%B8%80%E6%AC%A1%E7%BB%8F%E9%AA%8C%E4%BB%80%E4%B9%88%E6%97%B6%E5%80%99%E5%80%BC%E5%BE%97%E6%B2%89%E6%B7%80%EF%BC%9F)
 - [从提示词到工作流：怎么让 AI 不再每次等你提醒？](https://github.com/ExDevilLee/ai-work-system/wiki/06-%E4%BB%8E%E6%8F%90%E7%A4%BA%E8%AF%8D%E5%88%B0%E5%B7%A5%E4%BD%9C%E6%B5%81%EF%BC%9A%E6%80%8E%E4%B9%88%E8%AE%A9-AI-%E4%B8%8D%E5%86%8D%E6%AF%8F%E6%AC%A1%E7%AD%89%E4%BD%A0%E6%8F%90%E9%86%92%EF%BC%9F)
 - [为什么 AI 工作系统需要 Review，而不只是生成？](https://github.com/ExDevilLee/ai-work-system/wiki/07-%E4%B8%BA%E4%BB%80%E4%B9%88-AI-%E5%B7%A5%E4%BD%9C%E7%B3%BB%E7%BB%9F%E9%9C%80%E8%A6%81-Review%EF%BC%8C%E8%80%8C%E4%B8%8D%E5%8F%AA%E6%98%AF%E7%94%9F%E6%88%90%EF%BC%9F)
+- [哪些 Review 可以自动化，哪些判断必须留给人？](https://github.com/ExDevilLee/ai-work-system/wiki/08-%E5%93%AA%E4%BA%9B-Review-%E5%8F%AF%E4%BB%A5%E8%87%AA%E5%8A%A8%E5%8C%96%EF%BC%8C%E5%93%AA%E4%BA%9B%E5%88%A4%E6%96%AD%E5%BF%85%E9%A1%BB%E7%95%99%E7%BB%99%E4%BA%BA%EF%BC%9F)
 
 文章标题默认链接到 GitHub Wiki 阅读页；[Gitee Wiki](https://gitee.com/ExDevilLee/ai-work-system/wikis/Home) 保持同步展示，[墨问《AI 长期工作系统》](https://note.mowen.cn/detail/CGAIy3ZJS0VwC6wlH3je-) 按时间倒序内嵌全部文章。源码 Markdown 可从 Wiki 页面底部的来源入口进入。
 <!-- articles:index:end -->
