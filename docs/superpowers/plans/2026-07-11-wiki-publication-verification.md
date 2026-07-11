@@ -65,4 +65,4 @@
 - [x] Run `python -m py_compile scripts/sync_wiki.py scripts/verify_wiki.py`.
 - [x] Run local GitHub and Gitee pre-publish verification commands.
 - [x] Run workflow YAML syntax checks and `git diff --check`.
-- [ ] Commit and push, then confirm both Wiki workflows pass and MoWen skips publishing.
+- [x] Commit and push, then confirm both Wiki workflows pass and MoWen skips publishing.
