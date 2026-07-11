@@ -77,7 +77,9 @@ python3 scripts/sync_wiki.py
 - 生成 `Home.md`
 - 生成 `_Sidebar.md`
 - 为每篇 `ready` 文章生成一个 Wiki 页面；文章页文件名带 `01-`、`02-` 这类阅读序号前缀，用来稳定 Gitee 左侧页面树顺序。
+- 在每篇文章底部生成“上一篇 / 目录 / 下一篇”连续阅读导航。
 - Home 和 Sidebar 使用标准 Markdown 链接，不依赖 GitHub 专属 `[[title|page]]` Wiki 语法，避免 Gitee Wiki 渲染成原始文本。
+- 每次同步都会全量重建文章导航；新增第 n 篇后，第 n-1 篇的“下一篇”也会自动更新。首篇的“上一篇”和末篇的“下一篇”固定显示为“无”。
 - 同步时会清理旧的已生成文章页面，避免改名后 Gitee 左侧残留旧页面；没有文章来源标记的手工 Wiki 页面不会被自动删除。
 - 不自动 push
 
@@ -145,6 +147,8 @@ python3 scripts/sync_wiki.py --push \
 ## 墨问同步
 
 墨问由 `.github/workflows/sync-mowen.yml` 发布。为避免正文图片尚未进入 Gitee Raw 地址时就开始上传，墨问 workflow 会等待 `Sync to Gitee` 成功完成后再触发；手动运行入口仍然保留。
+
+Gitee 同步由任意主仓库 push 触发，但墨问只在文章、墨问资源、映射或墨问发布脚本发生变化时继续执行。README、Wiki 生成脚本或普通文档单独变化时，墨问 job 会成功跳过发布步骤，不消耗 API 调用额度。
 
 ```bash
 python3 scripts/sync_mowen.py

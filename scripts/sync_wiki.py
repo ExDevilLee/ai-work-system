@@ -133,15 +133,47 @@ def rewrite_asset_urls(markdown: str, asset_base_url: str) -> str:
     return pattern.sub(replace, markdown)
 
 
+def render_article_navigation(
+    wiki_base_url: str,
+    previous_page: str | None,
+    next_page: str | None,
+) -> str:
+    previous = (
+        f"[上一篇]({wiki_page_url(previous_page, wiki_base_url)})"
+        if previous_page
+        else "上一篇：无"
+    )
+    directory = f"[目录]({wiki_page_url('Home', wiki_base_url)})"
+    following = (
+        f"[下一篇]({wiki_page_url(next_page, wiki_base_url)})"
+        if next_page
+        else "下一篇：无"
+    )
+    return (
+        "| 上一篇 | 目录 | 下一篇 |\n"
+        "| --- | --- | --- |\n"
+        f"| {previous} | {directory} | {following} |"
+    )
+
+
 def render_article(
     article: dict[str, str | Path],
     asset_base_url: str = DEFAULT_ASSET_BASE_URL,
+    wiki_base_url: str = DEFAULT_WIKI_BASE_URL,
+    previous_page: str | None = None,
+    next_page: str | None = None,
 ) -> str:
     source = Path(article["path"]).relative_to(REPO_ROOT)
     body = rewrite_asset_urls(str(article["body"]), asset_base_url)
+    navigation = render_article_navigation(
+        wiki_base_url,
+        previous_page,
+        next_page,
+    )
     return (
         f"{body.rstrip()}\n\n"
         "---\n\n"
+        f"{navigation}\n\n"
         f"Source: `{source}`\n"
     )
 
@@ -172,10 +204,18 @@ def write_wiki(
         page = str(article["page"])
         title = str(article["title"])
         summary = str(article["summary"])
+        previous_page = str(articles[index - 2]["page"]) if index > 1 else None
+        next_page = str(articles[index]["page"]) if index < len(articles) else None
         url = wiki_page_url(page, wiki_base_url)
         filename = wiki_dir / f"{page}.md"
         filename.write_text(
-            render_article(article, asset_base_url=asset_base_url),
+            render_article(
+                article,
+                asset_base_url=asset_base_url,
+                wiki_base_url=wiki_base_url,
+                previous_page=previous_page,
+                next_page=next_page,
+            ),
             encoding="utf-8",
         )
         written.append(filename)
