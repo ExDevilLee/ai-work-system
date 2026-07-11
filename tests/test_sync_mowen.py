@@ -14,6 +14,7 @@ from scripts.sync_mowen import (
     document_sha256,
     ensure_cover_uploaded,
     load_mapping,
+    rewrite_article_asset_urls,
     save_mapping,
     sync_articles,
     sync_directory,
@@ -59,6 +60,16 @@ class FakeMowenClient:
 
 
 class SyncMowenTest(unittest.TestCase):
+    def test_relative_article_assets_are_rewritten_for_mowen(self) -> None:
+        markdown = "![结构图](images/04/memory.png)"
+
+        rewritten = rewrite_article_asset_urls(markdown)
+
+        self.assertEqual(
+            rewritten,
+            "![结构图](https://gitee.com/ExDevilLee/ai-work-system/raw/main/content/articles/images/04/memory.png)",
+        )
+
     def test_discovers_only_ready_articles_in_reverse_chronological_order(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)

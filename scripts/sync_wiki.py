@@ -17,6 +17,7 @@ DEFAULT_WIKI_DIR = REPO_ROOT / ".wiki" / "ai-work-system.wiki"
 DEFAULT_REMOTE = "https://github.com/ExDevilLee/ai-work-system.wiki.git"
 DEFAULT_SITE_NAME = "GitHub Wiki"
 DEFAULT_WIKI_BASE_URL = "https://github.com/ExDevilLee/ai-work-system/wiki"
+DEFAULT_ASSET_BASE_URL = "https://raw.githubusercontent.com/ExDevilLee/ai-work-system/main"
 
 
 def run(cmd: list[str], cwd: Path | None = None, check: bool = True) -> subprocess.CompletedProcess[str]:
@@ -115,10 +116,31 @@ def align_wiki_repo_with_remote(wiki_dir: Path) -> None:
         run(["git", "reset", "--hard", "origin/master"], cwd=wiki_dir)
 
 
-def render_article(article: dict[str, str | Path]) -> str:
+def rewrite_asset_urls(markdown: str, asset_base_url: str) -> str:
+    pattern = re.compile(
+        r"(?P<prefix>\]\()(?P<path>(?:(?:\.\./)+assets/|images/)[^)\s]+)"
+    )
+
+    def replace(match: re.Match[str]) -> str:
+        path = match.group("path")
+        asset_path = (
+            f"content/articles/{path}"
+            if path.startswith("images/")
+            else path[path.index("assets/") :]
+        )
+        return f"{match.group('prefix')}{asset_base_url.rstrip('/')}/{asset_path}"
+
+    return pattern.sub(replace, markdown)
+
+
+def render_article(
+    article: dict[str, str | Path],
+    asset_base_url: str = DEFAULT_ASSET_BASE_URL,
+) -> str:
     source = Path(article["path"]).relative_to(REPO_ROOT)
+    body = rewrite_asset_urls(str(article["body"]), asset_base_url)
     return (
-        f"{article['body'].rstrip()}\n\n"
+        f"{body.rstrip()}\n\n"
         "---\n\n"
         f"Source: `{source}`\n"
     )
@@ -129,6 +151,7 @@ def write_wiki(
     articles: list[dict[str, str | Path]],
     site_name: str,
     wiki_base_url: str,
+    asset_base_url: str = DEFAULT_ASSET_BASE_URL,
 ) -> list[Path]:
     written: list[Path] = []
 
@@ -151,7 +174,10 @@ def write_wiki(
         summary = str(article["summary"])
         url = wiki_page_url(page, wiki_base_url)
         filename = wiki_dir / f"{page}.md"
-        filename.write_text(render_article(article), encoding="utf-8")
+        filename.write_text(
+            render_article(article, asset_base_url=asset_base_url),
+            encoding="utf-8",
+        )
         written.append(filename)
 
         home_lines.append(f"{index}. [{title}]({url})")
@@ -212,6 +238,11 @@ def main() -> int:
         default=DEFAULT_WIKI_BASE_URL,
         help="Base URL used for generated Markdown links.",
     )
+    parser.add_argument(
+        "--asset-base-url",
+        default=DEFAULT_ASSET_BASE_URL,
+        help="Public repository base URL used to rewrite relative article assets.",
+    )
     parser.add_argument("--push", action="store_true", help="Commit and push wiki changes.")
     parser.add_argument("--dry-run", action="store_true", help="Print ready articles without writing wiki files.")
     args = parser.parse_args()
@@ -226,7 +257,13 @@ def main() -> int:
     ensure_wiki_repo(args.wiki_dir, args.remote)
     if args.push:
         align_wiki_repo_with_remote(args.wiki_dir)
-    written = write_wiki(args.wiki_dir, articles, args.site_name, args.wiki_base_url)
+    written = write_wiki(
+        args.wiki_dir,
+        articles,
+        args.site_name,
+        args.wiki_base_url,
+        args.asset_base_url,
+    )
     print(f"Synced ready articles: {len(articles)}")
     for path in written:
         print(path.relative_to(args.wiki_dir))

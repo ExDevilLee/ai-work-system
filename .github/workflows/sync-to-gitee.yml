@@ -56,4 +56,5 @@ jobs:
             --site-name "Gitee Wiki" \
             --wiki-dir ".wiki/ai-work-system.gitee-wiki" \
             --remote "https://gitee.com/ExDevilLee/ai-work-system.wiki.git" \
-            --wiki-base-url "https://gitee.com/ExDevilLee/ai-work-system/wikis"
+            --wiki-base-url "https://gitee.com/ExDevilLee/ai-work-system/wikis" \
+            --asset-base-url "https://gitee.com/ExDevilLee/ai-work-system/raw/main"

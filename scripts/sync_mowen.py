@@ -7,6 +7,7 @@ import argparse
 import hashlib
 import json
 import os
+import re
 import subprocess
 import sys
 import tempfile
@@ -25,6 +26,7 @@ ARTICLES_DIR = REPO_ROOT / "content" / "articles"
 MAPPING_PATH = REPO_ROOT / "publishing" / "mowen-notes.json"
 COVER_PATH = REPO_ROOT / "assets" / "mowen" / "ai-work-system-cover.jpg"
 MOWEN_MCP_ENDPOINT = "https://open.mowen.cn/api/open/mcp/v1/note"
+ARTICLE_ASSET_BASE_URL = "https://gitee.com/ExDevilLee/ai-work-system/raw/main"
 
 
 @dataclass(frozen=True)
@@ -98,6 +100,26 @@ def build_numbered_article_body(article: Article) -> str:
             lines[index] = f"# {numbered_title}{newline}"
             return "".join(lines)
     return f"# {numbered_title}\n\n{article.body}"
+
+
+def rewrite_article_asset_urls(
+    markdown: str,
+    asset_base_url: str = ARTICLE_ASSET_BASE_URL,
+) -> str:
+    pattern = re.compile(
+        r"(?P<prefix>\]\()(?P<path>(?:(?:\.\./)+assets/|images/)[^)\s]+)"
+    )
+
+    def replace(match: re.Match[str]) -> str:
+        path = match.group("path")
+        asset_path = (
+            f"content/articles/{path}"
+            if path.startswith("images/")
+            else path[path.index("assets/") :]
+        )
+        return f"{match.group('prefix')}{asset_base_url.rstrip('/')}/{asset_path}"
+
+    return pattern.sub(replace, markdown)
 
 
 def text_paragraph(text: str, bold: bool = False) -> dict:
@@ -232,7 +254,10 @@ def convert_article(
         temporary = Path(tmp)
         input_path = temporary / "article.md"
         cache_path = temporary / "cache"
-        input_path.write_text(build_numbered_article_body(article), encoding="utf-8")
+        converted_body = rewrite_article_asset_urls(
+            build_numbered_article_body(article)
+        )
+        input_path.write_text(converted_body, encoding="utf-8")
         command = [
             "npx",
             "--no-install",
