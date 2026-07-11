@@ -144,7 +144,7 @@ python3 scripts/sync_wiki.py --push \
 
 ## 墨问同步
 
-墨问由 `.github/workflows/sync-mowen.yml` 独立发布，入口脚本为：
+墨问由 `.github/workflows/sync-mowen.yml` 发布。为避免正文图片尚未进入 Gitee Raw 地址时就开始上传，墨问 workflow 会等待 `Sync to Gitee` 成功完成后再触发；手动运行入口仍然保留。
 
 ```bash
 python3 scripts/sync_mowen.py
@@ -184,6 +184,7 @@ content/articles/
 - GitHub Wiki 同步脚本把相对路径改写为 GitHub Raw 地址。
 - Gitee Wiki 同步脚本把相对路径改写为 Gitee Raw 地址。
 - 墨问同步脚本先通过 `UploadViaURL` 上传图片，把转换器生成的临时图片 UUID 替换为真实 UUID，再编辑正文。
+- Gitee Raw 暂时返回 `404` 时会等待重试，处理 workflow 完成后仍可能存在的短暂缓存延迟。
 - `publishing/mowen-notes.json` 按文章保存图片哈希、来源 URL 和墨问 UUID；图片内容未变化时直接复用，避免重复上传和消耗接口额度。
 
 `md-to-mowen --dry-run` 生成的图片 UUID 仅用于本地转换占位，不能直接发送给墨问 `EditRichNote`。如果忽略上传和替换步骤，远端会返回 `OPEN_MCP_NOTE_EDIT_FAIL`。

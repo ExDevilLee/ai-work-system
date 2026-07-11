@@ -1,9 +1,11 @@
 from __future__ import annotations
 
+import hashlib
 import json
 import tempfile
 import unittest
 from pathlib import Path
+from unittest import mock
 
 from scripts.sync_mowen import (
     Article,
@@ -20,6 +22,7 @@ from scripts.sync_mowen import (
     save_mapping,
     sync_articles,
     sync_directory,
+    wait_for_remote_asset,
 )
 
 
@@ -117,6 +120,45 @@ class SyncMowenTest(unittest.TestCase):
                 [call[0] for call in client.calls],
                 ["upload"],
             )
+
+    @mock.patch("scripts.sync_mowen.time.sleep")
+    def test_remote_asset_retries_404_then_succeeds(self, sleep: mock.Mock) -> None:
+        responses: list[bytes | RuntimeError] = [
+            RuntimeError("Asset download failed with HTTP 404"),
+            RuntimeError("Asset download failed with HTTP 404"),
+            b"current-image",
+        ]
+
+        def fetch(_: str) -> bytes:
+            response = responses.pop(0)
+            if isinstance(response, RuntimeError):
+                raise response
+            return response
+
+        wait_for_remote_asset(
+            "https://example.test/image.png",
+            hashlib.sha256(b"current-image").hexdigest(),
+            fetch,
+            attempts=6,
+            mismatch_message="Remote image does not match",
+        )
+
+        self.assertEqual(sleep.call_count, 2)
+
+    @mock.patch("scripts.sync_mowen.time.sleep")
+    def test_remote_asset_does_not_retry_non_404_errors(self, sleep: mock.Mock) -> None:
+        with self.assertRaisesRegex(RuntimeError, "HTTP 500"):
+            wait_for_remote_asset(
+                "https://example.test/image.png",
+                "unused",
+                lambda _: (_ for _ in ()).throw(
+                    RuntimeError("Asset download failed with HTTP 500")
+                ),
+                attempts=6,
+                mismatch_message="Remote image does not match",
+            )
+
+        sleep.assert_not_called()
 
     def test_document_image_count_must_match_uploaded_images(self) -> None:
         document = {
@@ -268,6 +310,32 @@ class SyncMowenTest(unittest.TestCase):
 
         self.assertEqual(client.calls, [])
 
+    def test_sync_edits_changed_published_article_without_republishing(self) -> None:
+        article = Article(Path("article.md"), "content/articles/article.md", "文章", "2026-07-10", "", ["AI"], "# 文章")
+        document = {"type": "doc", "content": [{"type": "paragraph"}]}
+        mapping = {
+            "version": 1,
+            "directory": {},
+            "articles": {
+                article.source: {
+                    "note_id": "article-id",
+                    "content_sha256": "old-digest",
+                    "published": True,
+                }
+            },
+        }
+        client = FakeMowenClient()
+
+        sync_articles(
+            [article],
+            mapping,
+            client,
+            converter=lambda _: document,
+            publish=True,
+        )
+
+        self.assertEqual([call[0] for call in client.calls], ["edit"])
+
     def test_sync_only_publishes_unchanged_private_article(self) -> None:
         article = Article(Path("article.md"), "content/articles/article.md", "文章", "2026-07-10", "", ["AI"], "# 文章")
         document = {"type": "doc", "content": [{"type": "paragraph"}]}
@@ -399,6 +467,23 @@ class SyncMowenTest(unittest.TestCase):
         sync_directory([article], mapping, client, publish=True, cover_uuid=None)
 
         self.assertEqual(client.calls, [])
+
+    def test_changed_published_directory_is_edited_without_republishing(self) -> None:
+        article = Article(Path("new.md"), "content/articles/new.md", "新文章", "2026-07-10", "", ["AI"], "# 新文章")
+        mapping = {
+            "version": 1,
+            "directory": {
+                "note_id": "directory-id",
+                "content_sha256": "old-digest",
+                "published": True,
+            },
+            "articles": {"content/articles/new.md": {"note_id": "article-id"}},
+        }
+        client = FakeMowenClient()
+
+        sync_directory([article], mapping, client, publish=True, cover_uuid=None)
+
+        self.assertEqual([call[0] for call in client.calls], ["edit"])
 
     def test_cover_upload_is_reused_until_file_content_changes(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:

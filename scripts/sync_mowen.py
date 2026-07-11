@@ -416,15 +416,13 @@ def ensure_cover_uploaded(
     ):
         return str(directory["cover_uuid"])
     fetch = fetcher or download_url
-    for attempt in range(attempts):
-        remote_digest = hashlib.sha256(fetch(cover_url)).hexdigest()
-        if remote_digest == digest:
-            break
-        if attempt + 1 == attempts:
-            raise RuntimeError(
-                "Remote cover content does not match the repository asset"
-            )
-        time.sleep(10)
+    wait_for_remote_asset(
+        cover_url,
+        digest,
+        fetch,
+        attempts,
+        "Remote cover content does not match the repository asset",
+    )
     uuid = client.upload_via_url(cover_url, cover_path.name)
     directory.update(
         {
@@ -461,15 +459,13 @@ def ensure_article_images_uploaded(
             image_uuids.append(str(cached["uuid"]))
             continue
 
-        for attempt in range(attempts):
-            remote_digest = hashlib.sha256(fetch(public_url)).hexdigest()
-            if remote_digest == digest:
-                break
-            if attempt + 1 == attempts:
-                raise RuntimeError(
-                    "Remote article image does not match the repository asset"
-                )
-            time.sleep(10)
+        wait_for_remote_asset(
+            public_url,
+            digest,
+            fetch,
+            attempts,
+            "Remote article image does not match the repository asset",
+        )
 
         uuid = client.upload_via_url(public_url, local_path.name)
         asset_mapping[relative_path] = {
@@ -482,6 +478,28 @@ def ensure_article_images_uploaded(
     return image_uuids
 
 
+def wait_for_remote_asset(
+    url: str,
+    expected_digest: str,
+    fetcher: Callable[[str], bytes],
+    attempts: int,
+    mismatch_message: str,
+) -> None:
+    for attempt in range(attempts):
+        try:
+            remote_digest = hashlib.sha256(fetcher(url)).hexdigest()
+        except RuntimeError as exc:
+            if "HTTP 404" not in str(exc) or attempt + 1 == attempts:
+                raise
+        else:
+            if remote_digest == expected_digest:
+                return
+            if attempt + 1 == attempts:
+                raise RuntimeError(mismatch_message)
+        time.sleep(10)
+    raise RuntimeError(mismatch_message)
+
+
 def download_url(url: str) -> bytes:
     request = urllib.request.Request(
         url,
@@ -491,9 +509,9 @@ def download_url(url: str) -> bytes:
         with urllib.request.urlopen(request, timeout=30) as response:
             return response.read()
     except urllib.error.HTTPError as exc:
-        raise RuntimeError(f"Cover download failed with HTTP {exc.code}") from exc
+        raise RuntimeError(f"Asset download failed with HTTP {exc.code}") from exc
     except urllib.error.URLError as exc:
-        raise RuntimeError("Cover download failed before receiving a response") from exc
+        raise RuntimeError("Asset download failed before receiving a response") from exc
 
 
 def sync_articles(
@@ -531,7 +549,7 @@ def sync_articles(
                     "published": False,
                 }
             )
-        if publish:
+        if publish and not entry.get("published"):
             client.set_public(note_id)
             entry["published"] = True
 
@@ -571,7 +589,7 @@ def sync_directory(
                 "published": False,
             }
         )
-    if publish:
+    if publish and not directory.get("published"):
         client.set_public(str(note_id))
         directory["published"] = True
 

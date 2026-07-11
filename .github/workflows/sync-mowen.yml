@@ -1,19 +1,11 @@
 name: Sync MoWen
 
 on:
-  push:
-    branches:
-      - main
-    paths:
-      - "content/articles/**"
-      - "assets/mowen/**"
-      - "publishing/mowen-notes.json"
-      - "scripts/sync_mowen.py"
-      - "tests/test_sync_mowen.py"
-      - "requirements-mowen.txt"
-      - "package.json"
-      - "package-lock.json"
-      - ".github/workflows/sync-mowen.yml"
+  workflow_run:
+    workflows:
+      - Sync to Gitee
+    types:
+      - completed
   workflow_dispatch:
 
 permissions:
@@ -25,11 +17,14 @@ concurrency:
 
 jobs:
   sync:
+    if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
 
       - name: Set up Python
         uses: actions/setup-python@v5
