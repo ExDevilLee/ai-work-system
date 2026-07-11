@@ -2,10 +2,34 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from scripts.sync_wiki import render_article, rewrite_asset_urls, write_wiki
+from scripts.sync_wiki import parse_frontmatter, render_article, rewrite_asset_urls, write_wiki
 
 
 class SyncWikiTest(unittest.TestCase):
+    def test_frontmatter_parses_quoted_colon(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            article = Path(tmp) / "article.md"
+            article.write_text(
+                '---\ntitle: "规则: 自动化"\nstatus: ready\n---\n正文\n',
+                encoding="utf-8",
+            )
+
+            metadata, body = parse_frontmatter(article)
+
+            self.assertEqual(metadata["title"], "规则: 自动化")
+            self.assertEqual(body, "正文\n")
+
+    def test_frontmatter_rejects_invalid_yaml(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            article = Path(tmp) / "article.md"
+            article.write_text(
+                "---\ntitle: [未闭合\nstatus: ready\n---\n正文\n",
+                encoding="utf-8",
+            )
+
+            with self.assertRaisesRegex(ValueError, "Invalid YAML frontmatter"):
+                parse_frontmatter(article)
+
     def test_relative_article_assets_are_rewritten_for_wiki(self) -> None:
         markdown = "![结构图](images/04/memory.png)"
 

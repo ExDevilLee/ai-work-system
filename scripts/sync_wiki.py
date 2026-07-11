@@ -10,6 +10,8 @@ import sys
 from pathlib import Path
 from urllib.parse import quote
 
+import yaml
+
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 ARTICLES_DIR = REPO_ROOT / "content" / "articles"
@@ -31,7 +33,7 @@ def run(cmd: list[str], cwd: Path | None = None, check: bool = True) -> subproce
     )
 
 
-def parse_frontmatter(path: Path) -> tuple[dict[str, str], str]:
+def parse_frontmatter(path: Path) -> tuple[dict[str, object], str]:
     text = path.read_text(encoding="utf-8")
     if not text.startswith("---\n"):
         return {}, text
@@ -42,12 +44,12 @@ def parse_frontmatter(path: Path) -> tuple[dict[str, str], str]:
 
     raw = text[4:end]
     body = text[end + len("\n---\n") :]
-    metadata: dict[str, str] = {}
-    for line in raw.splitlines():
-        if ":" not in line or line.startswith(" "):
-            continue
-        key, value = line.split(":", 1)
-        metadata[key.strip()] = value.strip().strip('"').strip("'")
+    try:
+        metadata = yaml.safe_load(raw) or {}
+    except yaml.YAMLError as exc:
+        raise ValueError(f"Invalid YAML frontmatter: {path}") from exc
+    if not isinstance(metadata, dict):
+        raise ValueError(f"YAML frontmatter must be a mapping: {path}")
     return metadata, body.lstrip()
 
 
@@ -65,9 +67,9 @@ def wiki_page_url(page: str, base_url: str) -> str:
     return f"{base_url.rstrip('/')}/{quote(url_page)}"
 
 
-def ready_articles() -> list[dict[str, str | Path]]:
-    rows: list[tuple[Path, dict[str, str], str]] = []
-    for path in sorted(ARTICLES_DIR.glob("*.md")):
+def ready_articles(repo_root: Path = REPO_ROOT) -> list[dict[str, str | Path]]:
+    rows: list[tuple[Path, dict[str, object], str]] = []
+    for path in sorted((repo_root / "content" / "articles").glob("*.md")):
         metadata, body = parse_frontmatter(path)
         if metadata.get("status") != "ready":
             continue
@@ -75,12 +77,12 @@ def ready_articles() -> list[dict[str, str | Path]]:
 
     articles: list[dict[str, str | Path]] = []
     for index, (path, metadata, body) in enumerate(rows, start=1):
-        title = metadata.get("title") or path.stem
+        title = str(metadata.get("title") or path.stem)
         articles.append(
             {
                 "path": path,
                 "title": title,
-                "summary": metadata.get("summary", ""),
+                "summary": str(metadata.get("summary") or ""),
                 "body": body,
                 "page": wiki_page_name(title, index),
             }
@@ -162,8 +164,9 @@ def render_article(
     wiki_base_url: str = DEFAULT_WIKI_BASE_URL,
     previous_page: str | None = None,
     next_page: str | None = None,
+    repo_root: Path = REPO_ROOT,
 ) -> str:
-    source = Path(article["path"]).relative_to(REPO_ROOT)
+    source = Path(article["path"]).relative_to(repo_root)
     body = rewrite_asset_urls(str(article["body"]), asset_base_url)
     navigation = render_article_navigation(
         wiki_base_url,
@@ -184,6 +187,7 @@ def write_wiki(
     site_name: str,
     wiki_base_url: str,
     asset_base_url: str = DEFAULT_ASSET_BASE_URL,
+    repo_root: Path = REPO_ROOT,
 ) -> list[Path]:
     written: list[Path] = []
 
@@ -215,6 +219,7 @@ def write_wiki(
                 wiki_base_url=wiki_base_url,
                 previous_page=previous_page,
                 next_page=next_page,
+                repo_root=repo_root,
             ),
             encoding="utf-8",
         )

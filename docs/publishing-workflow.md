@@ -111,6 +111,27 @@ python3 scripts/sync_wiki.py --push
 
 自动同步发生在主仓库 push 成功之后，因此日常只需要维护主仓库 Markdown。只要文章是 `status: ready`，推送到 `main` 后 workflow 会自动运行 `python3 scripts/sync_wiki.py --push`，刷新 Wiki 的 `Home.md`、`_Sidebar.md` 和文章页面。
 
+### Wiki 自动验收
+
+GitHub Wiki 与 Gitee Wiki 共用 `scripts/verify_wiki.py`，在同一条发布流水线中执行两阶段检查：
+
+- 发布前：用标准 YAML 解析 frontmatter，检查 ready 文章配图是否存在、非空、路径编号正确、扩展名与文件签名一致；随后在临时目录全量生成 Wiki，检查页面清单、连续阅读导航和目标平台图片 URL。
+- 发布后：重新克隆目标 Wiki 仓库，与本次预期生成的 Markdown 逐页比较；再请求全部正文配图并比较 SHA-256，确认远端不是可访问但内容陈旧的旧图。
+- 远端 Wiki 或图片存在短暂可见性延迟时，默认最多检查 6 次、每次间隔 10 秒。超过窗口后 workflow 失败，日志会标明 `pre-publish` / `post-publish` 以及具体页面或图片。
+
+本检查能够证明源文、生成页面、远端 Wiki 文件和远端图片内容一致，但不判断配图是否美观、位置是否自然。视觉与叙事效果仍由人工抽查。
+
+本地可以独立运行发布前检查：
+
+```bash
+python -m pip install --requirement requirements-wiki.txt
+python scripts/verify_wiki.py \
+  --phase pre \
+  --site-name "GitHub Wiki" \
+  --wiki-base-url "https://github.com/ExDevilLee/ai-work-system/wiki" \
+  --asset-base-url "https://raw.githubusercontent.com/ExDevilLee/ai-work-system/main"
+```
+
 如果 GitHub 默认 `GITHUB_TOKEN` 无法写入 Wiki 仓库，需要在仓库 Secrets 中添加具备 Wiki 写入权限的 `WIKI_PUSH_TOKEN`，workflow 会优先使用该 token。
 
 ## Gitee Wiki 同步
