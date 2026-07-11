@@ -35,13 +35,19 @@
       "note_id": "ZjiI83WfGXjGd7sKfrivI",
       "published": true,
       "url": "https://note.mowen.cn/detail/ZjiI83WfGXjGd7sKfrivI"
+    },
+    "content/articles/2026-07-11-why-ai-work-systems-need-review.md": {
+      "content_sha256": "eb0cd51b1ce636a12d2689ee9dcafff938ad4c5e8c6b11587a84dd73c332452c",
+      "note_id": "qrhzgcKWgsWefuG1pOaVi",
+      "published": true,
+      "url": "https://note.mowen.cn/detail/qrhzgcKWgsWefuG1pOaVi"
     }
   },
   "directory": {
+    "content_sha256": "d2e7bc048ff5585174eaa90de968e7283c7571aaaa8e699e0fc90376b7b2bab8",
     "cover_sha256": "b378829b08ff549181e4466f5909217adb8e54793f877a81ff1e5bea191c9949",
     "cover_source_url": "https://gitee.com/ExDevilLee/ai-work-system/raw/main/assets/mowen/ai-work-system-cover.jpg",
     "cover_uuid": "4Rmp_Zyq9_KQ4V5Q1KvVr-TMP",
-    "content_sha256": "132b0e4a53b9a3f34aab2f4096a34477dd8aa2e2e508524f76b5d4f744731f3f",
     "note_id": "CGAIy3ZJS0VwC6wlH3je-",
     "published": true,
     "url": "https://note.mowen.cn/detail/CGAIy3ZJS0VwC6wlH3je-"
