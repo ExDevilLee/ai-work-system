@@ -9,3 +9,4 @@
 - `content/articles/*.md` 是唯一内容源头；GitHub Wiki、个人网站、公众号等都只是展示层或分发层，不反向修改源文。
 - GitHub Wiki 只同步 `status: ready` 的文章；已发布文章如果主仓库源文更新，重新运行同步脚本覆盖更新 Wiki。
 - 墨问也只同步 `status: ready` 的文章；`publishing/mowen-notes.json` 是源文件与墨问笔记 ID 的持久映射，新文章发布后必须按时间倒序重建《AI 长期工作系统》目录笔记。
+- 当前墨问账号未开通 PRO，实际可用额度为每天 10 次 API 调用。遇到 `403 QUOTA` / `quota exceed` 时，当天不再重跑；保留本轮已写入 `publishing/mowen-notes.json` 的进度，未完成内容由源文与映射差异自动视为剩余任务，待次日额度恢复后再运行。日常发布优先沿用免费额度，只有持续影响正常发布时再评估开通 PRO。

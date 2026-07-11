@@ -63,15 +63,18 @@ jobs:
           python scripts/sync_mowen.py --publish \
             --cover-url "https://gitee.com/ExDevilLee/ai-work-system/raw/main/assets/mowen/ai-work-system-cover.jpg"
 
-      - name: Persist new MoWen note mappings
+      # The current non-PRO account has 10 API calls per day. Preserve partial
+      # progress after quota failures, but do not trigger another CI run today.
+      - name: Persist MoWen publishing progress
+        if: ${{ !cancelled() }}
         run: |
           if git diff --quiet -- publishing/mowen-notes.json; then
-            echo "No new MoWen note mappings."
+            echo "No new MoWen publishing progress."
             exit 0
           fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add publishing/mowen-notes.json
-          git commit -m "chore: persist MoWen note mappings"
+          git commit -m "chore: persist MoWen publishing progress [skip ci]"
           git pull --rebase origin main
           git push origin HEAD:main
