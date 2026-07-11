@@ -41,10 +41,16 @@
       "note_id": "qrhzgcKWgsWefuG1pOaVi",
       "published": true,
       "url": "https://note.mowen.cn/detail/qrhzgcKWgsWefuG1pOaVi"
+    },
+    "content/articles/2026-07-11-why-review-boundaries-matter.md": {
+      "content_sha256": "6e5f0d56dfab0b684cbef9a8a39398134e1b09ddbb375287b2f55865abf7cb76",
+      "note_id": "Z04uaodwgtbwWgJVf8b65",
+      "published": true,
+      "url": "https://note.mowen.cn/detail/Z04uaodwgtbwWgJVf8b65"
     }
   },
   "directory": {
-    "content_sha256": "d2e7bc048ff5585174eaa90de968e7283c7571aaaa8e699e0fc90376b7b2bab8",
+    "content_sha256": "6c827156aa9e8059f3c3fa63228b3f28036adb4282516da44204d30263754406",
     "cover_sha256": "b378829b08ff549181e4466f5909217adb8e54793f877a81ff1e5bea191c9949",
     "cover_source_url": "https://gitee.com/ExDevilLee/ai-work-system/raw/main/assets/mowen/ai-work-system-cover.jpg",
     "cover_uuid": "4Rmp_Zyq9_KQ4V5Q1KvVr-TMP",
