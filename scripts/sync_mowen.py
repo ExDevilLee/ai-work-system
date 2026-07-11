@@ -122,6 +122,40 @@ def rewrite_article_asset_urls(
     return pattern.sub(replace, markdown)
 
 
+def discover_article_images(article: Article) -> list[tuple[str, Path, str]]:
+    pattern = re.compile(r"!\[[^\]]*\]\((?P<path>images/[^)\s]+)\)")
+    images: list[tuple[str, Path, str]] = []
+    for match in pattern.finditer(article.body):
+        relative_path = match.group("path")
+        local_path = article.path.parent / relative_path
+        public_path = (Path(article.source).parent / relative_path).as_posix()
+        public_url = f"{ARTICLE_ASSET_BASE_URL}/{public_path}"
+        images.append((relative_path, local_path, public_url))
+    return images
+
+
+def replace_document_image_uuids(document: dict, image_uuids: list[str]) -> None:
+    image_nodes: list[dict] = []
+
+    def walk(value: object) -> None:
+        if isinstance(value, dict):
+            if value.get("type") == "image":
+                image_nodes.append(value)
+            for child in value.values():
+                walk(child)
+        elif isinstance(value, list):
+            for child in value:
+                walk(child)
+
+    walk(document)
+    if len(image_nodes) != len(image_uuids):
+        raise ValueError(
+            "Converted image count does not match uploaded article image count"
+        )
+    for node, uuid in zip(image_nodes, image_uuids):
+        node.setdefault("attrs", {})["uuid"] = uuid
+
+
 def text_paragraph(text: str, bold: bool = False) -> dict:
     node: dict = {"type": "text", "text": text}
     if bold:
@@ -402,6 +436,52 @@ def ensure_cover_uploaded(
     return uuid
 
 
+def ensure_article_images_uploaded(
+    article: Article,
+    mapping: dict,
+    client: MowenClient,
+    fetcher: Callable[[str], bytes] | None = None,
+    attempts: int = 6,
+) -> list[str]:
+    entry = mapping.setdefault("articles", {}).setdefault(article.source, {})
+    asset_mapping = entry.setdefault("assets", {})
+    fetch = fetcher or download_url
+    image_uuids: list[str] = []
+
+    for relative_path, local_path, public_url in discover_article_images(article):
+        if not local_path.exists():
+            raise ValueError(f"Article image does not exist: {local_path}")
+        digest = hashlib.sha256(local_path.read_bytes()).hexdigest()
+        cached = asset_mapping.get(relative_path, {})
+        if (
+            cached.get("uuid")
+            and cached.get("sha256") == digest
+            and cached.get("source_url") == public_url
+        ):
+            image_uuids.append(str(cached["uuid"]))
+            continue
+
+        for attempt in range(attempts):
+            remote_digest = hashlib.sha256(fetch(public_url)).hexdigest()
+            if remote_digest == digest:
+                break
+            if attempt + 1 == attempts:
+                raise RuntimeError(
+                    "Remote article image does not match the repository asset"
+                )
+            time.sleep(10)
+
+        uuid = client.upload_via_url(public_url, local_path.name)
+        asset_mapping[relative_path] = {
+            "uuid": uuid,
+            "sha256": digest,
+            "source_url": public_url,
+        }
+        image_uuids.append(uuid)
+
+    return image_uuids
+
+
 def download_url(url: str) -> bytes:
     request = urllib.request.Request(
         url,
@@ -442,13 +522,15 @@ def sync_articles(
             entry["content_sha256"] = digest
         else:
             note_id = client.create_rich_note(document, article.tags)
-            article_mapping[article.source] = {
-                "note_id": note_id,
-                "url": f"https://note.mowen.cn/detail/{note_id}",
-                "content_sha256": digest,
-                "published": False,
-            }
-            entry = article_mapping[article.source]
+            entry = article_mapping.setdefault(article.source, {})
+            entry.update(
+                {
+                    "note_id": note_id,
+                    "url": f"https://note.mowen.cn/detail/{note_id}",
+                    "content_sha256": digest,
+                    "published": False,
+                }
+            )
         if publish:
             client.set_public(note_id)
             entry["published"] = True
@@ -537,11 +619,19 @@ def main() -> int:
     mapping = load_mapping(args.mapping)
     update_existing = args.publish
     for article in articles:
+        document = convert_article(article)
+        image_uuids = ensure_article_images_uploaded(
+            article,
+            mapping,
+            client,
+        )
+        replace_document_image_uuids(document, image_uuids)
+        save_mapping(args.mapping, mapping)
         sync_articles(
             [article],
             mapping,
             client,
-            converter=convert_article,
+            converter=lambda _article, prepared=document: prepared,
             publish=args.publish,
             update_existing=update_existing,
         )

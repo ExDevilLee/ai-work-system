@@ -13,7 +13,9 @@ from scripts.sync_mowen import (
     discover_ready_articles,
     document_sha256,
     ensure_cover_uploaded,
+    ensure_article_images_uploaded,
     load_mapping,
+    replace_document_image_uuids,
     rewrite_article_asset_urls,
     save_mapping,
     sync_articles,
@@ -69,6 +71,61 @@ class SyncMowenTest(unittest.TestCase):
             rewritten,
             "![结构图](https://gitee.com/ExDevilLee/ai-work-system/raw/main/content/articles/images/04/memory.png)",
         )
+
+    def test_article_images_are_uploaded_cached_and_applied_to_document(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            article_path = Path(tmp) / "content" / "articles" / "article.md"
+            image_path = article_path.parent / "images" / "04" / "memory.png"
+            image_path.parent.mkdir(parents=True)
+            image_path.write_bytes(b"article-image")
+            article = Article(
+                article_path,
+                "content/articles/article.md",
+                "文章",
+                "2026-07-11",
+                "",
+                ["AI"],
+                "# 文章\n\n![结构图](images/04/memory.png)\n",
+            )
+            mapping = {"version": 1, "directory": {}, "articles": {}}
+            client = FakeMowenClient()
+
+            first = ensure_article_images_uploaded(
+                article,
+                mapping,
+                client,
+                fetcher=lambda _: b"article-image",
+                attempts=1,
+            )
+            second = ensure_article_images_uploaded(
+                article,
+                mapping,
+                client,
+                fetcher=lambda _: b"stale-image",
+                attempts=1,
+            )
+            document = {
+                "type": "doc",
+                "content": [{"type": "image", "attrs": {"uuid": "dry-run"}}],
+            }
+            replace_document_image_uuids(document, first)
+
+            self.assertEqual(first, ["cover-uuid"])
+            self.assertEqual(second, ["cover-uuid"])
+            self.assertEqual(document["content"][0]["attrs"]["uuid"], "cover-uuid")
+            self.assertEqual(
+                [call[0] for call in client.calls],
+                ["upload"],
+            )
+
+    def test_document_image_count_must_match_uploaded_images(self) -> None:
+        document = {
+            "type": "doc",
+            "content": [{"type": "image", "attrs": {"uuid": "dry-run"}}],
+        }
+
+        with self.assertRaisesRegex(ValueError, "image count"):
+            replace_document_image_uuids(document, [])
 
     def test_discovers_only_ready_articles_in_reverse_chronological_order(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
