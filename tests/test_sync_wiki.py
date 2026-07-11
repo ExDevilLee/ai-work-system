@@ -61,7 +61,7 @@ class SyncWikiTest(unittest.TestCase):
         )
 
         self.assertIn(
-            "| 上一篇：无 | [目录](https://gitee.com/example/repo/wikis/Home) | 下一篇：无 |",
+            "| 无 | [目录](https://gitee.com/example/repo/wikis/Home) | 无 |",
             rendered,
         )
 
@@ -90,7 +90,7 @@ class SyncWikiTest(unittest.TestCase):
                 "https://example.test/wiki",
             )
             self.assertIn(
-                "下一篇：无",
+                "| 无 | [目录](https://example.test/wiki/Home) | 无 |",
                 (wiki_dir / "01-第一篇.md").read_text(encoding="utf-8"),
             )
 

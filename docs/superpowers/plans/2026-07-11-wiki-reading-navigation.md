@@ -16,7 +16,7 @@
 - Modify: `tests/test_sync_wiki.py`
 
 - [x] Add a test that renders a middle article and expects links for previous article, `Home`, and next article.
-- [x] Add boundary assertions that missing previous or next articles render `上一篇：无` or `下一篇：无`.
+- [x] Add boundary assertions that missing previous or next articles render `无` beneath the corresponding table header.
 - [x] Add a full-rebuild test using a temporary Wiki directory, then append a new article and verify the former last article receives a next link.
 - [x] Run `python3 -m unittest tests.test_sync_wiki -v` and confirm the new tests fail because navigation arguments and output do not exist yet.
 

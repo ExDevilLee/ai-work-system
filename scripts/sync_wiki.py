@@ -141,13 +141,13 @@ def render_article_navigation(
     previous = (
         f"[上一篇]({wiki_page_url(previous_page, wiki_base_url)})"
         if previous_page
-        else "上一篇：无"
+        else "无"
     )
     directory = f"[目录]({wiki_page_url('Home', wiki_base_url)})"
     following = (
         f"[下一篇]({wiki_page_url(next_page, wiki_base_url)})"
         if next_page
-        else "下一篇：无"
+        else "无"
     )
     return (
         "| 上一篇 | 目录 | 下一篇 |\n"
