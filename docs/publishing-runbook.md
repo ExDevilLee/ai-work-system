@@ -6,22 +6,23 @@
 
 1. 在 `content/articles/*.md` 写文章。
 2. 草稿阶段保持 `status: draft`。
-3. 发布前审阅时可改为 `status: review`。
-4. 确认可公开后改为 `status: ready`。
-5. 运行文章索引更新：
+3. 初稿完成后判断配图是否能明显降低理解成本；需要时先生成图片、插入正文并完成本地预览，不需要时在阶段汇总中说明理由。
+4. 完成配图判断后，发布前审阅时可改为 `status: review`。
+5. 确认可公开后改为 `status: ready`。
+6. 运行文章索引更新：
 
 ```bash
 python3 scripts/update_readme_index.py
 ```
 
-6. 本地验证 Wiki 同步范围：
+7. 本地验证 Wiki 同步范围：
 
 ```bash
 python3 scripts/sync_wiki.py --dry-run
 ```
 
-7. 提交并 push 到 `main`。
-8. 等待自动链路完成：
+8. 提交并 push 到 `main`。
+9. 等待自动链路完成：
 
 ```text
 GitHub main
@@ -31,8 +32,8 @@ GitHub main
   -> GitHub Actions 发布到墨问并重建《AI 长期工作系统》目录
 ```
 
-9. 打开 GitHub Wiki 和 Gitee Wiki 检查文章阅读页。
-10. 打开[墨问《AI 长期工作系统》](https://note.mowen.cn/detail/CGAIy3ZJS0VwC6wlH3je-)检查新文章是否位于目录最上方。
+10. 打开 GitHub Wiki 和 Gitee Wiki 检查文章阅读页。
+11. 打开[墨问《AI 长期工作系统》](https://note.mowen.cn/detail/CGAIy3ZJS0VwC6wlH3je-)检查新文章是否位于目录最上方。
 
 ## 墨问首次配置
 
