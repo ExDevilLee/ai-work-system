@@ -20,6 +20,7 @@ from scripts.sync_mowen import (
     replace_document_image_uuids,
     rewrite_article_asset_urls,
     save_mapping,
+    split_articles_by_mapping,
     sync_articles,
     sync_directory,
     wait_for_remote_asset,
@@ -65,6 +66,20 @@ class FakeMowenClient:
 
 
 class SyncMowenTest(unittest.TestCase):
+    def test_unmapped_articles_are_prioritized_before_existing_updates(self) -> None:
+        new = Article(Path("new.md"), "content/articles/new.md", "新文章", "2026-07-12", "", ["AI"], "# 新文章")
+        old = Article(Path("old.md"), "content/articles/old.md", "旧文章", "2026-07-11", "", ["AI"], "# 旧文章")
+        mapping = {
+            "articles": {
+                old.source: {"note_id": "old-id", "published": True},
+            }
+        }
+
+        missing, existing = split_articles_by_mapping([new, old], mapping)
+
+        self.assertEqual(missing, [new])
+        self.assertEqual(existing, [old])
+
     def test_relative_article_assets_are_rewritten_for_mowen(self) -> None:
         markdown = "![结构图](images/04/memory.png)"
 

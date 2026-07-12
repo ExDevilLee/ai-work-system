@@ -594,6 +594,48 @@ def sync_directory(
         directory["published"] = True
 
 
+def split_articles_by_mapping(
+    articles: list[Article],
+    mapping: dict,
+) -> tuple[list[Article], list[Article]]:
+    article_mapping = mapping.get("articles", {})
+    missing: list[Article] = []
+    existing: list[Article] = []
+    for article in articles:
+        entry = article_mapping.get(article.source) or {}
+        target = existing if entry.get("note_id") else missing
+        target.append(article)
+    return missing, existing
+
+
+def sync_article_batch(
+    articles: list[Article],
+    mapping: dict,
+    mapping_path: Path,
+    client: MowenClient,
+    publish: bool,
+    update_existing: bool,
+) -> None:
+    for article in articles:
+        document = convert_article(article)
+        image_uuids = ensure_article_images_uploaded(
+            article,
+            mapping,
+            client,
+        )
+        replace_document_image_uuids(document, image_uuids)
+        save_mapping(mapping_path, mapping)
+        sync_articles(
+            [article],
+            mapping,
+            client,
+            converter=lambda _article, prepared=document: prepared,
+            publish=publish,
+            update_existing=update_existing,
+        )
+        save_mapping(mapping_path, mapping)
+
+
 def validate_conversions(articles: list[Article]) -> None:
     for article in articles:
         document = convert_article(article)
@@ -636,24 +678,15 @@ def main() -> int:
     )
     mapping = load_mapping(args.mapping)
     update_existing = args.publish
-    for article in articles:
-        document = convert_article(article)
-        image_uuids = ensure_article_images_uploaded(
-            article,
-            mapping,
-            client,
-        )
-        replace_document_image_uuids(document, image_uuids)
-        save_mapping(args.mapping, mapping)
-        sync_articles(
-            [article],
-            mapping,
-            client,
-            converter=lambda _article, prepared=document: prepared,
-            publish=args.publish,
-            update_existing=update_existing,
-        )
-        save_mapping(args.mapping, mapping)
+    missing_articles, existing_articles = split_articles_by_mapping(articles, mapping)
+    sync_article_batch(
+        missing_articles,
+        mapping,
+        args.mapping,
+        client,
+        publish=args.publish,
+        update_existing=update_existing,
+    )
     cover_uuid = mapping.get("directory", {}).get("cover_uuid")
     if args.cover_url:
         cover_uuid = ensure_cover_uploaded(
@@ -663,6 +696,24 @@ def main() -> int:
             client,
         )
         save_mapping(args.mapping, mapping)
+    if missing_articles:
+        sync_directory(
+            articles,
+            mapping,
+            client,
+            publish=args.publish,
+            cover_uuid=cover_uuid,
+            update_existing=update_existing,
+        )
+        save_mapping(args.mapping, mapping)
+    sync_article_batch(
+        existing_articles,
+        mapping,
+        args.mapping,
+        client,
+        publish=args.publish,
+        update_existing=update_existing,
+    )
     sync_directory(
         articles,
         mapping,
