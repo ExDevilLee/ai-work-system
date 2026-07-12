@@ -8,8 +8,14 @@
       "url": "https://note.mowen.cn/detail/ZTUrdIvtYYKjeaQ0QwdUh"
     },
     "content/articles/2026-07-08-why-ai-keeps-forgetting.md": {
-      "assets": {},
-      "content_sha256": "d42d0ad0ff36189aa2b70b0b0a0908f879e43f176c95aacae75aaee9435bd6a1",
+      "assets": {
+        "images/02/chat-vs-external-memory.png": {
+          "sha256": "ab9995ad24648168869288f8ce6522cdd017f3cb339565237528ce9e95bac122",
+          "source_url": "https://gitee.com/ExDevilLee/ai-work-system/raw/main/content/articles/images/02/chat-vs-external-memory.png",
+          "uuid": "RK-y-HHW3bwJaS6v7hDIa-TMP"
+        }
+      },
+      "content_sha256": "ed309534733f197cca965ff20f623ff24757b0e008fb5a4fdd983442e43c73d3",
       "note_id": "wBYkbGGt0mVziiU43btON",
       "published": true,
       "url": "https://note.mowen.cn/detail/wBYkbGGt0mVziiU43btON"
@@ -35,36 +41,73 @@
       "url": "https://note.mowen.cn/detail/ToF6TDiOGdYMHtkf30EX6"
     },
     "content/articles/2026-07-10-when-experience-becomes-project-rule.md": {
-      "assets": {},
-      "content_sha256": "8b314d4e7916cf88277c4e97f561e3c9dce38e9855e26dc7c951d17ca8901c29",
+      "assets": {
+        "images/05/experience-promotion-path.png": {
+          "sha256": "3bdbc50a134850a99438f7c48354894d022ca5ef207af900c5ec090eefae4dee",
+          "source_url": "https://gitee.com/ExDevilLee/ai-work-system/raw/main/content/articles/images/05/experience-promotion-path.png",
+          "uuid": "m3erDhsVH44VDzIk1-Bq3-TMP"
+        }
+      },
+      "content_sha256": "49d1597912bb04b34ce98dadce8539137ca36829b98ce63cf3ea435454a35ac6",
       "note_id": "cL1xrW4Lg9ojYpVtNmCze",
       "published": true,
       "url": "https://note.mowen.cn/detail/cL1xrW4Lg9ojYpVtNmCze"
     },
     "content/articles/2026-07-10-when-rules-become-workflows.md": {
-      "assets": {},
-      "content_sha256": "9320a1e9237978ffb38d017982512de93437240d2118d5c7f2c77bd482281c92",
+      "assets": {
+        "images/06/prompt-to-workflow-evolution.png": {
+          "sha256": "f51848115560bc0c3f1376a2d71d984a8335d774fdf3160c9bb183d3dc5cef1c",
+          "source_url": "https://gitee.com/ExDevilLee/ai-work-system/raw/main/content/articles/images/06/prompt-to-workflow-evolution.png",
+          "uuid": "KJi532z31TMJzT0Yf3_x6-TMP"
+        }
+      },
+      "content_sha256": "40f2eb13102e28b2ea17cf4fc40c2fb3cd6a8a5a62cf5efa81b868e57bbc0637",
       "note_id": "ZjiI83WfGXjGd7sKfrivI",
       "published": true,
       "url": "https://note.mowen.cn/detail/ZjiI83WfGXjGd7sKfrivI"
     },
     "content/articles/2026-07-11-why-ai-work-systems-need-review.md": {
-      "assets": {},
-      "content_sha256": "eb0cd51b1ce636a12d2689ee9dcafff938ad4c5e8c6b11587a84dd73c332452c",
+      "assets": {
+        "images/07/from-generation-to-acceptance.png": {
+          "sha256": "46d949b9468e2096358802b05851d18d6c60da9afd7824736101fe83e8146c81",
+          "source_url": "https://gitee.com/ExDevilLee/ai-work-system/raw/main/content/articles/images/07/from-generation-to-acceptance.png",
+          "uuid": "sxafVlnxTWk1TNs3O5TNe-TMP"
+        }
+      },
+      "content_sha256": "80ee6d5eacc3c63155f2e403af2a744730a3a27b7f6f7c33af284549968e1534",
       "note_id": "qrhzgcKWgsWefuG1pOaVi",
       "published": true,
       "url": "https://note.mowen.cn/detail/qrhzgcKWgsWefuG1pOaVi"
     },
     "content/articles/2026-07-11-why-review-boundaries-matter.md": {
-      "assets": {},
-      "content_sha256": "6e5f0d56dfab0b684cbef9a8a39398134e1b09ddbb375287b2f55865abf7cb76",
+      "assets": {
+        "images/08/review-responsibility-boundaries.png": {
+          "sha256": "b54207f2c18a015865a915860f62b68d9b27d615c4612801c6f4be957498b31b",
+          "source_url": "https://gitee.com/ExDevilLee/ai-work-system/raw/main/content/articles/images/08/review-responsibility-boundaries.png",
+          "uuid": "sJvomzm2CDagxQ0IcG-yQ-TMP"
+        }
+      },
+      "content_sha256": "369de8796fb839081f0710eb98af7cb3c234a73f7148beed4d188eb12c188d7b",
       "note_id": "Z04uaodwgtbwWgJVf8b65",
       "published": true,
       "url": "https://note.mowen.cn/detail/Z04uaodwgtbwWgJVf8b65"
+    },
+    "content/articles/2026-07-12-what-work-remains-for-humans.md": {
+      "assets": {
+        "images/09/work-redistribution.png": {
+          "sha256": "bf9fb92a10d28fd619ed15b2d0ec312bc736dff9ad24a1a4e8b235b896aad787",
+          "source_url": "https://gitee.com/ExDevilLee/ai-work-system/raw/main/content/articles/images/09/work-redistribution.png",
+          "uuid": "wPdLtnZCiwDs5Mf30XNH4-TMP"
+        }
+      },
+      "content_sha256": "b6cd5df3f1aceba2ea24abe23d332e34676d40989b4b372101c952e8765b7c09",
+      "note_id": "7Z2YTYnoJl6-qD_p7r6ru",
+      "published": true,
+      "url": "https://note.mowen.cn/detail/7Z2YTYnoJl6-qD_p7r6ru"
     }
   },
   "directory": {
-    "content_sha256": "6c827156aa9e8059f3c3fa63228b3f28036adb4282516da44204d30263754406",
+    "content_sha256": "961b65340f5dab55a5a0a4887bcc85183cb0b4f8affcf6f093fcd92c7e98034e",
     "cover_sha256": "b378829b08ff549181e4466f5909217adb8e54793f877a81ff1e5bea191c9949",
     "cover_source_url": "https://gitee.com/ExDevilLee/ai-work-system/raw/main/assets/mowen/ai-work-system-cover.jpg",
     "cover_uuid": "4Rmp_Zyq9_KQ4V5Q1KvVr-TMP",
