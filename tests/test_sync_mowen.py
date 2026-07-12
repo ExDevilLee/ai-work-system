@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import hashlib
+import io
 import json
 import tempfile
 import unittest
@@ -9,6 +10,7 @@ from unittest import mock
 
 from scripts.sync_mowen import (
     Article,
+    MowenClient,
     build_numbered_article_body,
     build_directory_document,
     convert_article,
@@ -66,6 +68,46 @@ class FakeMowenClient:
 
 
 class SyncMowenTest(unittest.TestCase):
+    @mock.patch("scripts.sync_mowen.urllib.request.urlopen")
+    def test_client_logs_successful_call_quota_estimate(self, urlopen: mock.Mock) -> None:
+        response = mock.MagicMock()
+        response.__enter__.return_value.read.return_value = json.dumps(
+            {"result": {"content": [{"type": "text", "text": "note-id"}]}}
+        ).encode("utf-8")
+        urlopen.return_value = response
+        client = MowenClient(api_key="test-key")
+
+        with mock.patch("sys.stdout", new_callable=io.StringIO) as stdout:
+            result = client.call("CreateRichNote", {})
+
+        self.assertEqual(result, "note-id")
+        self.assertEqual(client.attempted_calls, 1)
+        self.assertEqual(client.successful_calls, 1)
+        self.assertIn("estimated free quota remaining: at most 9/10", stdout.getvalue())
+        self.assertIn("excludes calls made outside this run", stdout.getvalue())
+
+    @mock.patch("scripts.sync_mowen.urllib.request.urlopen")
+    def test_client_logs_explicit_quota_exhaustion(self, urlopen: mock.Mock) -> None:
+        response = mock.MagicMock()
+        response.__enter__.return_value.read.return_value = json.dumps(
+            {
+                "error": {
+                    "message": "error: code = 403 reason = QUOTA quota exceed. quota=10, costed=10"
+                }
+            }
+        ).encode("utf-8")
+        urlopen.return_value = response
+        client = MowenClient(api_key="test-key")
+
+        with mock.patch("sys.stderr", new_callable=io.StringIO) as stderr:
+            with self.assertRaisesRegex(RuntimeError, "quota exceed"):
+                client.call("EditRichNote", {})
+
+        self.assertEqual(client.attempted_calls, 1)
+        self.assertEqual(client.successful_calls, 0)
+        self.assertIn("server quota exhausted", stderr.getvalue())
+        self.assertNotIn("remaining", stderr.getvalue())
+
     def test_unmapped_articles_are_prioritized_before_existing_updates(self) -> None:
         new = Article(Path("new.md"), "content/articles/new.md", "新文章", "2026-07-12", "", ["AI"], "# 新文章")
         old = Article(Path("old.md"), "content/articles/old.md", "旧文章", "2026-07-11", "", ["AI"], "# 旧文章")

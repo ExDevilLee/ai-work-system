@@ -27,6 +27,7 @@ MAPPING_PATH = REPO_ROOT / "publishing" / "mowen-notes.json"
 COVER_PATH = REPO_ROOT / "assets" / "mowen" / "ai-work-system-cover.jpg"
 MOWEN_MCP_ENDPOINT = "https://open.mowen.cn/api/open/mcp/v1/note"
 ARTICLE_ASSET_BASE_URL = "https://gitee.com/ExDevilLee/ai-work-system/raw/main"
+MOWEN_FREE_DAILY_QUOTA = 10
 
 
 @dataclass(frozen=True)
@@ -323,9 +324,26 @@ class MowenClient:
         else:
             raise ValueError("Set MOWEN_API_KEY or MOWEN_MCP_URL")
         self.request_id = 0
+        self.attempted_calls = 0
+        self.successful_calls = 0
+
+    def log_successful_call(self, name: str) -> None:
+        self.successful_calls += 1
+        estimated_remaining = max(
+            MOWEN_FREE_DAILY_QUOTA - self.successful_calls,
+            0,
+        )
+        print(
+            f"MoWen API call succeeded: api={name}, "
+            f"run_successful={self.successful_calls}, "
+            f"estimated free quota remaining: at most "
+            f"{estimated_remaining}/{MOWEN_FREE_DAILY_QUOTA}."
+        )
+        print("Quota estimate excludes calls made outside this run.")
 
     def call(self, name: str, arguments: dict) -> str:
         self.request_id += 1
+        self.attempted_calls += 1
         payload = {
             "jsonrpc": "2.0",
             "id": self.request_id,
@@ -348,10 +366,19 @@ class MowenClient:
         except urllib.error.URLError as exc:
             raise RuntimeError("MoWen MCP request failed before receiving a response") from exc
         if "error" in result:
-            raise RuntimeError(f"MoWen MCP error: {result['error'].get('message', 'unknown error')}")
+            message = str(result["error"].get("message", "unknown error"))
+            if "QUOTA" in message.upper() or "quota exceed" in message.lower():
+                print(
+                    f"MoWen server quota exhausted: api={name}, "
+                    f"run_attempted={self.attempted_calls}, "
+                    f"run_successful={self.successful_calls}.",
+                    file=sys.stderr,
+                )
+            raise RuntimeError(f"MoWen MCP error: {message}")
         blocks = result.get("result", {}).get("content", [])
         if not blocks or blocks[0].get("type") != "text":
             raise RuntimeError("MoWen MCP returned no text result")
+        self.log_successful_call(name)
         return str(blocks[0]["text"])
 
     def create_rich_note(self, document: dict, tags: list[str]) -> str:
