@@ -24,7 +24,7 @@ The core theme:
 
 ## Reusable Templates
 
-- [Minimum Project Memory Template](templates/minimum-project-memory/README.md): establish a minimum long-term collaboration context with a project README, an AI rule entry point, and `PROJECT-STATE.md`.
+- [Minimum Project Memory Template](templates/minimum-project-memory/README-EN.md): establish a minimum long-term collaboration context with a project README, an AI rule entry point, and `PROJECT-STATE.md`.
 
 ## Recommended Reading Order
 
