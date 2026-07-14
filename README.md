@@ -43,8 +43,9 @@ English version: [README-EN.md](README-EN.md)
 
 ## 后续选题池
 
-- 一个不会从零开始的 AI 助手，实际能帮我做什么。
-- 人和 AI 长期协作后，真正改变的不是效率，而是工作方式。
+- 有了长期工作系统，还需要每次给 AI 写很长的提示词吗？
+- 哪些工作值得进入长期 AI 系统，哪些只适合临时聊一次？
+- [ROADMAP](docs/series-roadmap.md)
 - [MORE](docs/topic-pool.md)
 
 ## 已发布文章

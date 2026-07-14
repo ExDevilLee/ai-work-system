@@ -45,8 +45,9 @@ The fourth article turns the series toward practical project memory. The fifth e
 
 ## Future Topic Pool
 
-- What a non-resetting AI assistant can actually help with.
-- After long-term human-AI collaboration, the real change may be work style, not just efficiency.
+- With a long-term work system, do we still need to write long prompts every time?
+- Which tasks belong in a long-term AI system, and which should remain one-off conversations?
+- [ROADMAP](docs/series-roadmap.md)
 - [MORE](docs/topic-pool.md)
 
 ## Published Articles
