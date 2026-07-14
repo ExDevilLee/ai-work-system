@@ -60,6 +60,7 @@ English version: [README-EN.md](README-EN.md)
 - [哪些 Review 可以自动化，哪些判断必须留给人？](https://github.com/ExDevilLee/ai-work-system/wiki/08-%E5%93%AA%E4%BA%9B-Review-%E5%8F%AF%E4%BB%A5%E8%87%AA%E5%8A%A8%E5%8C%96%EF%BC%8C%E5%93%AA%E4%BA%9B%E5%88%A4%E6%96%AD%E5%BF%85%E9%A1%BB%E7%95%99%E7%BB%99%E4%BA%BA%EF%BC%9F)
 - [当 AI 成为长期协作者，人真正需要做的工作还剩下什么？](https://github.com/ExDevilLee/ai-work-system/wiki/09-%E5%BD%93-AI-%E6%88%90%E4%B8%BA%E9%95%BF%E6%9C%9F%E5%8D%8F%E4%BD%9C%E8%80%85%EF%BC%8C%E4%BA%BA%E7%9C%9F%E6%AD%A3%E9%9C%80%E8%A6%81%E5%81%9A%E7%9A%84%E5%B7%A5%E4%BD%9C%E8%BF%98%E5%89%A9%E4%B8%8B%E4%BB%80%E4%B9%88%EF%BC%9F)
 - [怎么判断一套长期 AI 工作系统，是真的有帮助，而不是让流程变得更复杂？](https://github.com/ExDevilLee/ai-work-system/wiki/10-%E6%80%8E%E4%B9%88%E5%88%A4%E6%96%AD%E4%B8%80%E5%A5%97%E9%95%BF%E6%9C%9F-AI-%E5%B7%A5%E4%BD%9C%E7%B3%BB%E7%BB%9F%EF%BC%8C%E6%98%AF%E7%9C%9F%E7%9A%84%E6%9C%89%E5%B8%AE%E5%8A%A9%EF%BC%8C%E8%80%8C%E4%B8%8D%E6%98%AF%E8%AE%A9%E6%B5%81%E7%A8%8B%E5%8F%98%E5%BE%97%E6%9B%B4%E5%A4%8D%E6%9D%82%EF%BC%9F)
+- [为什么长期工作系统需要清理，而不是只需要积累？](https://github.com/ExDevilLee/ai-work-system/wiki/11-%E4%B8%BA%E4%BB%80%E4%B9%88%E9%95%BF%E6%9C%9F%E5%B7%A5%E4%BD%9C%E7%B3%BB%E7%BB%9F%E9%9C%80%E8%A6%81%E6%B8%85%E7%90%86%EF%BC%8C%E8%80%8C%E4%B8%8D%E6%98%AF%E5%8F%AA%E9%9C%80%E8%A6%81%E7%A7%AF%E7%B4%AF%EF%BC%9F)
 
 文章标题默认链接到 GitHub Wiki 阅读页；[Gitee Wiki](https://gitee.com/ExDevilLee/ai-work-system/wikis/Home) 保持同步展示，[墨问《AI 长期工作系统》](https://note.mowen.cn/detail/CGAIy3ZJS0VwC6wlH3je-) 按时间倒序内嵌全部文章。源码 Markdown 可从 Wiki 页面底部的来源入口进入。
 <!-- articles:index:end -->
