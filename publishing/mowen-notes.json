@@ -130,10 +130,23 @@
       "note_id": "bxBQ7Ef7mVyVJpdSjnPKK",
       "published": true,
       "url": "https://note.mowen.cn/detail/bxBQ7Ef7mVyVJpdSjnPKK"
+    },
+    "content/articles/2026-07-14-without-starting-over-ai-assistant.md": {
+      "assets": {
+        "images/12/continuous-ai-work-cycle.png": {
+          "sha256": "66770adb3ff786f83ec802e2cb83a9ac2c6cca278c15899ee86987f1da3ad356",
+          "source_url": "https://gitee.com/ExDevilLee/ai-work-system/raw/main/content/articles/images/12/continuous-ai-work-cycle.png",
+          "uuid": "cT7uw7vCGQbmFbIC7GUZG-TMP"
+        }
+      },
+      "content_sha256": "5d8932493f2a9df39466d59a7f17be866ba9491ec9272470281ce9dc6325828c",
+      "note_id": "aJsSD7xKUIc3R-yjTLFqF",
+      "published": true,
+      "url": "https://note.mowen.cn/detail/aJsSD7xKUIc3R-yjTLFqF"
     }
   },
   "directory": {
-    "content_sha256": "0ebc67dd2f9058509199144cfd95888e0c694c99f028954ea2d4fe97a68b39e2",
+    "content_sha256": "7410d9173c11852a88456e1d38f41e587e34781bf1463ac053795a445dda1edd",
     "cover_sha256": "b378829b08ff549181e4466f5909217adb8e54793f877a81ff1e5bea191c9949",
     "cover_source_url": "https://gitee.com/ExDevilLee/ai-work-system/raw/main/assets/mowen/ai-work-system-cover.jpg",
     "cover_uuid": "4Rmp_Zyq9_KQ4V5Q1KvVr-TMP",
