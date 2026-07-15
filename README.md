@@ -43,7 +43,6 @@ English version: [README-EN.md](README-EN.md)
 
 ## 后续选题池
 
-- 哪些工作值得进入长期 AI 系统，哪些只适合临时聊一次？
 - 当 AI 越来越了解你的工作，哪些信息不应该进入系统？
 - [ROADMAP](docs/series-roadmap.md)
 - [MORE](docs/topic-pool.md)
@@ -64,6 +63,7 @@ English version: [README-EN.md](README-EN.md)
 - [为什么长期工作系统需要清理，而不是只需要积累？](https://github.com/ExDevilLee/ai-work-system/wiki/11-%E4%B8%BA%E4%BB%80%E4%B9%88%E9%95%BF%E6%9C%9F%E5%B7%A5%E4%BD%9C%E7%B3%BB%E7%BB%9F%E9%9C%80%E8%A6%81%E6%B8%85%E7%90%86%EF%BC%8C%E8%80%8C%E4%B8%8D%E6%98%AF%E5%8F%AA%E9%9C%80%E8%A6%81%E7%A7%AF%E7%B4%AF%EF%BC%9F)
 - [一个不会从零开始的 AI 助手，实际能帮我做什么？](https://github.com/ExDevilLee/ai-work-system/wiki/12-%E4%B8%80%E4%B8%AA%E4%B8%8D%E4%BC%9A%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E7%9A%84-AI-%E5%8A%A9%E6%89%8B%EF%BC%8C%E5%AE%9E%E9%99%85%E8%83%BD%E5%B8%AE%E6%88%91%E5%81%9A%E4%BB%80%E4%B9%88%EF%BC%9F)
 - [有了长期工作系统，还需要每次给 AI 写很长的提示词吗？](https://github.com/ExDevilLee/ai-work-system/wiki/13-%E6%9C%89%E4%BA%86%E9%95%BF%E6%9C%9F%E5%B7%A5%E4%BD%9C%E7%B3%BB%E7%BB%9F%EF%BC%8C%E8%BF%98%E9%9C%80%E8%A6%81%E6%AF%8F%E6%AC%A1%E7%BB%99-AI-%E5%86%99%E5%BE%88%E9%95%BF%E7%9A%84%E6%8F%90%E7%A4%BA%E8%AF%8D%E5%90%97%EF%BC%9F)
+- [哪些工作值得进入长期 AI 系统，哪些只适合临时聊一次？](https://github.com/ExDevilLee/ai-work-system/wiki/14-%E5%93%AA%E4%BA%9B%E5%B7%A5%E4%BD%9C%E5%80%BC%E5%BE%97%E8%BF%9B%E5%85%A5%E9%95%BF%E6%9C%9F-AI-%E7%B3%BB%E7%BB%9F%EF%BC%8C%E5%93%AA%E4%BA%9B%E5%8F%AA%E9%80%82%E5%90%88%E4%B8%B4%E6%97%B6%E8%81%8A%E4%B8%80%E6%AC%A1%EF%BC%9F)
 
 文章标题默认链接到 GitHub Wiki 阅读页；[Gitee Wiki](https://gitee.com/ExDevilLee/ai-work-system/wikis/Home) 保持同步展示，[墨问《AI 长期工作系统》](https://note.mowen.cn/detail/CGAIy3ZJS0VwC6wlH3je-) 按时间倒序内嵌全部文章。源码 Markdown 可从 Wiki 页面底部的来源入口进入。
 <!-- articles:index:end -->
