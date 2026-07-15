@@ -143,10 +143,23 @@
       "note_id": "aJsSD7xKUIc3R-yjTLFqF",
       "published": true,
       "url": "https://note.mowen.cn/detail/aJsSD7xKUIc3R-yjTLFqF"
+    },
+    "content/articles/2026-07-15-do-we-still-need-long-prompts.md": {
+      "assets": {
+        "images/13/system-context-vs-current-prompt.png": {
+          "sha256": "c994544ebdae949c165b86fed4b76c2b32469f889b8e295f5a58bfa3ac71f545",
+          "source_url": "https://gitee.com/ExDevilLee/ai-work-system/raw/main/content/articles/images/13/system-context-vs-current-prompt.png",
+          "uuid": "ImurQC2CEqoi5FFs_bVje-TMP"
+        }
+      },
+      "content_sha256": "c3ed4dbb07aa0c92ce4a247fd542f42e07fcf64698624bde91e7d8b5c3c00164",
+      "note_id": "FDRpJdP3tt23H28Ue9WgH",
+      "published": true,
+      "url": "https://note.mowen.cn/detail/FDRpJdP3tt23H28Ue9WgH"
     }
   },
   "directory": {
-    "content_sha256": "7410d9173c11852a88456e1d38f41e587e34781bf1463ac053795a445dda1edd",
+    "content_sha256": "195a4ca3addba2c2cdc884d4d8b3c264114baab37c6c70644e52866c9acdc8c8",
     "cover_sha256": "b378829b08ff549181e4466f5909217adb8e54793f877a81ff1e5bea191c9949",
     "cover_source_url": "https://gitee.com/ExDevilLee/ai-work-system/raw/main/assets/mowen/ai-work-system-cover.jpg",
     "cover_uuid": "4Rmp_Zyq9_KQ4V5Q1KvVr-TMP",
