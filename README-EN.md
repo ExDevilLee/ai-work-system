@@ -45,8 +45,8 @@ The fourth article turns the series toward practical project memory. The fifth e
 
 ## Future Topic Pool
 
-- With a long-term work system, do we still need to write long prompts every time?
 - Which tasks belong in a long-term AI system, and which should remain one-off conversations?
+- As AI learns more about your work, what information should stay outside the system?
 - [ROADMAP](docs/series-roadmap.md)
 - [MORE](docs/topic-pool.md)
 
@@ -65,6 +65,7 @@ The fourth article turns the series toward practical project memory. The fifth e
 - [How to Tell Whether a Long-Term AI Work System Is Helping Instead of Adding Complexity](https://github.com/ExDevilLee/ai-work-system/wiki/10-%E6%80%8E%E4%B9%88%E5%88%A4%E6%96%AD%E4%B8%80%E5%A5%97%E9%95%BF%E6%9C%9F-AI-%E5%B7%A5%E4%BD%9C%E7%B3%BB%E7%BB%9F%EF%BC%8C%E6%98%AF%E7%9C%9F%E7%9A%84%E6%9C%89%E5%B8%AE%E5%8A%A9%EF%BC%8C%E8%80%8C%E4%B8%8D%E6%98%AF%E8%AE%A9%E6%B5%81%E7%A8%8B%E5%8F%98%E5%BE%97%E6%9B%B4%E5%A4%8D%E6%9D%82%EF%BC%9F)
 - [Why Do Long-Term Work Systems Need Cleanup, Not Just Accumulation?](https://github.com/ExDevilLee/ai-work-system/wiki/11-%E4%B8%BA%E4%BB%80%E4%B9%88%E9%95%BF%E6%9C%9F%E5%B7%A5%E4%BD%9C%E7%B3%BB%E7%BB%9F%E9%9C%80%E8%A6%81%E6%B8%85%E7%90%86%EF%BC%8C%E8%80%8C%E4%B8%8D%E6%98%AF%E5%8F%AA%E9%9C%80%E8%A6%81%E7%A7%AF%E7%B4%AF%EF%BC%9F)
 - [What Can an AI Assistant That Does Not Start From Scratch Actually Do?](https://github.com/ExDevilLee/ai-work-system/wiki/12-%E4%B8%80%E4%B8%AA%E4%B8%8D%E4%BC%9A%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E7%9A%84-AI-%E5%8A%A9%E6%89%8B%EF%BC%8C%E5%AE%9E%E9%99%85%E8%83%BD%E5%B8%AE%E6%88%91%E5%81%9A%E4%BB%80%E4%B9%88%EF%BC%9F)
+- [With a Long-Term Work System, Do We Still Need Long Prompts Every Time?](https://github.com/ExDevilLee/ai-work-system/wiki/13-%E6%9C%89%E4%BA%86%E9%95%BF%E6%9C%9F%E5%B7%A5%E4%BD%9C%E7%B3%BB%E7%BB%9F%EF%BC%8C%E8%BF%98%E9%9C%80%E8%A6%81%E6%AF%8F%E6%AC%A1%E7%BB%99-AI-%E5%86%99%E5%BE%88%E9%95%BF%E7%9A%84%E6%8F%90%E7%A4%BA%E8%AF%8D%E5%90%97%EF%BC%9F)
 
 Article titles link to the GitHub Wiki reading pages by default; [Gitee Wiki](https://gitee.com/ExDevilLee/ai-work-system/wikis/Home) stays in sync, while the [AI Long-Term Work System collection on MoWen](https://note.mowen.cn/detail/CGAIy3ZJS0VwC6wlH3je-) embeds every article in reverse chronological order. Source Markdown is available from each Wiki page's source link.
 

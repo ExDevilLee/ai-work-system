@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900" viewBox="0 0 1600 900">
+  <rect width="1600" height="900" fill="#f7f8fa"/>
+  <style>
+    .title { font: 700 38px "PingFang SC", "Microsoft YaHei", sans-serif; fill: #26313d; }
+    .subtitle { font: 24px "PingFang SC", "Microsoft YaHei", sans-serif; fill: #5b6573; }
+    .head { font: 700 28px "PingFang SC", "Microsoft YaHei", sans-serif; }
+    .body { font: 23px "PingFang SC", "Microsoft YaHei", sans-serif; fill: #33404d; }
+    .small { font: 21px "PingFang SC", "Microsoft YaHei", sans-serif; fill: #65717e; }
+  </style>
+
+  <text x="80" y="85" class="title">提示词不必独自搬运整个项目</text>
+  <text x="80" y="130" class="subtitle">系统保存长期稳定的上下文，提示词说明这一次的目标和变化</text>
+
+  <rect x="80" y="205" width="650" height="500" rx="8" fill="#ffffff" stroke="#b65f76" stroke-width="3"/>
+  <rect x="80" y="205" width="650" height="18" rx="8" fill="#b65f76"/>
+  <text x="405" y="280" text-anchor="middle" class="head" fill="#b65f76">一次性长提示词</text>
+  <text x="150" y="360" class="body">项目背景</text>
+  <text x="150" y="430" class="body">稳定规则与个人偏好</text>
+  <text x="150" y="500" class="body">已有状态与历史决策</text>
+  <text x="150" y="570" class="body">执行步骤与检查方式</text>
+  <text x="150" y="640" class="body">当前任务和临时变化</text>
+  <text x="405" y="750" text-anchor="middle" class="small">每次开始都要重新打包，容易过期或遗漏</text>
+
+  <rect x="870" y="205" width="650" height="315" rx="8" fill="#ffffff" stroke="#1f8a70" stroke-width="3"/>
+  <rect x="870" y="205" width="650" height="18" rx="8" fill="#1f8a70"/>
+  <text x="1195" y="280" text-anchor="middle" class="head" fill="#1f8a70">长期工作系统</text>
+  <text x="940" y="360" class="body">README：项目背景与范围</text>
+  <text x="940" y="420" class="body">规则与工作流：稳定做法</text>
+  <text x="940" y="480" class="body">状态与证据：已经做到哪里</text>
+
+  <path d="M1195 520 V570" stroke="#aeb7c2" stroke-width="4"/>
+  <path d="M1180 550 L1195 570 L1210 550" fill="none" stroke="#aeb7c2" stroke-width="4"/>
+
+  <rect x="870" y="570" width="650" height="180" rx="8" fill="#ffffff" stroke="#3772b9" stroke-width="3"/>
+  <rect x="870" y="570" width="650" height="18" rx="8" fill="#3772b9"/>
+  <text x="1195" y="640" text-anchor="middle" class="head" fill="#3772b9">当前提示词</text>
+  <text x="1195" y="690" text-anchor="middle" class="body">当前目标 · 本次变化 · 临时约束 · 人工决定</text>
+
+  <rect x="280" y="805" width="1040" height="65" rx="8" fill="#ffffff" stroke="#c5ccd4" stroke-width="2"/>
+  <text x="800" y="847" text-anchor="middle" class="body">提示词变短，不是省略上下文，而是上下文已经有了可信位置</text>
+</svg>
