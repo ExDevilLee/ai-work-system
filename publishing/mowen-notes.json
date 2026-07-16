@@ -48,20 +48,25 @@
           "uuid": "m3erDhsVH44VDzIk1-Bq3-TMP"
         }
       },
-      "content_sha256": "49d1597912bb04b34ce98dadce8539137ca36829b98ce63cf3ea435454a35ac6",
+      "content_sha256": "ddbbf765a862ffec03254f9fbffc7598b46b7b381f6e74a092cd76df24e05ebd",
       "note_id": "cL1xrW4Lg9ojYpVtNmCze",
       "published": true,
       "url": "https://note.mowen.cn/detail/cL1xrW4Lg9ojYpVtNmCze"
     },
     "content/articles/2026-07-10-when-rules-become-workflows.md": {
       "assets": {
+        "images/06/minimum-workflow-elements.png": {
+          "sha256": "1e9b19cced088f3b08340522ff90c98f1b6c88d09f3d3c9aef61fc54cb463b1c",
+          "source_url": "https://gitee.com/ExDevilLee/ai-work-system/raw/main/content/articles/images/06/minimum-workflow-elements.png",
+          "uuid": "cQ_Pmch0xSAc13_m6Nu-s-TMP"
+        },
         "images/06/prompt-to-workflow-evolution.png": {
           "sha256": "f51848115560bc0c3f1376a2d71d984a8335d774fdf3160c9bb183d3dc5cef1c",
           "source_url": "https://gitee.com/ExDevilLee/ai-work-system/raw/main/content/articles/images/06/prompt-to-workflow-evolution.png",
           "uuid": "KJi532z31TMJzT0Yf3_x6-TMP"
         }
       },
-      "content_sha256": "40f2eb13102e28b2ea17cf4fc40c2fb3cd6a8a5a62cf5efa81b868e57bbc0637",
+      "content_sha256": "43a99d56af45eea18e9ed8512ba6bd121b8fdc058c6ad7974d6b2c1f06d75098",
       "note_id": "ZjiI83WfGXjGd7sKfrivI",
       "published": true,
       "url": "https://note.mowen.cn/detail/ZjiI83WfGXjGd7sKfrivI"
@@ -74,7 +79,7 @@
           "uuid": "sxafVlnxTWk1TNs3O5TNe-TMP"
         }
       },
-      "content_sha256": "80ee6d5eacc3c63155f2e403af2a744730a3a27b7f6f7c33af284549968e1534",
+      "content_sha256": "f35babcc011f30ae01dcd395e42740337e6c772ee4c5f2ecba27c0b644ad2702",
       "note_id": "qrhzgcKWgsWefuG1pOaVi",
       "published": true,
       "url": "https://note.mowen.cn/detail/qrhzgcKWgsWefuG1pOaVi"
@@ -87,7 +92,7 @@
           "uuid": "sJvomzm2CDagxQ0IcG-yQ-TMP"
         }
       },
-      "content_sha256": "369de8796fb839081f0710eb98af7cb3c234a73f7148beed4d188eb12c188d7b",
+      "content_sha256": "fd087ef38b3b08f300ce3f53fa4937d7486fa4d53e3cefa383aa1bc6225e0144",
       "note_id": "Z04uaodwgtbwWgJVf8b65",
       "published": true,
       "url": "https://note.mowen.cn/detail/Z04uaodwgtbwWgJVf8b65"
@@ -113,7 +118,7 @@
           "uuid": "ShZ-D9DppaMt-WgQSICLR-TMP"
         }
       },
-      "content_sha256": "ab4664546da446f18d958cc3177ece1d5950142206a04ec30d817051001d7394",
+      "content_sha256": "70694101c4c7867020306e29c1bf4a28cf98190d2a29110d6e7c286be1a5c25e",
       "note_id": "H6IfdhqE6DZICiOv_91-y",
       "published": true,
       "url": "https://note.mowen.cn/detail/H6IfdhqE6DZICiOv_91-y"
@@ -139,7 +144,7 @@
           "uuid": "cT7uw7vCGQbmFbIC7GUZG-TMP"
         }
       },
-      "content_sha256": "5d8932493f2a9df39466d59a7f17be866ba9491ec9272470281ce9dc6325828c",
+      "content_sha256": "f4d0cf2a2fb1f794c95b2dfe26f921e854073c8936233b2ac64e0fe2b00cd20c",
       "note_id": "aJsSD7xKUIc3R-yjTLFqF",
       "published": true,
       "url": "https://note.mowen.cn/detail/aJsSD7xKUIc3R-yjTLFqF"
@@ -165,7 +170,7 @@
           "uuid": "PqXdH962wADL7lPs1ybYp-TMP"
         }
       },
-      "content_sha256": "c2a9448d9b7b311f7ab5c5a1b013f77d0c30011c30d1bd77c79791f4eaa58949",
+      "content_sha256": "454b9964b87fdd757b9e4948b1245bfb5ba6b596b541b42665b3c74519df747b",
       "note_id": "RvTft5egx23iXG2-WUKdH",
       "published": true,
       "url": "https://note.mowen.cn/detail/RvTft5egx23iXG2-WUKdH"
@@ -176,9 +181,14 @@
           "sha256": "9904d9c180301865300a644e2ea9828b922885c0ba623e20898e47192c338f6c",
           "source_url": "https://gitee.com/ExDevilLee/ai-work-system/raw/main/content/articles/images/15/information-boundary-layers.png",
           "uuid": "NnJ8nO1OUSnZ9SgplmrAz-TMP"
+        },
+        "images/15/private-to-public-safety-gate.png": {
+          "sha256": "f269db9622d763fad4c1f423d445aec920ae8ff0a83f12fda0d0ea138cf6cd31",
+          "source_url": "https://gitee.com/ExDevilLee/ai-work-system/raw/main/content/articles/images/15/private-to-public-safety-gate.png",
+          "uuid": "l-zl5UHljtuQB7--Eo-ue-TMP"
         }
       },
-      "content_sha256": "607a51163db022557f6a8b8f93bfbb8ced6c5d1ee291fb880e873eca53b8357a",
+      "content_sha256": "4ab2be9b5b3ac10e024f9d662617e707462f77fd821aedb4218af566c65df660",
       "note_id": "F6hycW26Ax5NRwEknDab9",
       "published": true,
       "url": "https://note.mowen.cn/detail/F6hycW26Ax5NRwEknDab9"
