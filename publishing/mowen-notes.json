@@ -180,12 +180,7 @@
       },
       "content_sha256": "607a51163db022557f6a8b8f93bfbb8ced6c5d1ee291fb880e873eca53b8357a",
       "note_id": "F6hycW26Ax5NRwEknDab9",
-      "publication_blocked": {
-        "content_sha256": "607a51163db022557f6a8b8f93bfbb8ced6c5d1ee291fb880e873eca53b8357a",
-        "message": "MoWen MCP error: error: code = 403 reason = RISKY message = svc [NoteSvc.SetPrivacy]: note risky. metadata = map[] cause = <nil>",
-        "reason": "RISKY"
-      },
-      "published": false,
+      "published": true,
       "url": "https://note.mowen.cn/detail/F6hycW26Ax5NRwEknDab9"
     }
   },
