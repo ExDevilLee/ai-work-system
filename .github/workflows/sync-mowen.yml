@@ -97,8 +97,8 @@ jobs:
           python scripts/sync_mowen.py --publish \
             --cover-url "https://gitee.com/ExDevilLee/ai-work-system/raw/main/assets/mowen/ai-work-system-cover.jpg"
 
-      # The current non-PRO account has 10 API calls per day. Preserve partial
-      # progress after quota failures, but do not trigger another CI run today.
+      # Preserve partial progress after quota, moderation, or other publishing
+      # interruptions without triggering another CI run from the bot commit.
       - name: Persist MoWen publishing progress
         if: ${{ !cancelled() && steps.changes.outputs.publish == 'true' }}
         run: |

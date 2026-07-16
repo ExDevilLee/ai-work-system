@@ -126,6 +126,7 @@ python3 scripts/sync_wiki.py --dry-run
 - `publishing/mowen-notes.json` 缺少已有笔记 ID，或包含错误 ID。
 - 封面尚未推送到 `main`，导致 `UploadViaURL` 无法读取公开图片 URL。
 - workflow 创建了私密笔记，但在映射提交前中断。
+- 墨问返回 `403 RISKY`，文章已创建为私密笔记，但平台拒绝公开。
 
 发生中断时先运行：
 
@@ -134,3 +135,11 @@ mocli note mine --filter priv --recent 1d --count 20
 ```
 
 确认是否已有同名私密笔记，再修正映射后重跑；不要直接再次创建公开笔记。
+
+如果映射包含 `publication_blocked.reason: RISKY`：
+
+1. 通过映射里的 `url` 打开对应私密笔记。
+2. 检查墨问审核状态，并尝试在平台界面人工公开。
+3. 不通过替换字符、拆词或改变接口调用来规避平台风控。
+4. 人工确认已经公开后，将该条映射的 `published` 改为 `true`，并删除 `publication_blocked`。
+5. 重新运行同步，让公开系列目录纳入这篇文章。

@@ -8,6 +8,7 @@ import unittest
 from pathlib import Path
 from unittest import mock
 
+from scripts import sync_mowen
 from scripts.sync_mowen import (
     Article,
     MowenClient,
@@ -116,6 +117,116 @@ class FakeMowenClient:
 
 
 class SyncMowenTest(unittest.TestCase):
+    def test_created_note_id_is_checkpointed_before_publication_failure(self) -> None:
+        article = Article(
+            Path("article.md"),
+            "content/articles/article.md",
+            "文章",
+            "2026-07-10",
+            "",
+            ["AI"],
+            "# 文章",
+        )
+        mapping = {"version": 2, "directories": {}, "articles": {}}
+        snapshots: list[dict] = []
+
+        class FailingPublicClient(FakeMowenClient):
+            def set_public(self, note_id: str) -> None:
+                raise RuntimeError("network failed while publishing")
+
+        with self.assertRaisesRegex(RuntimeError, "network failed"):
+            sync_articles(
+                [article],
+                mapping,
+                FailingPublicClient(),
+                converter=lambda _: {"type": "doc", "content": []},
+                publish=True,
+                checkpoint=lambda: snapshots.append(
+                    json.loads(json.dumps(mapping))
+                ),
+            )
+
+        self.assertEqual(
+            snapshots[-1]["articles"][article.source]["note_id"],
+            "new-note-1",
+        )
+
+    def test_risky_publication_is_recorded_without_recreating_note(self) -> None:
+        article = Article(
+            Path("article.md"),
+            "content/articles/article.md",
+            "文章",
+            "2026-07-10",
+            "",
+            ["AI"],
+            "# 文章",
+        )
+        mapping = {"version": 2, "directories": {}, "articles": {}}
+
+        class RiskyPublicClient(FakeMowenClient):
+            def set_public(self, note_id: str) -> None:
+                self.calls.append(("public", note_id))
+                raise RuntimeError("MoWen MCP error: code = 403 reason = RISKY")
+
+        first_client = RiskyPublicClient()
+        sync_articles(
+            [article],
+            mapping,
+            first_client,
+            converter=lambda _: {"type": "doc", "content": []},
+            publish=True,
+            checkpoint=lambda: None,
+        )
+        second_client = RiskyPublicClient()
+        sync_articles(
+            [article],
+            mapping,
+            second_client,
+            converter=lambda _: {"type": "doc", "content": []},
+            publish=True,
+            checkpoint=lambda: None,
+        )
+
+        entry = mapping["articles"][article.source]
+        self.assertEqual(entry["note_id"], "new-note-1")
+        self.assertFalse(entry["published"])
+        self.assertEqual(entry["publication_blocked"]["reason"], "RISKY")
+        self.assertEqual([call[0] for call in first_client.calls], ["create", "public"])
+        self.assertEqual(second_client.calls, [])
+
+    def test_directory_uses_only_published_articles(self) -> None:
+        published = Article(
+            Path("published.md"),
+            "content/articles/published.md",
+            "已发布",
+            "2026-07-09",
+            "",
+            ["AI"],
+            "# 已发布",
+        )
+        private = Article(
+            Path("private.md"),
+            "content/articles/private.md",
+            "私密",
+            "2026-07-10",
+            "",
+            ["AI"],
+            "# 私密",
+        )
+        mapping = {
+            "articles": {
+                published.source: {"note_id": "published-id", "published": True},
+                private.source: {"note_id": "private-id", "published": False},
+            }
+        }
+
+        selected = sync_mowen.published_articles_for_directory(
+            [private, published],
+            mapping,
+        )
+
+        self.assertEqual(selected, [published])
+
     def test_load_mapping_migrates_legacy_directory_without_losing_fields(self) -> None:
         legacy_directory = {
             "note_id": "directory-id",

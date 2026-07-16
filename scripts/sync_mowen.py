@@ -603,7 +603,44 @@ def sync_articles(
     converter: Callable[[Article], dict],
     publish: bool,
     update_existing: bool = True,
+    checkpoint: Callable[[], None] | None = None,
 ) -> None:
+    def persist() -> None:
+        if checkpoint:
+            checkpoint()
+
+    def publish_entry(article: Article, entry: dict, note_id: str, digest: str) -> None:
+        blocked = entry.get("publication_blocked") or {}
+        if (
+            blocked.get("reason") == "RISKY"
+            and blocked.get("content_sha256") == digest
+        ):
+            print(
+                f"::warning title=MoWen publication blocked::{article.source} "
+                "is still private because the current content was flagged RISKY."
+            )
+            return
+        try:
+            client.set_public(note_id)
+        except RuntimeError as exc:
+            if "RISKY" not in str(exc).upper():
+                raise
+            entry["publication_blocked"] = {
+                "reason": "RISKY",
+                "content_sha256": digest,
+                "message": str(exc),
+            }
+            entry["published"] = False
+            persist()
+            print(
+                f"::warning title=MoWen publication blocked::{article.source} "
+                "was created or updated privately, but MoWen rejected public access as RISKY."
+            )
+            return
+        entry["published"] = True
+        entry.pop("publication_blocked", None)
+        persist()
+
     article_mapping = mapping.setdefault("articles", {})
     for article in articles:
         entry = article_mapping.get(article.source)
@@ -613,13 +650,14 @@ def sync_articles(
         digest = document_sha256(document)
         if entry and entry.get("note_id") and entry.get("content_sha256") == digest:
             if publish and not entry.get("published"):
-                client.set_public(str(entry["note_id"]))
-                entry["published"] = True
+                publish_entry(article, entry, str(entry["note_id"]), digest)
             continue
         if entry and entry.get("note_id"):
             note_id = str(entry["note_id"])
             client.edit_rich_note(note_id, document)
             entry["content_sha256"] = digest
+            entry.pop("publication_blocked", None)
+            persist()
         else:
             note_id = client.create_rich_note(document, article.tags)
             entry = article_mapping.setdefault(article.source, {})
@@ -631,9 +669,9 @@ def sync_articles(
                     "published": False,
                 }
             )
+            persist()
         if publish and not entry.get("published"):
-            client.set_public(note_id)
-            entry["published"] = True
+            publish_entry(article, entry, note_id, digest)
 
 
 def sync_directory(
@@ -699,6 +737,18 @@ def split_articles_by_mapping(
     return missing, existing
 
 
+def published_articles_for_directory(
+    articles: list[Article],
+    mapping: dict,
+) -> list[Article]:
+    article_mapping = mapping.get("articles", {})
+    return [
+        article
+        for article in articles
+        if (article_mapping.get(article.source) or {}).get("published") is True
+    ]
+
+
 def sync_article_batch(
     articles: list[Article],
     mapping: dict,
@@ -723,6 +773,7 @@ def sync_article_batch(
             converter=lambda _article, prepared=document: prepared,
             publish=publish,
             update_existing=update_existing,
+            checkpoint=lambda: save_mapping(mapping_path, mapping),
         )
         save_mapping(mapping_path, mapping)
 
@@ -797,8 +848,14 @@ def main() -> int:
     missing_series = {article.series for article in missing_articles}
     for series_id in missing_series:
         series = catalog_by_id[series_id]
-        sync_directory(
+        directory_articles = published_articles_for_directory(
             articles_by_series[series_id],
+            mapping,
+        )
+        if not directory_articles:
+            continue
+        sync_directory(
+            directory_articles,
             mapping,
             client,
             publish=args.publish,
@@ -823,8 +880,11 @@ def main() -> int:
         series_articles = articles_by_series.get(series_id, [])
         if not series_articles:
             continue
+        directory_articles = published_articles_for_directory(series_articles, mapping)
+        if not directory_articles:
+            continue
         sync_directory(
-            series_articles,
+            directory_articles,
             mapping,
             client,
             publish=args.publish,
