@@ -611,13 +611,15 @@ def sync_articles(
 
     def publish_entry(article: Article, entry: dict, note_id: str, digest: str) -> None:
         blocked = entry.get("publication_blocked") or {}
+        note_url = str(entry.get("url") or f"https://note.mowen.cn/detail/{note_id}")
         if (
             blocked.get("reason") == "RISKY"
             and blocked.get("content_sha256") == digest
         ):
             print(
                 f"::warning title=MoWen publication blocked::{article.source} "
-                "is still private because the current content was flagged RISKY."
+                "is still private because the current content was flagged RISKY. "
+                f"Review and publish manually: {note_url}"
             )
             return
         try:
@@ -634,7 +636,8 @@ def sync_articles(
             persist()
             print(
                 f"::warning title=MoWen publication blocked::{article.source} "
-                "was created or updated privately, but MoWen rejected public access as RISKY."
+                "was created or updated privately, but MoWen rejected public access as RISKY. "
+                f"Review and publish manually: {note_url}"
             )
             return
         entry["published"] = True

@@ -178,14 +178,15 @@ class SyncMowenTest(unittest.TestCase):
             checkpoint=lambda: None,
         )
         second_client = RiskyPublicClient()
-        sync_articles(
-            [article],
-            mapping,
-            second_client,
-            converter=lambda _: {"type": "doc", "content": []},
-            publish=True,
-            checkpoint=lambda: None,
-        )
+        with mock.patch("builtins.print") as printer:
+            sync_articles(
+                [article],
+                mapping,
+                second_client,
+                converter=lambda _: {"type": "doc", "content": []},
+                publish=True,
+                checkpoint=lambda: None,
+            )
 
         entry = mapping["articles"][article.source]
         self.assertEqual(entry["note_id"], "new-note-1")
@@ -193,6 +194,7 @@ class SyncMowenTest(unittest.TestCase):
         self.assertEqual(entry["publication_blocked"]["reason"], "RISKY")
         self.assertEqual([call[0] for call in first_client.calls], ["create", "public"])
         self.assertEqual(second_client.calls, [])
+        self.assertIn(entry["url"], str(printer.call_args))
 
     def test_directory_uses_only_published_articles(self) -> None:
         published = Article(
