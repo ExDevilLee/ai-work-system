@@ -20,6 +20,11 @@ from typing import Callable
 
 import yaml
 
+try:
+    from scripts.series_catalog import load_series_catalog
+except ModuleNotFoundError:
+    from series_catalog import load_series_catalog
+
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 ARTICLES_DIR = REPO_ROOT / "content" / "articles"
@@ -28,6 +33,11 @@ COVER_PATH = REPO_ROOT / "assets" / "mowen" / "ai-work-system-cover.jpg"
 MOWEN_MCP_ENDPOINT = "https://open.mowen.cn/api/open/mcp/v1/note"
 ARTICLE_ASSET_BASE_URL = "https://gitee.com/ExDevilLee/ai-work-system/raw/main"
 MOWEN_FREE_DAILY_QUOTA = 10
+FIRST_SERIES_ID = "long-term-ai-work-system"
+DEFAULT_DIRECTORY_INTRODUCTION = (
+    "这里记录我如何把 AI 从一次性聊天工具，逐步放进一个有记忆、有流程、有证据、有复盘的长期工作系统。",
+    "文章按发布时间倒序排列，最新内容在最上方；第一次阅读时，也可以从最早的一篇开始。",
+)
 
 
 @dataclass(frozen=True)
@@ -40,6 +50,7 @@ class Article:
     tags: list[str]
     body: str
     sequence: int | None = None
+    series: str = FIRST_SERIES_ID
 
 
 def parse_article(path: Path, repo_root: Path) -> Article:
@@ -63,10 +74,13 @@ def parse_article(path: Path, repo_root: Path) -> Article:
         summary=str(metadata.get("summary") or ""),
         tags=[str(tag) for tag in tags],
         body=text[end + len("\n---\n") :].lstrip(),
+        series=str(metadata.get("series") or ""),
     )
 
 
 def discover_ready_articles(repo_root: Path = REPO_ROOT) -> list[Article]:
+    catalog = load_series_catalog(repo_root)
+    known_series = {entry["id"] for entry in catalog}
     articles: list[Article] = []
     for path in (repo_root / "content" / "articles").glob("*.md"):
         text = path.read_text(encoding="utf-8")
@@ -78,12 +92,16 @@ def discover_ready_articles(repo_root: Path = REPO_ROOT) -> list[Article]:
         metadata = yaml.safe_load(text[4:end]) or {}
         if metadata.get("status") != "ready":
             continue
-        articles.append(parse_article(path, repo_root))
+        article = parse_article(path, repo_root)
+        if article.series not in known_series:
+            raise ValueError(f"Unknown article series '{article.series}' in {path.name}")
+        articles.append(article)
     ordered = sorted(articles, key=lambda item: (item.date, item.source), reverse=True)
-    sequence_by_source = {
-        article.source: sequence
-        for sequence, article in enumerate(reversed(ordered), start=1)
-    }
+    series_counts: dict[str, int] = {}
+    sequence_by_source: dict[str, int] = {}
+    for article in reversed(ordered):
+        series_counts[article.series] = series_counts.get(article.series, 0) + 1
+        sequence_by_source[article.source] = series_counts[article.series]
     return [
         replace(article, sequence=sequence_by_source[article.source])
         for article in ordered
@@ -189,10 +207,14 @@ def link_paragraph(label: str, url: str) -> dict:
 
 
 def build_directory_document(
-    articles: list[Article], mapping: dict, cover_uuid: str | None = None
+    articles: list[Article],
+    mapping: dict,
+    cover_uuid: str | None = None,
+    title: str = "AI 长期工作系统",
+    introduction: str | list[str] | tuple[str, ...] = DEFAULT_DIRECTORY_INTRODUCTION,
 ) -> dict:
     content: list[dict] = [
-        text_paragraph("AI 长期工作系统", bold=True),
+        text_paragraph(title, bold=True),
         {"type": "paragraph"},
     ]
     if cover_uuid:
@@ -203,7 +225,7 @@ def build_directory_document(
                     "attrs": {
                         "uuid": cover_uuid,
                         "align": "center",
-                        "alt": "AI 长期工作系统",
+                        "alt": title,
                     },
                 },
                 {"type": "paragraph"},
@@ -212,10 +234,7 @@ def build_directory_document(
     content.extend(
         [
             text_paragraph_from_parts(
-                [
-                    "这里记录我如何把 AI 从一次性聊天工具，逐步放进一个有记忆、有流程、有证据、有复盘的长期工作系统。",
-                    "文章按发布时间倒序排列，最新内容在最上方；第一次阅读时，也可以从最早的一篇开始。",
-                ]
+                [introduction] if isinstance(introduction, str) else list(introduction)
             ),
             {"type": "paragraph"},
         ]
@@ -243,8 +262,43 @@ def build_directory_document(
 
 def load_mapping(path: Path = MAPPING_PATH) -> dict:
     if not path.exists():
-        return {"version": 1, "directory": {}, "articles": {}}
-    return json.loads(path.read_text(encoding="utf-8"))
+        return {"version": 2, "directories": {}, "articles": {}}
+    mapping = json.loads(path.read_text(encoding="utf-8"))
+    if mapping.get("version") == 1 or "directory" in mapping:
+        legacy_directory = mapping.pop("directory", {})
+        directories = mapping.setdefault("directories", {})
+        directories.setdefault(FIRST_SERIES_ID, legacy_directory)
+        mapping["version"] = 2
+    else:
+        mapping.setdefault("directories", {})
+        mapping.setdefault("articles", {})
+    return mapping
+
+
+def directory_mapping(mapping: dict, series_id: str) -> dict:
+    directories = mapping.get("directories")
+    if isinstance(directories, dict):
+        return directories.setdefault(series_id, {})
+    if series_id == FIRST_SERIES_ID and "directory" in mapping:
+        return mapping.setdefault("directory", {})
+    mapping["version"] = 2
+    return mapping.setdefault("directories", {}).setdefault(series_id, {})
+
+
+def validate_registered_directories(
+    articles_by_series: dict[str, list[Article]],
+    mapping: dict,
+) -> None:
+    missing = [
+        series_id
+        for series_id in articles_by_series
+        if not directory_mapping(mapping, series_id).get("note_id")
+    ]
+    if missing:
+        raise ValueError(
+            "Register MoWen directory note IDs before publishing: "
+            + ", ".join(sorted(missing))
+        )
 
 
 def save_mapping(path: Path, mapping: dict) -> None:
@@ -429,13 +483,14 @@ def ensure_cover_uploaded(
     client: MowenClient,
     fetcher: Callable[[str], bytes] | None = None,
     attempts: int = 6,
+    series_id: str = FIRST_SERIES_ID,
 ) -> str:
     if not cover_path.exists():
         raise ValueError(f"Cover file does not exist: {cover_path}")
     if not cover_url.startswith("https://"):
         raise ValueError("Cover URL must use HTTPS")
     digest = hashlib.sha256(cover_path.read_bytes()).hexdigest()
-    directory = mapping.setdefault("directory", {})
+    directory = directory_mapping(mapping, series_id)
     if (
         directory.get("cover_uuid")
         and directory.get("cover_sha256") == digest
@@ -588,12 +643,21 @@ def sync_directory(
     publish: bool,
     cover_uuid: str | None,
     update_existing: bool = True,
+    series_id: str = FIRST_SERIES_ID,
+    title: str = "AI 长期工作系统",
+    introduction: str | list[str] | tuple[str, ...] = DEFAULT_DIRECTORY_INTRODUCTION,
 ) -> None:
-    directory = mapping.setdefault("directory", {})
+    directory = directory_mapping(mapping, series_id)
     note_id = directory.get("note_id")
     if note_id and not update_existing:
         return
-    document = build_directory_document(articles, mapping, cover_uuid=cover_uuid)
+    document = build_directory_document(
+        articles,
+        mapping,
+        cover_uuid=cover_uuid,
+        title=title,
+        introduction=introduction,
+    )
     digest = document_sha256(document)
     if note_id and directory.get("content_sha256") == digest:
         if publish and not directory.get("published"):
@@ -694,6 +758,11 @@ def main() -> int:
     args = parser.parse_args()
 
     articles = discover_ready_articles()
+    catalog = load_series_catalog(REPO_ROOT)
+    catalog_by_id = {entry["id"]: entry for entry in catalog}
+    articles_by_series: dict[str, list[Article]] = {}
+    for article in articles:
+        articles_by_series.setdefault(article.series, []).append(article)
     validate_conversions(articles)
     if not args.register_private and not args.publish:
         print(f"Dry run complete: {len(articles)} ready article(s).")
@@ -704,6 +773,7 @@ def main() -> int:
         mcp_url=os.environ.get("MOWEN_MCP_URL"),
     )
     mapping = load_mapping(args.mapping)
+    validate_registered_directories(articles_by_series, mapping)
     update_existing = args.publish
     missing_articles, existing_articles = split_articles_by_mapping(articles, mapping)
     sync_article_batch(
@@ -714,7 +784,8 @@ def main() -> int:
         publish=args.publish,
         update_existing=update_existing,
     )
-    cover_uuid = mapping.get("directory", {}).get("cover_uuid")
+    first_directory = directory_mapping(mapping, FIRST_SERIES_ID)
+    cover_uuid = first_directory.get("cover_uuid")
     if args.cover_url:
         cover_uuid = ensure_cover_uploaded(
             args.cover_path,
@@ -723,14 +794,20 @@ def main() -> int:
             client,
         )
         save_mapping(args.mapping, mapping)
-    if missing_articles:
+    missing_series = {article.series for article in missing_articles}
+    for series_id in missing_series:
+        series = catalog_by_id[series_id]
         sync_directory(
-            articles,
+            articles_by_series[series_id],
             mapping,
             client,
             publish=args.publish,
-            cover_uuid=cover_uuid,
+            cover_uuid=cover_uuid if series_id == FIRST_SERIES_ID else None,
             update_existing=update_existing,
+            series_id=series_id,
+            title=str(series["mowen_directory_title"]),
+            introduction=series.get("mowen_directory_introduction")
+            or str(series["description"]),
         )
         save_mapping(args.mapping, mapping)
     sync_article_batch(
@@ -741,14 +818,23 @@ def main() -> int:
         publish=args.publish,
         update_existing=update_existing,
     )
-    sync_directory(
-        articles,
-        mapping,
-        client,
-        publish=args.publish,
-        cover_uuid=cover_uuid,
-        update_existing=update_existing,
-    )
+    for series in catalog:
+        series_id = str(series["id"])
+        series_articles = articles_by_series.get(series_id, [])
+        if not series_articles:
+            continue
+        sync_directory(
+            series_articles,
+            mapping,
+            client,
+            publish=args.publish,
+            cover_uuid=cover_uuid if series_id == FIRST_SERIES_ID else None,
+            update_existing=update_existing,
+            series_id=series_id,
+            title=str(series["mowen_directory_title"]),
+            introduction=series.get("mowen_directory_introduction")
+            or str(series["description"]),
+        )
     save_mapping(args.mapping, mapping)
     action = "Published" if args.publish else "Registered privately"
     print(f"{action}: {len(articles)} article(s) and directory mapping.")

@@ -1,0 +1,21 @@
+{
+  "version": 1,
+  "series": [
+    {
+      "id": "long-term-ai-work-system",
+      "order": 1,
+      "title": "长期 AI 工作系统",
+      "title_en": "Long-Term AI Work System",
+      "description": "从一次性 AI 聊天，走向有记忆、有流程、有证据、有复盘的长期协作系统。",
+      "description_en": "From one-off AI chats to a long-term collaboration system with memory, workflows, evidence, and reflection.",
+      "status": "complete",
+      "wiki_page": "Series-01-Long-Term-AI-Work-System",
+      "mowen_directory_title": "AI 长期工作系统",
+      "mowen_directory_introduction": [
+        "这里记录我如何把 AI 从一次性聊天工具，逐步放进一个有记忆、有流程、有证据、有复盘的长期工作系统。",
+        "文章按发布时间倒序排列，最新内容在最上方；第一次阅读时，也可以从最早的一篇开始。"
+      ],
+      "mowen_directory_url": "https://note.mowen.cn/detail/CGAIy3ZJS0VwC6wlH3je-"
+    }
+  ]
+}

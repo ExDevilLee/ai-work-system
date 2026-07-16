@@ -1,11 +1,125 @@
+import json
 import tempfile
 import unittest
 from pathlib import Path
 
-from scripts.sync_wiki import parse_frontmatter, render_article, rewrite_asset_urls, write_wiki
+from scripts.sync_wiki import (
+    parse_frontmatter,
+    ready_articles,
+    render_article,
+    rewrite_asset_urls,
+    write_wiki,
+)
+
+
+def write_series_catalog(root: Path) -> None:
+    path = root / "content" / "series.json"
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(
+        json.dumps(
+            {
+                "version": 1,
+                "series": [
+                    {
+                        "id": "series-one",
+                        "order": 1,
+                        "title": "系列一",
+                        "title_en": "Series One",
+                        "description": "第一组",
+                        "description_en": "First group",
+                        "status": "complete",
+                        "wiki_page": "Series-01-Series-One",
+                        "mowen_directory_title": "系列一目录",
+                        "mowen_directory_url": "",
+                    },
+                    {
+                        "id": "series-two",
+                        "order": 2,
+                        "title": "系列二",
+                        "title_en": "Series Two",
+                        "description": "第二组",
+                        "description_en": "Second group",
+                        "status": "active",
+                        "wiki_page": "Series-02-Series-Two",
+                        "mowen_directory_title": "系列二目录",
+                        "mowen_directory_url": "",
+                    },
+                ],
+            },
+            ensure_ascii=False,
+        ),
+        encoding="utf-8",
+    )
+
+
+def write_ready_article(root: Path, filename: str, title: str, series: str) -> None:
+    path = root / "content" / "articles" / filename
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(
+        f"---\ntitle: {title}\nstatus: ready\nseries: {series}\nsummary: 摘要\n---\n\n# {title}\n",
+        encoding="utf-8",
+    )
 
 
 class SyncWikiTest(unittest.TestCase):
+    def test_ready_articles_keep_global_pages_and_reset_series_sequence(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            write_series_catalog(root)
+            write_ready_article(root, "2026-07-01-one.md", "第一篇", "series-one")
+            write_ready_article(root, "2026-07-02-two.md", "第二篇", "series-one")
+            write_ready_article(root, "2026-07-03-three.md", "第三篇", "series-two")
+
+            articles = ready_articles(root)
+
+            self.assertEqual(
+                [article["page"] for article in articles],
+                ["01-第一篇", "02-第二篇", "03-第三篇"],
+            )
+            self.assertEqual(
+                [(article["series_id"], article["series_sequence"]) for article in articles],
+                [("series-one", 1), ("series-one", 2), ("series-two", 1)],
+            )
+
+    def test_wiki_groups_series_and_bounds_article_navigation(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            wiki_dir = root / "wiki"
+            wiki_dir.mkdir()
+            write_series_catalog(root)
+            write_ready_article(root, "2026-07-01-one.md", "第一篇", "series-one")
+            write_ready_article(root, "2026-07-02-two.md", "第二篇", "series-one")
+            write_ready_article(root, "2026-07-03-three.md", "第三篇", "series-two")
+            articles = ready_articles(root)
+
+            write_wiki(
+                wiki_dir,
+                articles,
+                "Test Wiki",
+                "https://example.test/wiki",
+                repo_root=root,
+            )
+
+            self.assertTrue((wiki_dir / "Series-01-Series-One.md").exists())
+            self.assertTrue((wiki_dir / "Series-02-Series-Two.md").exists())
+            home = (wiki_dir / "Home.md").read_text(encoding="utf-8")
+            sidebar = (wiki_dir / "_Sidebar.md").read_text(encoding="utf-8")
+            self.assertIn("### [系列一](https://example.test/wiki/Series-01-Series-One)", home)
+            self.assertIn("### [系列二](https://example.test/wiki/Series-02-Series-Two)", home)
+            self.assertIn("  - [第三篇](https://example.test/wiki/03-%E7%AC%AC%E4%B8%89%E7%AF%87)", sidebar)
+
+            series_one_last = (wiki_dir / "02-第二篇.md").read_text(encoding="utf-8")
+            series_two_first = (wiki_dir / "03-第三篇.md").read_text(encoding="utf-8")
+            self.assertIn(
+                "| [上一篇](https://example.test/wiki/01-%E7%AC%AC%E4%B8%80%E7%AF%87) "
+                "| [目录](https://example.test/wiki/Series-01-Series-One) | 无 |",
+                series_one_last,
+            )
+            self.assertIn(
+                "| 无 | [目录](https://example.test/wiki/Series-02-Series-Two) | 无 |",
+                series_two_first,
+            )
+
     def test_frontmatter_parses_quoted_colon(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             article = Path(tmp) / "article.md"

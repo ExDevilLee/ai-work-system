@@ -39,8 +39,10 @@ jobs:
 
           if git diff --quiet HEAD^ HEAD -- \
             content/articles \
+            content/series.json \
             assets/mowen \
             publishing/mowen-notes.json \
+            scripts/series_catalog.py \
             scripts/sync_mowen.py \
             tests/test_sync_mowen.py \
             requirements-mowen.txt \

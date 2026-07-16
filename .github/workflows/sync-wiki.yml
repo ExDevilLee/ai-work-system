@@ -6,10 +6,13 @@ on:
       - main
     paths:
       - "content/articles/**"
+      - "content/series.json"
+      - "scripts/series_catalog.py"
       - "scripts/sync_wiki.py"
       - "scripts/verify_wiki.py"
       - "tests/test_sync_wiki.py"
       - "tests/test_verify_wiki.py"
+      - "tests/test_update_readme_index.py"
       - "requirements-wiki.txt"
       - ".github/workflows/sync-wiki.yml"
   workflow_dispatch:
@@ -40,7 +43,7 @@ jobs:
         run: python -m pip install --requirement requirements-wiki.txt
 
       - name: Run Wiki publishing tests
-        run: python -m unittest tests.test_sync_wiki tests.test_verify_wiki -v
+        run: python -m unittest tests.test_update_readme_index tests.test_sync_wiki tests.test_verify_wiki -v
 
       - name: Configure Git identity
         run: |

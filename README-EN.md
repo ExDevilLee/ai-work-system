@@ -51,9 +51,13 @@ The fourth article turns the series toward practical project memory. The fifth e
 - [ROADMAP](docs/series-roadmap.md)
 - [MORE](docs/topic-pool.md)
 
-## Published Articles
+## Article Series
 
 <!-- articles:index:start -->
+### Long-Term AI Work System (Complete, 15 articles)
+
+From one-off AI chats to a long-term collaboration system with memory, workflows, evidence, and reflection.
+
 - [I Am Not Just Using AI Tools; I Am Building A Long-Term Work System](https://github.com/ExDevilLee/ai-work-system/wiki/01-%E6%88%91%E4%B8%8D%E6%98%AF%E5%9C%A8%E4%BD%BF%E7%94%A8-AI-%E5%B7%A5%E5%85%B7%EF%BC%8C%E8%80%8C%E6%98%AF%E5%9C%A8%E6%90%AD%E5%BB%BA%E9%95%BF%E6%9C%9F%E5%B7%A5%E4%BD%9C%E7%B3%BB%E7%BB%9F)
 - [Why Does AI Keep Forgetting?](https://github.com/ExDevilLee/ai-work-system/wiki/02-%E4%B8%BA%E4%BB%80%E4%B9%88-AI-%E6%80%BB%E6%98%AF%E5%A4%B1%E5%BF%86%EF%BC%9F)
 - [Why Does AI Writing Feel Less Artificial Inside A Long-Term Work System?](https://github.com/ExDevilLee/ai-work-system/wiki/03-%E4%B8%BA%E4%BB%80%E4%B9%88%E6%9C%89%E4%BA%86%E9%95%BF%E6%9C%9F%E5%B7%A5%E4%BD%9C%E7%B3%BB%E7%BB%9F%E5%90%8E%EF%BC%8CAI-%E5%86%99%E4%BD%9C%E5%8F%8D%E8%80%8C%E4%B8%8D%E6%98%BE-AI-%E5%91%B3%EF%BC%9F)
@@ -70,7 +74,9 @@ The fourth article turns the series toward practical project memory. The fifth e
 - [Which Tasks Belong in a Long-Term AI System, and Which Should Stay One-Off?](https://github.com/ExDevilLee/ai-work-system/wiki/14-%E5%93%AA%E4%BA%9B%E5%B7%A5%E4%BD%9C%E5%80%BC%E5%BE%97%E8%BF%9B%E5%85%A5%E9%95%BF%E6%9C%9F-AI-%E7%B3%BB%E7%BB%9F%EF%BC%8C%E5%93%AA%E4%BA%9B%E5%8F%AA%E9%80%82%E5%90%88%E4%B8%B4%E6%97%B6%E8%81%8A%E4%B8%80%E6%AC%A1%EF%BC%9F)
 - [As AI Learns More About Your Work, What Information Should Stay Out?](https://github.com/ExDevilLee/ai-work-system/wiki/15-%E5%BD%93-AI-%E8%B6%8A%E6%9D%A5%E8%B6%8A%E4%BA%86%E8%A7%A3%E4%BD%A0%E7%9A%84%E5%B7%A5%E4%BD%9C%EF%BC%8C%E5%93%AA%E4%BA%9B%E4%BF%A1%E6%81%AF%E4%B8%8D%E5%BA%94%E8%AF%A5%E8%BF%9B%E5%85%A5%E7%B3%BB%E7%BB%9F%EF%BC%9F)
 
-Article titles link to the GitHub Wiki reading pages by default; [Gitee Wiki](https://gitee.com/ExDevilLee/ai-work-system/wikis/Home) stays in sync, while the [AI Long-Term Work System collection on MoWen](https://note.mowen.cn/detail/CGAIy3ZJS0VwC6wlH3je-) embeds every article in reverse chronological order. Source Markdown is available from each Wiki page's source link.
+[MoWen series collection](https://note.mowen.cn/detail/CGAIy3ZJS0VwC6wlH3je-)
+
+Article titles link to the GitHub Wiki reading pages by default; [Gitee Wiki](https://gitee.com/ExDevilLee/ai-work-system/wikis/Home) stays in sync. Source Markdown is available from each Wiki page's source link.
 
 Article bodies are currently written in Chinese first. English titles are provided for navigation; full English translations may be added selectively.
 <!-- articles:index:end -->

@@ -18,9 +18,9 @@ from pathlib import Path
 from typing import Callable
 
 try:
-    from scripts.sync_wiki import ready_articles, render_article_navigation, write_wiki
+    from scripts.sync_wiki import group_articles, ready_articles, render_article_navigation, write_wiki
 except ModuleNotFoundError:
-    from sync_wiki import ready_articles, render_article_navigation, write_wiki
+    from sync_wiki import group_articles, ready_articles, render_article_navigation, write_wiki
 
 
 ARTICLE_IMAGE_PATTERN = re.compile(r"!\[[^\]]*\]\((?P<path>[^)\s]+)\)")
@@ -105,33 +105,44 @@ def validate_generated_wiki(
 ) -> None:
     expected_names = {"Home.md", "_Sidebar.md"}
     expected_names.update(f"{article['page']}.md" for article in articles)
+    expected_names.update(
+        f"{series['wiki_page']}.md"
+        for series, _ in group_articles(articles)
+        if series["wiki_page"] != "Home"
+    )
     actual_names = {path.name for path in wiki_dir.glob("*.md")}
     if actual_names != expected_names:
         raise ValueError(
             f"[pre-publish] generated Wiki page inventory mismatch: {sorted(actual_names)}"
         )
 
-    for index, article in enumerate(articles):
-        previous_page = str(articles[index - 1]["page"]) if index > 0 else None
-        next_page = str(articles[index + 1]["page"]) if index + 1 < len(articles) else None
-        expected_navigation = render_article_navigation(
-            wiki_base_url,
-            previous_page,
-            next_page,
-        )
-        page_path = wiki_dir / f"{article['page']}.md"
-        page = page_path.read_text(encoding="utf-8")
-        if expected_navigation not in page:
-            raise ValueError(f"[pre-publish] generated navigation mismatch: {page_path}")
-        source = str(Path(article["path"]).relative_to(repo_root))
-        for relative_path, _ in images_by_source[source]:
-            expected_url = (
-                f"{asset_base_url.rstrip('/')}/content/articles/{relative_path}"
+    for series, series_articles in group_articles(articles):
+        for index, article in enumerate(series_articles):
+            previous_page = str(series_articles[index - 1]["page"]) if index > 0 else None
+            next_page = (
+                str(series_articles[index + 1]["page"])
+                if index + 1 < len(series_articles)
+                else None
             )
-            if expected_url not in page:
-                raise ValueError(
-                    f"[pre-publish] generated article image URL mismatch: {page_path}"
+            expected_navigation = render_article_navigation(
+                wiki_base_url,
+                previous_page,
+                next_page,
+                str(series["wiki_page"]),
+            )
+            page_path = wiki_dir / f"{article['page']}.md"
+            page = page_path.read_text(encoding="utf-8")
+            if expected_navigation not in page:
+                raise ValueError(f"[pre-publish] generated navigation mismatch: {page_path}")
+            source = str(Path(article["path"]).relative_to(repo_root))
+            for relative_path, _ in images_by_source[source]:
+                expected_url = (
+                    f"{asset_base_url.rstrip('/')}/content/articles/{relative_path}"
                 )
+                if expected_url not in page:
+                    raise ValueError(
+                        f"[pre-publish] generated article image URL mismatch: {page_path}"
+                    )
 
 
 def verify_pre_publish(

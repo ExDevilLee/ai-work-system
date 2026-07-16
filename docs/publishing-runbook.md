@@ -5,35 +5,45 @@
 ## 日常发布步骤
 
 1. 在 `content/articles/*.md` 写文章。
-2. 草稿阶段保持 `status: draft`。
-3. 初稿完成后判断配图是否能明显降低理解成本；需要时先生成图片、插入正文并完成本地预览，不需要时在阶段汇总中说明理由。
-4. 完成配图判断后，发布前审阅时可改为 `status: review`。
-5. 确认可公开后改为 `status: ready`。
-6. 运行文章索引更新：
+1. 草稿阶段保持 `status: draft`。
+1. 初稿完成后判断配图是否能明显降低理解成本；需要时先生成图片、插入正文并完成本地预览，不需要时在阶段汇总中说明理由。
+1. 完成配图判断后，发布前审阅时可改为 `status: review`。
+1. 确认可公开后改为 `status: ready`。
+1. 运行文章索引更新：
 
 ```bash
 python3 scripts/update_readme_index.py
 ```
 
-7. 本地验证 Wiki 同步范围：
+1. 本地验证 Wiki 同步范围：
 
 ```bash
 python3 scripts/sync_wiki.py --dry-run
 ```
 
-8. 提交并 push 到 `main`。
-9. 等待自动链路完成：
+1. 提交并 push 到 `main`。
+1. 等待自动链路完成：
 
 ```text
 GitHub main
   -> GitHub Actions 同步到 GitHub Wiki
   -> GitHub Actions 镜像主仓库到 Gitee main
   -> GitHub Actions 发布到 Gitee Wiki
-  -> GitHub Actions 发布到墨问并重建《AI 长期工作系统》目录
+  -> GitHub Actions 发布到墨问并重建受影响的系列目录
 ```
 
-10. 打开 GitHub Wiki 和 Gitee Wiki 检查文章阅读页。
-11. 打开[墨问《AI 长期工作系统》](https://note.mowen.cn/detail/CGAIy3ZJS0VwC6wlH3je-)检查新文章是否位于目录最上方。
+1. 打开 GitHub Wiki 和 Gitee Wiki 检查文章阅读页。
+1. 从 README 的“墨问系列目录”进入对应系列，检查新文章是否位于目录最上方。
+
+## 新系列首次发布
+
+1. 在 `content/series.json` 登记稳定的系列 ID、中英文标题、顺序、Wiki 系列页和墨问目录信息。
+2. 在墨问创建该系列的独立目录笔记，并完成需要的封面和公开设置。
+3. 在 `publishing/mowen-notes.json` 的 `directories.<series-id>` 登记目录 `note_id`、`url` 和 `published` 状态。
+4. 确认系列 ID 与文章 frontmatter 的 `series` 完全一致，再把第一篇文章推进到 `status: ready`。
+5. 运行本文的本地 Wiki 与墨问转换检查后再 push。
+
+第一系列的 Wiki 页面仍使用全局 `01-` 至 `15-` 编号，旧链接不会因新增系列改变。新系列的 Wiki 页面继续使用全局编号，但上一篇、下一篇和目录只在当前系列内导航；墨问文章编号则从 `01-` 重新开始。
 
 ## 墨问首次配置
 
@@ -64,7 +74,7 @@ python3 scripts/update_readme_index.py
 git diff -- README.md README-EN.md
 ```
 
-如果文章没有出现在 `已发布文章` 中，检查文章 frontmatter 是否为 `status: ready`。
+如果文章没有出现在“系列文章”中，检查文章 frontmatter 是否为 `status: ready`，并确认 `series` 已登记在 `content/series.json`。
 
 ### GitHub Wiki 没有更新
 

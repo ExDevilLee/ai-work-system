@@ -8,9 +8,15 @@ import re
 import subprocess
 import sys
 from pathlib import Path
+from typing import Any
 from urllib.parse import quote
 
 import yaml
+
+try:
+    from scripts.series_catalog import load_series_catalog
+except ModuleNotFoundError:
+    from series_catalog import load_series_catalog
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
@@ -67,17 +73,26 @@ def wiki_page_url(page: str, base_url: str) -> str:
     return f"{base_url.rstrip('/')}/{quote(url_page)}"
 
 
-def ready_articles(repo_root: Path = REPO_ROOT) -> list[dict[str, str | Path]]:
+def ready_articles(repo_root: Path = REPO_ROOT) -> list[dict[str, Any]]:
+    catalog = load_series_catalog(repo_root)
+    catalog_by_id = {entry["id"]: entry for entry in catalog}
     rows: list[tuple[Path, dict[str, object], str]] = []
     for path in sorted((repo_root / "content" / "articles").glob("*.md")):
         metadata, body = parse_frontmatter(path)
         if metadata.get("status") != "ready":
             continue
+        series_id = str(metadata.get("series") or "")
+        if series_id not in catalog_by_id:
+            raise ValueError(f"Unknown article series '{series_id}' in {path.name}")
         rows.append((path, metadata, body))
 
-    articles: list[dict[str, str | Path]] = []
+    series_counts: dict[str, int] = {}
+    articles: list[dict[str, Any]] = []
     for index, (path, metadata, body) in enumerate(rows, start=1):
         title = str(metadata.get("title") or path.stem)
+        series_id = str(metadata["series"])
+        series = catalog_by_id[series_id]
+        series_counts[series_id] = series_counts.get(series_id, 0) + 1
         articles.append(
             {
                 "path": path,
@@ -85,9 +100,36 @@ def ready_articles(repo_root: Path = REPO_ROOT) -> list[dict[str, str | Path]]:
                 "summary": str(metadata.get("summary") or ""),
                 "body": body,
                 "page": wiki_page_name(title, index),
+                "series_id": series_id,
+                "series_sequence": series_counts[series_id],
+                "series_order": series["order"],
+                "series_title": series["title"],
+                "series_description": series["description"],
+                "series_wiki_page": series["wiki_page"],
             }
         )
     return articles
+
+
+def group_articles(
+    articles: list[dict[str, Any]],
+) -> list[tuple[dict[str, Any], list[dict[str, Any]]]]:
+    groups: dict[str, tuple[dict[str, Any], list[dict[str, Any]]]] = {}
+    for article in articles:
+        series_id = str(article.get("series_id") or "__legacy__")
+        if series_id not in groups:
+            groups[series_id] = (
+                {
+                    "id": series_id,
+                    "order": int(article.get("series_order") or 1),
+                    "title": str(article.get("series_title") or "文章"),
+                    "description": str(article.get("series_description") or ""),
+                    "wiki_page": str(article.get("series_wiki_page") or "Home"),
+                },
+                [],
+            )
+        groups[series_id][1].append(article)
+    return sorted(groups.values(), key=lambda group: group[0]["order"])
 
 
 def ensure_wiki_repo(wiki_dir: Path, remote: str) -> None:
@@ -139,13 +181,14 @@ def render_article_navigation(
     wiki_base_url: str,
     previous_page: str | None,
     next_page: str | None,
+    directory_page: str = "Home",
 ) -> str:
     previous = (
         f"[上一篇]({wiki_page_url(previous_page, wiki_base_url)})"
         if previous_page
         else "无"
     )
-    directory = f"[目录]({wiki_page_url('Home', wiki_base_url)})"
+    directory = f"[目录]({wiki_page_url(directory_page, wiki_base_url)})"
     following = (
         f"[下一篇]({wiki_page_url(next_page, wiki_base_url)})"
         if next_page
@@ -159,11 +202,12 @@ def render_article_navigation(
 
 
 def render_article(
-    article: dict[str, str | Path],
+    article: dict[str, Any],
     asset_base_url: str = DEFAULT_ASSET_BASE_URL,
     wiki_base_url: str = DEFAULT_WIKI_BASE_URL,
     previous_page: str | None = None,
     next_page: str | None = None,
+    directory_page: str = "Home",
     repo_root: Path = REPO_ROOT,
 ) -> str:
     source = Path(article["path"]).relative_to(repo_root)
@@ -172,6 +216,7 @@ def render_article(
         wiki_base_url,
         previous_page,
         next_page,
+        directory_page,
     )
     return (
         f"{body.rstrip()}\n\n"
@@ -183,7 +228,7 @@ def render_article(
 
 def write_wiki(
     wiki_dir: Path,
-    articles: list[dict[str, str | Path]],
+    articles: list[dict[str, Any]],
     site_name: str,
     wiki_base_url: str,
     asset_base_url: str = DEFAULT_ASSET_BASE_URL,
@@ -198,38 +243,77 @@ def write_wiki(
         "",
         "内容源头在主仓库 `content/articles/`；Wiki 只同步 `status: ready` 的文章。",
         "",
-        "## 文章",
+        "## 系列文章",
         "",
     ]
 
-    sidebar_lines = ["# 文章", ""]
+    sidebar_lines = ["# 系列文章", ""]
+    groups = group_articles(articles)
 
-    for index, article in enumerate(articles, start=1):
-        page = str(article["page"])
-        title = str(article["title"])
-        summary = str(article["summary"])
-        previous_page = str(articles[index - 2]["page"]) if index > 1 else None
-        next_page = str(articles[index]["page"]) if index < len(articles) else None
-        url = wiki_page_url(page, wiki_base_url)
-        filename = wiki_dir / f"{page}.md"
-        filename.write_text(
-            render_article(
-                article,
-                asset_base_url=asset_base_url,
-                wiki_base_url=wiki_base_url,
-                previous_page=previous_page,
-                next_page=next_page,
-                repo_root=repo_root,
-            ),
-            encoding="utf-8",
-        )
-        written.append(filename)
-
-        home_lines.append(f"{index}. [{title}]({url})")
-        if summary:
-            home_lines.append(f"   {summary}")
+    for series, series_articles in groups:
+        directory_page = str(series["wiki_page"])
+        directory_url = wiki_page_url(directory_page, wiki_base_url)
+        home_lines.append(f"### [{series['title']}]({directory_url})")
+        if series["description"]:
+            home_lines.extend(["", str(series["description"])])
         home_lines.append("")
-        sidebar_lines.append(f"- [{title}]({url})")
+        sidebar_lines.append(f"- [{series['title']}]({directory_url})")
+
+        directory_lines = [
+            "<!-- generated:series-index -->",
+            f"# {series['title']}",
+            "",
+        ]
+        if series["description"]:
+            directory_lines.extend([str(series["description"]), ""])
+
+        for series_index, article in enumerate(series_articles):
+            page = str(article["page"])
+            title = str(article["title"])
+            summary = str(article["summary"])
+            previous_page = (
+                str(series_articles[series_index - 1]["page"])
+                if series_index > 0
+                else None
+            )
+            next_page = (
+                str(series_articles[series_index + 1]["page"])
+                if series_index + 1 < len(series_articles)
+                else None
+            )
+            url = wiki_page_url(page, wiki_base_url)
+            filename = wiki_dir / f"{page}.md"
+            filename.write_text(
+                render_article(
+                    article,
+                    asset_base_url=asset_base_url,
+                    wiki_base_url=wiki_base_url,
+                    previous_page=previous_page,
+                    next_page=next_page,
+                    directory_page=directory_page,
+                    repo_root=repo_root,
+                ),
+                encoding="utf-8",
+            )
+            written.append(filename)
+
+            item_number = int(article.get("series_sequence") or series_index + 1)
+            home_lines.append(f"{item_number}. [{title}]({url})")
+            directory_lines.append(f"{item_number}. [{title}]({url})")
+            if summary:
+                home_lines.append(f"   {summary}")
+                directory_lines.append(f"   {summary}")
+            home_lines.append("")
+            directory_lines.append("")
+            sidebar_lines.append(f"  - [{title}]({url})")
+
+        if directory_page != "Home":
+            directory_path = wiki_dir / f"{directory_page}.md"
+            directory_path.write_text(
+                "\n".join(directory_lines).rstrip() + "\n",
+                encoding="utf-8",
+            )
+            written.append(directory_path)
 
     home_path = wiki_dir / "Home.md"
     sidebar_path = wiki_dir / "_Sidebar.md"
@@ -245,7 +329,11 @@ def remove_stale_wiki_pages(wiki_dir: Path, written: list[Path]) -> None:
     for path in wiki_dir.glob("*.md"):
         if path.resolve() in written_paths:
             continue
-        if "Source: `content/articles/" not in path.read_text(encoding="utf-8"):
+        text = path.read_text(encoding="utf-8")
+        if (
+            "Source: `content/articles/" not in text
+            and "<!-- generated:series-index -->" not in text
+        ):
             continue
         path.unlink()
 

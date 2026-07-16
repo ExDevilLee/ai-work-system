@@ -15,6 +15,7 @@ from scripts.sync_mowen import (
     build_directory_document,
     convert_article,
     discover_ready_articles,
+    directory_mapping,
     document_sha256,
     ensure_cover_uploaded,
     ensure_article_images_uploaded,
@@ -25,15 +26,22 @@ from scripts.sync_mowen import (
     split_articles_by_mapping,
     sync_articles,
     sync_directory,
+    validate_registered_directories,
     wait_for_remote_asset,
 )
 
 
-def article_text(title: str, date: str, status: str = "ready") -> str:
+def article_text(
+    title: str,
+    date: str,
+    status: str = "ready",
+    series: str = "series-one",
+) -> str:
     return f"""---
 title: {title}
 date: {date}
 status: {status}
+series: {series}
 summary: {title}摘要
 tags:
   - AI Work System
@@ -43,6 +51,46 @@ tags:
 
 正文
 """
+
+
+def write_series_catalog(root: Path) -> None:
+    path = root / "content" / "series.json"
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(
+        json.dumps(
+            {
+                "version": 1,
+                "series": [
+                    {
+                        "id": "series-one",
+                        "order": 1,
+                        "title": "系列一",
+                        "title_en": "Series One",
+                        "description": "第一组介绍",
+                        "description_en": "First group",
+                        "status": "complete",
+                        "wiki_page": "Series-01-Series-One",
+                        "mowen_directory_title": "系列一目录",
+                        "mowen_directory_url": "",
+                    },
+                    {
+                        "id": "series-two",
+                        "order": 2,
+                        "title": "系列二",
+                        "title_en": "Series Two",
+                        "description": "第二组介绍",
+                        "description_en": "Second group",
+                        "status": "active",
+                        "wiki_page": "Series-02-Series-Two",
+                        "mowen_directory_title": "系列二目录",
+                        "mowen_directory_url": "",
+                    },
+                ],
+            },
+            ensure_ascii=False,
+        ),
+        encoding="utf-8",
+    )
 
 
 class FakeMowenClient:
@@ -68,6 +116,66 @@ class FakeMowenClient:
 
 
 class SyncMowenTest(unittest.TestCase):
+    def test_load_mapping_migrates_legacy_directory_without_losing_fields(self) -> None:
+        legacy_directory = {
+            "note_id": "directory-id",
+            "url": "https://example.test/directory-id",
+            "cover_uuid": "cover-id",
+            "cover_sha256": "cover-digest",
+            "content_sha256": "content-digest",
+            "published": True,
+        }
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "mowen-notes.json"
+            path.write_text(
+                json.dumps(
+                    {
+                        "version": 1,
+                        "directory": legacy_directory,
+                        "articles": {},
+                    }
+                ),
+                encoding="utf-8",
+            )
+
+            mapping = load_mapping(path)
+
+            self.assertEqual(mapping["version"], 2)
+            self.assertNotIn("directory", mapping)
+            self.assertEqual(
+                mapping["directories"]["long-term-ai-work-system"],
+                legacy_directory,
+            )
+
+    def test_directory_mapping_keeps_series_state_separate(self) -> None:
+        mapping = {"version": 2, "directories": {}, "articles": {}}
+
+        first = directory_mapping(mapping, "series-one")
+        second = directory_mapping(mapping, "series-two")
+        first["note_id"] = "first-directory"
+
+        self.assertEqual(second, {})
+        self.assertNotIn("note_id", second)
+
+    def test_remote_sync_requires_registered_directory_for_every_series(self) -> None:
+        mapping = {
+            "version": 2,
+            "directories": {
+                "series-one": {"note_id": "first-directory"},
+                "series-two": {},
+            },
+            "articles": {},
+        }
+
+        with self.assertRaisesRegex(
+            ValueError,
+            "Register MoWen directory note IDs.*series-two",
+        ):
+            validate_registered_directories(
+                {"series-one": [], "series-two": []},
+                mapping,
+            )
+
     @mock.patch("scripts.sync_mowen.urllib.request.urlopen")
     def test_client_logs_successful_call_quota_estimate(self, urlopen: mock.Mock) -> None:
         response = mock.MagicMock()
@@ -229,6 +337,7 @@ class SyncMowenTest(unittest.TestCase):
     def test_discovers_only_ready_articles_in_reverse_chronological_order(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
+            write_series_catalog(root)
             articles_dir = root / "content" / "articles"
             articles_dir.mkdir(parents=True)
             (articles_dir / "2026-07-09-old.md").write_text(
@@ -249,6 +358,32 @@ class SyncMowenTest(unittest.TestCase):
             self.assertEqual([item.title for item in articles], ["同日较新", "同日较早", "旧文章"])
             self.assertEqual(articles[0].source, "content/articles/2026-07-10-zulu.md")
             self.assertEqual([item.sequence for item in articles], [3, 2, 1])
+
+    def test_discovery_resets_sequence_for_each_series(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            write_series_catalog(root)
+            articles_dir = root / "content" / "articles"
+            articles_dir.mkdir(parents=True, exist_ok=True)
+            (articles_dir / "2026-07-01-one.md").write_text(
+                article_text("一之一", "2026-07-01", series="series-one"),
+                encoding="utf-8",
+            )
+            (articles_dir / "2026-07-02-two.md").write_text(
+                article_text("一之二", "2026-07-02", series="series-one"),
+                encoding="utf-8",
+            )
+            (articles_dir / "2026-07-03-three.md").write_text(
+                article_text("二之一", "2026-07-03", series="series-two"),
+                encoding="utf-8",
+            )
+
+            articles = discover_ready_articles(root)
+
+            self.assertEqual(
+                [(item.title, item.series, item.sequence) for item in articles],
+                [("二之一", "series-two", 1), ("一之二", "series-one", 2), ("一之一", "series-one", 1)],
+            )
 
     def test_numbered_article_body_uses_series_order_without_changing_source(self) -> None:
         article = Article(
@@ -291,9 +426,45 @@ class SyncMowenTest(unittest.TestCase):
         ]
         self.assertEqual(note_ids, ["new-id", "old-id"])
         self.assertEqual(
+            [node["text"] for node in document["content"][4]["content"]],
+            [
+                "这里记录我如何把 AI 从一次性聊天工具，逐步放进一个有记忆、有流程、有证据、有复盘的长期工作系统。",
+                "文章按发布时间倒序排列，最新内容在最上方；第一次阅读时，也可以从最早的一篇开始。",
+            ],
+        )
+        self.assertEqual(
             document["content"][-2]["content"][0],
             {"type": "text", "text": "首发地址："},
         )
+
+    def test_directory_document_uses_selected_series_title_and_introduction(self) -> None:
+        article = Article(
+            Path("article.md"),
+            "content/articles/article.md",
+            "文章",
+            "2026-07-10",
+            "摘要",
+            ["AI"],
+            "# 文章",
+            series="series-two",
+        )
+        mapping = {"articles": {article.source: {"note_id": "article-id"}}}
+
+        document = build_directory_document(
+            [article],
+            mapping,
+            title="系列二目录",
+            introduction="第二组介绍",
+        )
+
+        texts = [
+            node.get("text")
+            for atom in document["content"]
+            for node in atom.get("content", [])
+            if node.get("type") == "text"
+        ]
+        self.assertEqual(texts[0], "系列二目录")
+        self.assertIn("第二组介绍", texts)
         self.assertEqual(
             document["content"][-1]["content"][0],
             {
@@ -311,7 +482,13 @@ class SyncMowenTest(unittest.TestCase):
     def test_mapping_is_written_atomically_and_round_trips(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             path = Path(tmp) / "publishing" / "mowen-notes.json"
-            expected = {"version": 1, "directory": {"note_id": "directory-id"}, "articles": {}}
+            expected = {
+                "version": 2,
+                "directories": {
+                    "long-term-ai-work-system": {"note_id": "directory-id"}
+                },
+                "articles": {},
+            }
 
             save_mapping(path, expected)
 

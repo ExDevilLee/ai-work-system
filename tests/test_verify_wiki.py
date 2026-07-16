@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import tempfile
 import unittest
 from pathlib import Path
@@ -22,10 +23,36 @@ def write_article(
     title: str,
     body: str,
 ) -> Path:
+    catalog_path = repo_root / "content" / "series.json"
+    catalog_path.parent.mkdir(parents=True, exist_ok=True)
+    if not catalog_path.exists():
+        catalog_path.write_text(
+            json.dumps(
+                {
+                    "version": 1,
+                    "series": [
+                        {
+                            "id": "series-one",
+                            "order": 1,
+                            "title": "系列一",
+                            "title_en": "Series One",
+                            "description": "第一组",
+                            "description_en": "First group",
+                            "status": "active",
+                            "wiki_page": "Series-01-Series-One",
+                            "mowen_directory_title": "系列一目录",
+                            "mowen_directory_url": "",
+                        }
+                    ],
+                },
+                ensure_ascii=False,
+            ),
+            encoding="utf-8",
+        )
     path = repo_root / "content" / "articles" / filename
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(
-        f"---\ntitle: {title}\nstatus: ready\nsummary: 摘要\n---\n\n# {title}\n\n{body}\n",
+        f"---\ntitle: {title}\nstatus: ready\nseries: series-one\nsummary: 摘要\n---\n\n# {title}\n\n{body}\n",
         encoding="utf-8",
     )
     return path
