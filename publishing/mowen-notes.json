@@ -1,8 +1,14 @@
 {
   "articles": {
     "content/articles/2026-07-07-long-term-ai-work-system.md": {
-      "assets": {},
-      "content_sha256": "e240f92ae3a338d23e2d08bbcc0006c162792bf6b18fe5faba89b99af48f6e76",
+      "assets": {
+        "images/01/long-term-ai-work-system-overview.png": {
+          "sha256": "87e1d2e13f9beeba201be036c9624c68af2d6ceb770dec8d17757f2dfdbc52ad",
+          "source_url": "https://gitee.com/ExDevilLee/ai-work-system/raw/main/content/articles/images/01/long-term-ai-work-system-overview.png",
+          "uuid": "5WzAa4L2Rw2WcLKLJLnCg-TMP"
+        }
+      },
+      "content_sha256": "8137ab0a9dbb27e7706d7f101befa0513658b506bb5013766ac8af1e41b0acd3",
       "note_id": "ZTUrdIvtYYKjeaQ0QwdUh",
       "published": true,
       "url": "https://note.mowen.cn/detail/ZTUrdIvtYYKjeaQ0QwdUh"
@@ -22,7 +28,7 @@
     },
     "content/articles/2026-07-08-why-ai-writing-feels-human.md": {
       "assets": {},
-      "content_sha256": "843379e3d025964c3e19da4a25007d982d6d288034a89fc03e60c5f72aa73f85",
+      "content_sha256": "13fa087be4170d3e63c40e3c0ac1cc1d58812bd832c2a21e9b9656af2bdd4394",
       "note_id": "pLXNhHE2jjupLWuMw2xtG",
       "published": true,
       "url": "https://note.mowen.cn/detail/pLXNhHE2jjupLWuMw2xtG"
@@ -35,7 +41,7 @@
           "uuid": "iPY1S5N-sB_S3WYwTYtyb-TMP"
         }
       },
-      "content_sha256": "241b9666d36fa32ee5aee3f17d9a15c54ac7685fb11228d240ad90cc9c6c995b",
+      "content_sha256": "ff5b1b17805a8e8ccce35fcf74bcb0507568106b11a8baff2f296c1b1db46cd8",
       "note_id": "ToF6TDiOGdYMHtkf30EX6",
       "published": true,
       "url": "https://note.mowen.cn/detail/ToF6TDiOGdYMHtkf30EX6"
