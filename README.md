@@ -20,6 +20,8 @@ English version: [README-EN.md](README-EN.md)
 
 > 从一次性 AI 聊天，走向有记忆、有流程、有证据、有复盘的长期 AI 工作系统。
 
+第一系列“长期 AI 工作系统”共 15 篇，现已完成。它从 AI 为什么总是失忆出发，逐步讨论项目记忆、经验沉淀、规则、工作流、Review、人机边界、系统清理，以及哪些任务和信息不应该进入长期系统。
+
 ## 可复用模板
 
 - [最小项目记忆模板](templates/minimum-project-memory/README.md)：用 `README.md`、AI 规则入口和 `PROJECT-STATE.md`，为一个项目建立最小可用的长期协作上下文。
@@ -39,11 +41,11 @@ English version: [README-EN.md](README-EN.md)
 
 8. [哪些 Review 可以自动化，哪些判断必须留给人？](https://github.com/ExDevilLee/ai-work-system/wiki/08-%E5%93%AA%E4%BA%9B-Review-%E5%8F%AF%E4%BB%A5%E8%87%AA%E5%8A%A8%E5%8C%96%EF%BC%8C%E5%93%AA%E4%BA%9B%E5%88%A4%E6%96%AD%E5%BF%85%E9%A1%BB%E7%95%99%E7%BB%99%E4%BA%BA%EF%BC%9F)
 
-第四篇接回第二篇末尾留下的问题，进入最小可用项目记忆系统的实践层；第五篇讨论经验如何从临时观察进入项目规则；第六篇再把稳定规则推进为可重复执行的工作流；第七篇讨论如何通过审阅和证据判断执行结果是否可以接受；第八篇进一步划分自动检查、AI Review 和人工判断的边界。
+第四篇接回第二篇末尾留下的问题，进入最小可用项目记忆系统的实践层；第五篇讨论经验如何从临时观察进入项目规则；第六篇再把稳定规则推进为可重复执行的工作流；第七、八篇建立 Review、证据和人机判断边界；第九至十二篇讨论人的职责、系统价值、清理与任务连续性；第十三至十五篇则通过提示词、任务类型和信息安全边界完成系列收束。
 
-## 后续选题池
+## 后续方向
 
-- 当 AI 越来越了解你的工作，哪些信息不应该进入系统？
+- 下一系列暂定为“AI 长期记忆实战”，从工作记忆、长期记忆和可索引资料为什么需要分层开始。
 - [ROADMAP](docs/series-roadmap.md)
 - [MORE](docs/topic-pool.md)
 
@@ -64,6 +66,7 @@ English version: [README-EN.md](README-EN.md)
 - [一个不会从零开始的 AI 助手，实际能帮我做什么？](https://github.com/ExDevilLee/ai-work-system/wiki/12-%E4%B8%80%E4%B8%AA%E4%B8%8D%E4%BC%9A%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E7%9A%84-AI-%E5%8A%A9%E6%89%8B%EF%BC%8C%E5%AE%9E%E9%99%85%E8%83%BD%E5%B8%AE%E6%88%91%E5%81%9A%E4%BB%80%E4%B9%88%EF%BC%9F)
 - [有了长期工作系统，还需要每次给 AI 写很长的提示词吗？](https://github.com/ExDevilLee/ai-work-system/wiki/13-%E6%9C%89%E4%BA%86%E9%95%BF%E6%9C%9F%E5%B7%A5%E4%BD%9C%E7%B3%BB%E7%BB%9F%EF%BC%8C%E8%BF%98%E9%9C%80%E8%A6%81%E6%AF%8F%E6%AC%A1%E7%BB%99-AI-%E5%86%99%E5%BE%88%E9%95%BF%E7%9A%84%E6%8F%90%E7%A4%BA%E8%AF%8D%E5%90%97%EF%BC%9F)
 - [哪些工作值得进入长期 AI 系统，哪些只适合临时聊一次？](https://github.com/ExDevilLee/ai-work-system/wiki/14-%E5%93%AA%E4%BA%9B%E5%B7%A5%E4%BD%9C%E5%80%BC%E5%BE%97%E8%BF%9B%E5%85%A5%E9%95%BF%E6%9C%9F-AI-%E7%B3%BB%E7%BB%9F%EF%BC%8C%E5%93%AA%E4%BA%9B%E5%8F%AA%E9%80%82%E5%90%88%E4%B8%B4%E6%97%B6%E8%81%8A%E4%B8%80%E6%AC%A1%EF%BC%9F)
+- [当 AI 越来越了解你的工作，哪些信息不应该进入系统？](https://github.com/ExDevilLee/ai-work-system/wiki/15-%E5%BD%93-AI-%E8%B6%8A%E6%9D%A5%E8%B6%8A%E4%BA%86%E8%A7%A3%E4%BD%A0%E7%9A%84%E5%B7%A5%E4%BD%9C%EF%BC%8C%E5%93%AA%E4%BA%9B%E4%BF%A1%E6%81%AF%E4%B8%8D%E5%BA%94%E8%AF%A5%E8%BF%9B%E5%85%A5%E7%B3%BB%E7%BB%9F%EF%BC%9F)
 
 文章标题默认链接到 GitHub Wiki 阅读页；[Gitee Wiki](https://gitee.com/ExDevilLee/ai-work-system/wikis/Home) 保持同步展示，[墨问《AI 长期工作系统》](https://note.mowen.cn/detail/CGAIy3ZJS0VwC6wlH3je-) 按时间倒序内嵌全部文章。源码 Markdown 可从 Wiki 页面底部的来源入口进入。
 <!-- articles:index:end -->

@@ -14,6 +14,8 @@ The core theme:
 
 > From one-off AI chats to a long-term AI work system with memory, workflow, evidence, and review.
 
+The first 15-article series, "Long-Term AI Work System," is now complete. It starts with why AI keeps forgetting, then moves through project memory, experience capture, rules, workflows, review, human-AI boundaries, system cleanup, and the tasks and information that should remain outside a long-term system.
+
 ## Planned Content
 
 - Essays about long-term AI collaboration.
@@ -41,11 +43,11 @@ If you are new to this project, start with these articles:
 
 8. [Which Reviews Can Be Automated, And Which Decisions Must Remain Human?](https://github.com/ExDevilLee/ai-work-system/wiki/08-%E5%93%AA%E4%BA%9B-Review-%E5%8F%AF%E4%BB%A5%E8%87%AA%E5%8A%A8%E5%8C%96%EF%BC%8C%E5%93%AA%E4%BA%9B%E5%88%A4%E6%96%AD%E5%BF%85%E9%A1%BB%E7%95%99%E7%BB%99%E4%BA%BA%EF%BC%9F)
 
-The fourth article turns the series toward practical project memory. The fifth explains how an observation becomes a project rule. The sixth turns stable rules into repeatable workflows. The seventh examines how review and evidence determine whether an executed result is acceptable. The eighth draws the boundary between automated checks, AI review, and human judgment.
+The fourth article turns the series toward practical project memory. The fifth explains how an observation becomes a project rule, and the sixth turns stable rules into repeatable workflows. Articles seven and eight establish review, evidence, and human-decision boundaries. Articles nine through twelve examine human responsibility, system value, cleanup, and task continuity. Articles thirteen through fifteen close the series through prompt design, task selection, and information boundaries.
 
-## Future Topic Pool
+## What Comes Next
 
-- As AI learns more about your work, what information should stay outside the system?
+- The next planned series is "Practical Long-Term AI Memory," beginning with why working memory, long-term memory, and indexed reference material need separate layers.
 - [ROADMAP](docs/series-roadmap.md)
 - [MORE](docs/topic-pool.md)
 
@@ -66,6 +68,7 @@ The fourth article turns the series toward practical project memory. The fifth e
 - [What Can an AI Assistant That Does Not Start From Scratch Actually Do?](https://github.com/ExDevilLee/ai-work-system/wiki/12-%E4%B8%80%E4%B8%AA%E4%B8%8D%E4%BC%9A%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E7%9A%84-AI-%E5%8A%A9%E6%89%8B%EF%BC%8C%E5%AE%9E%E9%99%85%E8%83%BD%E5%B8%AE%E6%88%91%E5%81%9A%E4%BB%80%E4%B9%88%EF%BC%9F)
 - [With a Long-Term Work System, Do We Still Need Long Prompts Every Time?](https://github.com/ExDevilLee/ai-work-system/wiki/13-%E6%9C%89%E4%BA%86%E9%95%BF%E6%9C%9F%E5%B7%A5%E4%BD%9C%E7%B3%BB%E7%BB%9F%EF%BC%8C%E8%BF%98%E9%9C%80%E8%A6%81%E6%AF%8F%E6%AC%A1%E7%BB%99-AI-%E5%86%99%E5%BE%88%E9%95%BF%E7%9A%84%E6%8F%90%E7%A4%BA%E8%AF%8D%E5%90%97%EF%BC%9F)
 - [Which Tasks Belong in a Long-Term AI System, and Which Should Stay One-Off?](https://github.com/ExDevilLee/ai-work-system/wiki/14-%E5%93%AA%E4%BA%9B%E5%B7%A5%E4%BD%9C%E5%80%BC%E5%BE%97%E8%BF%9B%E5%85%A5%E9%95%BF%E6%9C%9F-AI-%E7%B3%BB%E7%BB%9F%EF%BC%8C%E5%93%AA%E4%BA%9B%E5%8F%AA%E9%80%82%E5%90%88%E4%B8%B4%E6%97%B6%E8%81%8A%E4%B8%80%E6%AC%A1%EF%BC%9F)
+- [As AI Learns More About Your Work, What Information Should Stay Out?](https://github.com/ExDevilLee/ai-work-system/wiki/15-%E5%BD%93-AI-%E8%B6%8A%E6%9D%A5%E8%B6%8A%E4%BA%86%E8%A7%A3%E4%BD%A0%E7%9A%84%E5%B7%A5%E4%BD%9C%EF%BC%8C%E5%93%AA%E4%BA%9B%E4%BF%A1%E6%81%AF%E4%B8%8D%E5%BA%94%E8%AF%A5%E8%BF%9B%E5%85%A5%E7%B3%BB%E7%BB%9F%EF%BC%9F)
 
 Article titles link to the GitHub Wiki reading pages by default; [Gitee Wiki](https://gitee.com/ExDevilLee/ai-work-system/wikis/Home) stays in sync, while the [AI Long-Term Work System collection on MoWen](https://note.mowen.cn/detail/CGAIy3ZJS0VwC6wlH3je-) embeds every article in reverse chronological order. Source Markdown is available from each Wiki page's source link.
 
