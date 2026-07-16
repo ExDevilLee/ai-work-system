@@ -1,16 +1,4 @@
 {
-  "version": 2,
-  "directories": {
-    "long-term-ai-work-system": {
-      "content_sha256": "4966e55f72d54ac0ec6b817d617bcc0e07c2392e6730e5eb094d0bcf2d3cdf33",
-      "cover_sha256": "b378829b08ff549181e4466f5909217adb8e54793f877a81ff1e5bea191c9949",
-      "cover_source_url": "https://gitee.com/ExDevilLee/ai-work-system/raw/main/assets/mowen/ai-work-system-cover.jpg",
-      "cover_uuid": "4Rmp_Zyq9_KQ4V5Q1KvVr-TMP",
-      "note_id": "CGAIy3ZJS0VwC6wlH3je-",
-      "published": true,
-      "url": "https://note.mowen.cn/detail/CGAIy3ZJS0VwC6wlH3je-"
-    }
-  },
   "articles": {
     "content/articles/2026-07-07-long-term-ai-work-system.md": {
       "assets": {},
@@ -181,6 +169,27 @@
       "note_id": "RvTft5egx23iXG2-WUKdH",
       "published": true,
       "url": "https://note.mowen.cn/detail/RvTft5egx23iXG2-WUKdH"
+    },
+    "content/articles/2026-07-16-what-information-should-not-enter-ai-system.md": {
+      "assets": {
+        "images/15/information-boundary-layers.png": {
+          "sha256": "9904d9c180301865300a644e2ea9828b922885c0ba623e20898e47192c338f6c",
+          "source_url": "https://gitee.com/ExDevilLee/ai-work-system/raw/main/content/articles/images/15/information-boundary-layers.png",
+          "uuid": "NnJ8nO1OUSnZ9SgplmrAz-TMP"
+        }
+      }
     }
-  }
+  },
+  "directories": {
+    "long-term-ai-work-system": {
+      "content_sha256": "4966e55f72d54ac0ec6b817d617bcc0e07c2392e6730e5eb094d0bcf2d3cdf33",
+      "cover_sha256": "b378829b08ff549181e4466f5909217adb8e54793f877a81ff1e5bea191c9949",
+      "cover_source_url": "https://gitee.com/ExDevilLee/ai-work-system/raw/main/assets/mowen/ai-work-system-cover.jpg",
+      "cover_uuid": "4Rmp_Zyq9_KQ4V5Q1KvVr-TMP",
+      "note_id": "CGAIy3ZJS0VwC6wlH3je-",
+      "published": true,
+      "url": "https://note.mowen.cn/detail/CGAIy3ZJS0VwC6wlH3je-"
+    }
+  },
+  "version": 2
 }
