@@ -896,8 +896,23 @@ def main() -> int:
             or str(series["description"]),
         )
     save_mapping(args.mapping, mapping)
-    action = "Published" if args.publish else "Registered privately"
-    print(f"{action}: {len(articles)} article(s) and directory mapping.")
+    if args.publish:
+        public_count = len(published_articles_for_directory(articles, mapping))
+        blocked_count = sum(
+            bool((mapping.get("articles", {}).get(article.source) or {}).get(
+                "publication_blocked"
+            ))
+            for article in articles
+        )
+        print(
+            f"Processed: {len(articles)} article(s); public: {public_count}; "
+            f"publication blocked: {blocked_count}; directory mapping synchronized."
+        )
+    else:
+        print(
+            f"Registered privately: {len(articles)} article(s) "
+            "and directory mapping."
+        )
     return 0
 
 
