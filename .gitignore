@@ -4,3 +4,6 @@ WORKLOG.md
 .DS_Store
 __pycache__/
 *.pyc
+docs/superpowers/
+docs/reviews/
+docs/plans/
