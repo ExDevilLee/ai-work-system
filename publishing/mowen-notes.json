@@ -2,9 +2,9 @@
   "articles": {
     "content/articles/2026-07-07-long-term-ai-work-system.md": {
       "assets": {
-        "images/01/long-term-ai-work-system-overview.png": {
+        "long-term-ai-work-system/images/01/long-term-ai-work-system-overview.png": {
           "sha256": "87e1d2e13f9beeba201be036c9624c68af2d6ceb770dec8d17757f2dfdbc52ad",
-          "source_url": "https://gitee.com/ExDevilLee/ai-work-system/raw/main/content/articles/images/01/long-term-ai-work-system-overview.png",
+          "source_url": "https://gitee.com/ExDevilLee/ai-work-system/raw/main/content/articles/long-term-ai-work-system/images/01/long-term-ai-work-system-overview.png",
           "uuid": "5WzAa4L2Rw2WcLKLJLnCg-TMP"
         }
       },
@@ -15,9 +15,9 @@
     },
     "content/articles/2026-07-08-why-ai-keeps-forgetting.md": {
       "assets": {
-        "images/02/chat-vs-external-memory.png": {
+        "long-term-ai-work-system/images/02/chat-vs-external-memory.png": {
           "sha256": "ab9995ad24648168869288f8ce6522cdd017f3cb339565237528ce9e95bac122",
-          "source_url": "https://gitee.com/ExDevilLee/ai-work-system/raw/main/content/articles/images/02/chat-vs-external-memory.png",
+          "source_url": "https://gitee.com/ExDevilLee/ai-work-system/raw/main/content/articles/long-term-ai-work-system/images/02/chat-vs-external-memory.png",
           "uuid": "RK-y-HHW3bwJaS6v7hDIa-TMP"
         }
       },
@@ -35,9 +35,9 @@
     },
     "content/articles/2026-07-09-minimum-project-memory-system.md": {
       "assets": {
-        "images/04/minimum-project-memory-system.png": {
+        "long-term-ai-work-system/images/04/minimum-project-memory-system.png": {
           "sha256": "bfc680106327376e54d18b5fbe08821ee65291e6a89572c49b183a88ce7bd480",
-          "source_url": "https://gitee.com/ExDevilLee/ai-work-system/raw/main/content/articles/images/04/minimum-project-memory-system.png",
+          "source_url": "https://gitee.com/ExDevilLee/ai-work-system/raw/main/content/articles/long-term-ai-work-system/images/04/minimum-project-memory-system.png",
           "uuid": "iPY1S5N-sB_S3WYwTYtyb-TMP"
         }
       },
@@ -48,9 +48,9 @@
     },
     "content/articles/2026-07-10-when-experience-becomes-project-rule.md": {
       "assets": {
-        "images/05/experience-promotion-path.png": {
+        "long-term-ai-work-system/images/05/experience-promotion-path.png": {
           "sha256": "3bdbc50a134850a99438f7c48354894d022ca5ef207af900c5ec090eefae4dee",
-          "source_url": "https://gitee.com/ExDevilLee/ai-work-system/raw/main/content/articles/images/05/experience-promotion-path.png",
+          "source_url": "https://gitee.com/ExDevilLee/ai-work-system/raw/main/content/articles/long-term-ai-work-system/images/05/experience-promotion-path.png",
           "uuid": "m3erDhsVH44VDzIk1-Bq3-TMP"
         }
       },
@@ -61,14 +61,14 @@
     },
     "content/articles/2026-07-10-when-rules-become-workflows.md": {
       "assets": {
-        "images/06/minimum-workflow-elements.png": {
+        "long-term-ai-work-system/images/06/minimum-workflow-elements.png": {
           "sha256": "1e9b19cced088f3b08340522ff90c98f1b6c88d09f3d3c9aef61fc54cb463b1c",
-          "source_url": "https://gitee.com/ExDevilLee/ai-work-system/raw/main/content/articles/images/06/minimum-workflow-elements.png",
+          "source_url": "https://gitee.com/ExDevilLee/ai-work-system/raw/main/content/articles/long-term-ai-work-system/images/06/minimum-workflow-elements.png",
           "uuid": "cQ_Pmch0xSAc13_m6Nu-s-TMP"
         },
-        "images/06/prompt-to-workflow-evolution.png": {
+        "long-term-ai-work-system/images/06/prompt-to-workflow-evolution.png": {
           "sha256": "f51848115560bc0c3f1376a2d71d984a8335d774fdf3160c9bb183d3dc5cef1c",
-          "source_url": "https://gitee.com/ExDevilLee/ai-work-system/raw/main/content/articles/images/06/prompt-to-workflow-evolution.png",
+          "source_url": "https://gitee.com/ExDevilLee/ai-work-system/raw/main/content/articles/long-term-ai-work-system/images/06/prompt-to-workflow-evolution.png",
           "uuid": "KJi532z31TMJzT0Yf3_x6-TMP"
         }
       },
@@ -79,9 +79,9 @@
     },
     "content/articles/2026-07-11-why-ai-work-systems-need-review.md": {
       "assets": {
-        "images/07/from-generation-to-acceptance.png": {
+        "long-term-ai-work-system/images/07/from-generation-to-acceptance.png": {
           "sha256": "46d949b9468e2096358802b05851d18d6c60da9afd7824736101fe83e8146c81",
-          "source_url": "https://gitee.com/ExDevilLee/ai-work-system/raw/main/content/articles/images/07/from-generation-to-acceptance.png",
+          "source_url": "https://gitee.com/ExDevilLee/ai-work-system/raw/main/content/articles/long-term-ai-work-system/images/07/from-generation-to-acceptance.png",
           "uuid": "sxafVlnxTWk1TNs3O5TNe-TMP"
         }
       },
@@ -92,9 +92,9 @@
     },
     "content/articles/2026-07-11-why-review-boundaries-matter.md": {
       "assets": {
-        "images/08/review-responsibility-boundaries.png": {
+        "long-term-ai-work-system/images/08/review-responsibility-boundaries.png": {
           "sha256": "b54207f2c18a015865a915860f62b68d9b27d615c4612801c6f4be957498b31b",
-          "source_url": "https://gitee.com/ExDevilLee/ai-work-system/raw/main/content/articles/images/08/review-responsibility-boundaries.png",
+          "source_url": "https://gitee.com/ExDevilLee/ai-work-system/raw/main/content/articles/long-term-ai-work-system/images/08/review-responsibility-boundaries.png",
           "uuid": "sJvomzm2CDagxQ0IcG-yQ-TMP"
         }
       },
@@ -105,9 +105,9 @@
     },
     "content/articles/2026-07-12-what-work-remains-for-humans.md": {
       "assets": {
-        "images/09/work-redistribution.png": {
+        "long-term-ai-work-system/images/09/work-redistribution.png": {
           "sha256": "bf9fb92a10d28fd619ed15b2d0ec312bc736dff9ad24a1a4e8b235b896aad787",
-          "source_url": "https://gitee.com/ExDevilLee/ai-work-system/raw/main/content/articles/images/09/work-redistribution.png",
+          "source_url": "https://gitee.com/ExDevilLee/ai-work-system/raw/main/content/articles/long-term-ai-work-system/images/09/work-redistribution.png",
           "uuid": "wPdLtnZCiwDs5Mf30XNH4-TMP"
         }
       },
@@ -118,9 +118,9 @@
     },
     "content/articles/2026-07-13-how-to-evaluate-ai-work-system.md": {
       "assets": {
-        "images/10/ai-work-system-value-signals.png": {
+        "long-term-ai-work-system/images/10/ai-work-system-value-signals.png": {
           "sha256": "9a90d2dedd6d2b4f00ab9253433a8d24789921fb3ac8adf1c61c3d3e98a4986f",
-          "source_url": "https://gitee.com/ExDevilLee/ai-work-system/raw/main/content/articles/images/10/ai-work-system-value-signals.png",
+          "source_url": "https://gitee.com/ExDevilLee/ai-work-system/raw/main/content/articles/long-term-ai-work-system/images/10/ai-work-system-value-signals.png",
           "uuid": "ShZ-D9DppaMt-WgQSICLR-TMP"
         }
       },
@@ -131,9 +131,9 @@
     },
     "content/articles/2026-07-14-why-long-term-work-systems-need-cleanup.md": {
       "assets": {
-        "images/11/content-lifecycle-and-cleanup.png": {
+        "long-term-ai-work-system/images/11/content-lifecycle-and-cleanup.png": {
           "sha256": "b05b019c848099278bd662d5d0d1f21a063b0dcfefb1b220ba3cba0ed02cbfc5",
-          "source_url": "https://gitee.com/ExDevilLee/ai-work-system/raw/main/content/articles/images/11/content-lifecycle-and-cleanup.png",
+          "source_url": "https://gitee.com/ExDevilLee/ai-work-system/raw/main/content/articles/long-term-ai-work-system/images/11/content-lifecycle-and-cleanup.png",
           "uuid": "qAsstXLe3ms8MzXLl1bMc-TMP"
         }
       },
@@ -144,9 +144,9 @@
     },
     "content/articles/2026-07-14-without-starting-over-ai-assistant.md": {
       "assets": {
-        "images/12/continuous-ai-work-cycle.png": {
+        "long-term-ai-work-system/images/12/continuous-ai-work-cycle.png": {
           "sha256": "66770adb3ff786f83ec802e2cb83a9ac2c6cca278c15899ee86987f1da3ad356",
-          "source_url": "https://gitee.com/ExDevilLee/ai-work-system/raw/main/content/articles/images/12/continuous-ai-work-cycle.png",
+          "source_url": "https://gitee.com/ExDevilLee/ai-work-system/raw/main/content/articles/long-term-ai-work-system/images/12/continuous-ai-work-cycle.png",
           "uuid": "cT7uw7vCGQbmFbIC7GUZG-TMP"
         }
       },
@@ -157,9 +157,9 @@
     },
     "content/articles/2026-07-15-do-we-still-need-long-prompts.md": {
       "assets": {
-        "images/13/system-context-vs-current-prompt.png": {
+        "long-term-ai-work-system/images/13/system-context-vs-current-prompt.png": {
           "sha256": "c994544ebdae949c165b86fed4b76c2b32469f889b8e295f5a58bfa3ac71f545",
-          "source_url": "https://gitee.com/ExDevilLee/ai-work-system/raw/main/content/articles/images/13/system-context-vs-current-prompt.png",
+          "source_url": "https://gitee.com/ExDevilLee/ai-work-system/raw/main/content/articles/long-term-ai-work-system/images/13/system-context-vs-current-prompt.png",
           "uuid": "ImurQC2CEqoi5FFs_bVje-TMP"
         }
       },
@@ -170,9 +170,9 @@
     },
     "content/articles/2026-07-15-which-tasks-belong-in-long-term-ai-system.md": {
       "assets": {
-        "images/14/task-systemization-matrix.png": {
+        "long-term-ai-work-system/images/14/task-systemization-matrix.png": {
           "sha256": "05fa7e2de121ee72b3cef4729b155d40cf971ebf22ab1ab72cc2768e490174d8",
-          "source_url": "https://gitee.com/ExDevilLee/ai-work-system/raw/main/content/articles/images/14/task-systemization-matrix.png",
+          "source_url": "https://gitee.com/ExDevilLee/ai-work-system/raw/main/content/articles/long-term-ai-work-system/images/14/task-systemization-matrix.png",
           "uuid": "PqXdH962wADL7lPs1ybYp-TMP"
         }
       },
@@ -183,14 +183,14 @@
     },
     "content/articles/2026-07-16-what-information-should-not-enter-ai-system.md": {
       "assets": {
-        "images/15/information-boundary-layers.png": {
+        "long-term-ai-work-system/images/15/information-boundary-layers.png": {
           "sha256": "9904d9c180301865300a644e2ea9828b922885c0ba623e20898e47192c338f6c",
-          "source_url": "https://gitee.com/ExDevilLee/ai-work-system/raw/main/content/articles/images/15/information-boundary-layers.png",
+          "source_url": "https://gitee.com/ExDevilLee/ai-work-system/raw/main/content/articles/long-term-ai-work-system/images/15/information-boundary-layers.png",
           "uuid": "NnJ8nO1OUSnZ9SgplmrAz-TMP"
         },
-        "images/15/private-to-public-safety-gate.png": {
+        "long-term-ai-work-system/images/15/private-to-public-safety-gate.png": {
           "sha256": "f269db9622d763fad4c1f423d445aec920ae8ff0a83f12fda0d0ea138cf6cd31",
-          "source_url": "https://gitee.com/ExDevilLee/ai-work-system/raw/main/content/articles/images/15/private-to-public-safety-gate.png",
+          "source_url": "https://gitee.com/ExDevilLee/ai-work-system/raw/main/content/articles/long-term-ai-work-system/images/15/private-to-public-safety-gate.png",
           "uuid": "l-zl5UHljtuQB7--Eo-ue-TMP"
         }
       },
