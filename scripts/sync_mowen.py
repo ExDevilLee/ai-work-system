@@ -32,7 +32,6 @@ MAPPING_PATH = REPO_ROOT / "publishing" / "mowen-notes.json"
 COVER_PATH = REPO_ROOT / "assets" / "mowen" / "ai-work-system-cover.jpg"
 MOWEN_MCP_ENDPOINT = "https://open.mowen.cn/api/open/mcp/v1/note"
 ARTICLE_ASSET_BASE_URL = "https://gitee.com/ExDevilLee/ai-work-system/raw/main"
-MOWEN_FREE_DAILY_QUOTA = 10
 FIRST_SERIES_ID = "long-term-ai-work-system"
 DEFAULT_DIRECTORY_INTRODUCTION = (
     "这里记录我如何把 AI 从一次性聊天工具，逐步放进一个有记忆、有流程、有证据、有复盘的长期工作系统。",
@@ -383,17 +382,11 @@ class MowenClient:
 
     def log_successful_call(self, name: str) -> None:
         self.successful_calls += 1
-        estimated_remaining = max(
-            MOWEN_FREE_DAILY_QUOTA - self.successful_calls,
-            0,
-        )
         print(
             f"MoWen API call succeeded: api={name}, "
-            f"run_successful={self.successful_calls}, "
-            f"estimated free quota remaining: at most "
-            f"{estimated_remaining}/{MOWEN_FREE_DAILY_QUOTA}."
+            f"run_successful={self.successful_calls}."
         )
-        print("Quota estimate excludes calls made outside this run.")
+        print("MoWen remaining quota is determined by the server response.")
 
     def call(self, name: str, arguments: dict) -> str:
         self.request_id += 1

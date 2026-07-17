@@ -21,8 +21,8 @@ The first 15-article series, "Long-Term AI Work System," is now complete. It sta
 - Essays about long-term AI collaboration.
 - Public notes and frameworks distilled from real practice.
 - Templates for memory, workflow, and publishing.
-- A lightweight static-site publishing pipeline.
-- Platform-specific exports for personal websites and other publishing channels.
+- Automated publishing pipelines for GitHub Wiki, Gitee Wiki, and MoWen.
+- Future publishing experiments for personal websites and other channels.
 
 ## Reusable Templates
 
@@ -89,6 +89,14 @@ No public draft is currently in progress.
 
 Markdown is the source of truth.
 
+Current publishing targets:
+
+- GitHub Wiki
+- Gitee Wiki
+- MoWen
+
+GitHub Actions synchronizes articles with `status: ready` and performs automated checks before and after publication. Each platform is a display and distribution layer; it does not replace the source Markdown.
+
 Future publishing targets may include:
 
 - Personal website
@@ -102,7 +110,7 @@ Future publishing targets may include:
 Current workflow notes: [docs/publishing-workflow.md](docs/publishing-workflow.md).
 Daily publishing checklist: [docs/publishing-runbook.md](docs/publishing-runbook.md).
 
-The first display layers are GitHub Wiki and Gitee Wiki:
+GitHub Wiki and Gitee Wiki content can be generated and checked locally:
 
 ```bash
 python3 scripts/update_readme_index.py
@@ -113,6 +121,10 @@ The script only syncs articles with `status: ready`. By default it only updates 
 
 ## License
 
-Unless otherwise noted, the content in this repository is licensed under the [Creative Commons Attribution 4.0 International License](LICENSE).
+This repository uses separate licenses for code and content:
 
-You may share and adapt the content, including for commercial purposes, as long as proper attribution is given.
+- `.github/workflows/`, `scripts/`, `tests/`, and executable code under experiment directories use the [MIT License](LICENSE-CODE).
+- Articles, documentation, templates, original images, and non-code experiment records use the [Creative Commons Attribution 4.0 International License](LICENSE-CONTENT).
+- Third-party assets retain their original licenses and attribution requirements.
+
+Unless a file states otherwise, these directory boundaries define the default license.

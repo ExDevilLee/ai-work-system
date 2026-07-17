@@ -290,7 +290,7 @@ class SyncMowenTest(unittest.TestCase):
             )
 
     @mock.patch("scripts.sync_mowen.urllib.request.urlopen")
-    def test_client_logs_successful_call_quota_estimate(self, urlopen: mock.Mock) -> None:
+    def test_client_logs_successful_call_count_without_quota_limit(self, urlopen: mock.Mock) -> None:
         response = mock.MagicMock()
         response.__enter__.return_value.read.return_value = json.dumps(
             {"result": {"content": [{"type": "text", "text": "note-id"}]}}
@@ -304,8 +304,9 @@ class SyncMowenTest(unittest.TestCase):
         self.assertEqual(result, "note-id")
         self.assertEqual(client.attempted_calls, 1)
         self.assertEqual(client.successful_calls, 1)
-        self.assertIn("estimated free quota remaining: at most 9/10", stdout.getvalue())
-        self.assertIn("excludes calls made outside this run", stdout.getvalue())
+        self.assertIn("run_successful=1", stdout.getvalue())
+        self.assertIn("remaining quota is determined by the server", stdout.getvalue())
+        self.assertNotRegex(stdout.getvalue(), r"\b\d+/\d+\b")
 
     @mock.patch("scripts.sync_mowen.urllib.request.urlopen")
     def test_client_logs_explicit_quota_exhaustion(self, urlopen: mock.Mock) -> None:
@@ -313,7 +314,7 @@ class SyncMowenTest(unittest.TestCase):
         response.__enter__.return_value.read.return_value = json.dumps(
             {
                 "error": {
-                    "message": "error: code = 403 reason = QUOTA quota exceed. quota=10, costed=10"
+                    "message": "error: code = 403 reason = QUOTA quota exceed"
                 }
             }
         ).encode("utf-8")

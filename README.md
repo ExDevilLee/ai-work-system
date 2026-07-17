@@ -13,8 +13,8 @@ English version: [README-EN.md](README-EN.md)
 - 关于长期 AI 协作的系列文章。
 - 从真实实践中抽象出来的方法论和笔记。
 - 记忆、工作流、发布流程相关的模板。
-- 面向个人网站的轻量静态站发布流水线。
-- 面向微信公众号、知乎、短内容平台、视频脚本等渠道的导出格式。
+- GitHub Wiki、Gitee Wiki 和墨问的自动发布流水线。
+- 面向个人网站、微信公众号、知乎、短内容平台和视频脚本等渠道的后续发布实验。
 
 核心主题：
 
@@ -85,7 +85,15 @@ English version: [README-EN.md](README-EN.md)
 
 Markdown 是内容源头。
 
-未来可能支持的发布目标：
+当前已经运行的发布目标：
+
+- GitHub Wiki
+- Gitee Wiki
+- 墨问
+
+GitHub Actions 会同步 `status: ready` 的文章，并在发布前后执行自动检查。不同平台只作为展示和分发层，不反向修改源 Markdown。
+
+后续可能支持的发布目标：
 
 - 个人网站
 - 微信公众号
@@ -93,14 +101,14 @@ Markdown 是内容源头。
 - 短内容平台
 - 视频口播大纲
 
-第一阶段会优先保证个人网站自动部署；微信公众号等平台先采用人工确认或半自动发布，避免误发。
+微信公众号等需要人工确认的渠道，仍优先采用人工或半自动发布，避免误发。
 
 ## 发布工作流
 
 当前约定见 [docs/publishing-workflow.md](docs/publishing-workflow.md)。
 日常发布检查见 [docs/publishing-runbook.md](docs/publishing-runbook.md)。
 
-第一阶段先接入 GitHub Wiki 和 Gitee Wiki：
+本地可以生成并检查 GitHub Wiki 和 Gitee Wiki 内容：
 
 ```bash
 python3 scripts/update_readme_index.py
@@ -111,6 +119,10 @@ python3 scripts/sync_wiki.py
 
 ## 授权协议
 
-除非另有说明，本仓库内容采用 [Creative Commons Attribution 4.0 International License](LICENSE) 授权。
+本仓库采用双许可证：
 
-你可以分享、转载、改编，也可以用于商业场景，但需要保留署名和来源。
+- `.github/workflows/`、`scripts/`、`tests/` 和实验目录中的可执行代码采用 [MIT License](LICENSE-CODE)。
+- 文章、文档、模板、自制图片和非代码实验记录采用 [Creative Commons Attribution 4.0 International License](LICENSE-CONTENT)。
+- 第三方素材继续遵守各自的许可和署名说明。
+
+除非文件另有声明，上述目录边界作为默认授权规则。
