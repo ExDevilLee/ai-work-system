@@ -1,0 +1,16 @@
+{
+  "current_goal": "完成第二系列第一篇三层记忆 POC 的 macOS 试跑",
+  "next_action": "运行 baseline 和 layered 各一次独立新会话并保存原始结果",
+  "stable_rules": [
+    "公开文章中的实践结论必须来自已经运行的真实实验",
+    "文章进入 review 前必须完成配图必要性判断"
+  ],
+  "wiki_post_publish_checks": [
+    "文章页面可以访问",
+    "正文图片可以加载",
+    "上一篇、目录、下一篇导航链接正确"
+  ],
+  "wiki_source": "references/wiki-publishing-checklist.md",
+  "unverified_observation": "分层后 Agent 的文件读取次数可能更少",
+  "superseded_claim": "第一篇必须等 macOS 和 Windows 都验证完成后才能开始写作"
+}

@@ -1,0 +1,11 @@
+{
+  "run_name": "formal-01-current-task-baseline",
+  "task": "current-task",
+  "condition": "baseline",
+  "correctness_score": 5,
+  "correctness_max": 5,
+  "protocol_valid": true,
+  "unsupported_claims": 0,
+  "manual_review_status": "reviewed",
+  "notes": "目标、下一步、Pilot 01 阻塞、最近完成项和来源均正确。"
+}

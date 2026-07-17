@@ -1,0 +1,17 @@
+{
+  "raw_event_count": 8,
+  "event_type_counts": {
+    "item.completed": 4,
+    "item.started": 1,
+    "thread.started": 1,
+    "turn.completed": 1,
+    "turn.started": 1
+  },
+  "completed_commands": [
+    {
+      "scope": "workspace",
+      "command": "/bin/zsh -lc \"sed -n '1,240p' PROJECT_NOTES.md\""
+    }
+  ],
+  "raw_jsonl_publication": "withheld because it contains local paths, thread identifiers, and unrelated global runtime context"
+}

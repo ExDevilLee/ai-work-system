@@ -1,0 +1,11 @@
+{
+  "run_name": "formal-01-stable-rules-layered",
+  "task": "stable-rules",
+  "condition": "layered",
+  "correctness_score": 10,
+  "correctness_max": 10,
+  "protocol_valid": true,
+  "unsupported_claims": 0,
+  "manual_review_status": "reviewed",
+  "notes": "五条稳定规则、两条待验证观察、两条失效结论和来源均正确。"
+}

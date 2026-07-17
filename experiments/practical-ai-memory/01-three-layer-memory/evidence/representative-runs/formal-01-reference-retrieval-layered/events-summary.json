@@ -1,0 +1,25 @@
+{
+  "raw_event_count": 13,
+  "event_type_counts": {
+    "item.completed": 7,
+    "item.started": 3,
+    "thread.started": 1,
+    "turn.completed": 1,
+    "turn.started": 1
+  },
+  "completed_commands": [
+    {
+      "scope": "workspace",
+      "command": "/bin/zsh -lc \"sed -n '1,240p' references/INDEX.md\""
+    },
+    {
+      "scope": "workspace",
+      "command": "/bin/zsh -lc 'nl -ba references/platform-validation-policy.md'"
+    },
+    {
+      "scope": "workspace",
+      "command": "/bin/zsh -lc 'nl -ba references/wiki-publishing-checklist.md'"
+    }
+  ],
+  "raw_jsonl_publication": "withheld because it contains local paths, thread identifiers, and unrelated global runtime context"
+}

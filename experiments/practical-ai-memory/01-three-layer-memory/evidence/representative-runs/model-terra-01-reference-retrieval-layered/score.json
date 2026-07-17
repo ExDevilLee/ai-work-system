@@ -1,0 +1,11 @@
+{
+  "run_name": "model-terra-01-reference-retrieval-layered",
+  "task": "reference-retrieval",
+  "condition": "layered",
+  "correctness_score": 8,
+  "correctness_max": 8,
+  "protocol_valid": true,
+  "unsupported_claims": 0,
+  "manual_review_status": "reviewed",
+  "notes": "检查项、平台策略、限制声明和来源均正确；Layered 额外读取一份无关参考资料，作为模型探索差异保留。"
+}

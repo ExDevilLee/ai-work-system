@@ -1,0 +1,33 @@
+{
+  "run_name": "model-terra-01-reference-retrieval-baseline",
+  "condition": "baseline",
+  "fixture_set": "pilot-02",
+  "task": "reference-retrieval",
+  "purpose": "model sensitivity",
+  "started_at_utc": "2026-07-17T07:57:23.567254+00:00",
+  "platform": "macOS-26.5-arm64-arm-64bit",
+  "python_version": "3.9.6",
+  "codex_version": "codex-cli 0.144.1",
+  "requested_model": "gpt-5.6-terra",
+  "reasoning_effort": "medium",
+  "model_record_status": "explicit",
+  "fixture_sha256": "6d7dbc2ea5b4413d5d67a664fe95349216abbb76cc3cad1f0eb63f64830aeb47",
+  "prompt_sha256": "ae841e88c2f27ab8943cd28b81aa1f63e6e97f6034fa8104218901b22d53952d",
+  "sandbox": "read-only",
+  "ephemeral": true,
+  "exit_code": 0,
+  "elapsed_seconds": 32.978,
+  "usage": {
+    "input_tokens": 66942,
+    "cached_input_tokens": 64128,
+    "output_tokens": 2535,
+    "reasoning_output_tokens": 0
+  },
+  "completed_command_calls": 2,
+  "workspace_command_calls": 2,
+  "mixed_scope_command_calls": 0,
+  "workspace_output_bytes_reliable": true,
+  "mixed_scope_adjusted_bytes": 0,
+  "workspace_output_bytes": 4171,
+  "command_shape": "codex exec -C <isolated-workspace> --skip-git-repo-check --sandbox read-only --ephemeral --json --output-last-message <file> [--model <model>] [--config model_reasoning_effort=<effort>] <prompt>"
+}

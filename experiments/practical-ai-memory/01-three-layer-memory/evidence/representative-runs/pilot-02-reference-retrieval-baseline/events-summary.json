@@ -1,0 +1,29 @@
+{
+  "raw_event_count": 16,
+  "event_type_counts": {
+    "item.completed": 9,
+    "item.started": 4,
+    "thread.started": 1,
+    "turn.completed": 1,
+    "turn.started": 1
+  },
+  "completed_commands": [
+    {
+      "scope": "workspace",
+      "command": "/bin/zsh -lc \"sed -n '1,240p' PROJECT_NOTES.md\""
+    },
+    {
+      "scope": "workspace",
+      "command": "/bin/zsh -lc \"sed -n '1,200p' references/wiki-publishing-checklist.md\""
+    },
+    {
+      "scope": "workspace",
+      "command": "/bin/zsh -lc \"sed -n '1,200p' references/platform-validation-policy.md\""
+    },
+    {
+      "scope": "workspace",
+      "command": "/bin/zsh -lc \"rg --files -g '\"'!PROJECT_NOTES.md'\"'\""
+    }
+  ],
+  "raw_jsonl_publication": "withheld because it contains local paths, thread identifiers, and unrelated global runtime context"
+}

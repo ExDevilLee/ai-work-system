@@ -1,0 +1,7 @@
+run_name,purpose,task,condition,model,reasoning_effort,codex_version,score,max_score,workspace_command_calls,workspace_output_bytes,workspace_output_bytes_reliable,elapsed_seconds,input_tokens,cached_input_tokens,output_tokens,reasoning_output_tokens
+model-terra-01-current-task-baseline,model sensitivity,current-task,baseline,gpt-5.6-terra,medium,codex-cli 0.144.1,5,5,2,4164,True,32.817,67401,47360,543,69
+model-terra-01-current-task-layered,model sensitivity,current-task,layered,gpt-5.6-terra,medium,codex-cli 0.144.1,5,5,2,698,True,24.547,66472,47360,435,0
+model-terra-01-reference-retrieval-baseline,model sensitivity,reference-retrieval,baseline,gpt-5.6-terra,medium,codex-cli 0.144.1,8,8,2,4171,True,32.978,66942,64128,2535,0
+model-terra-01-reference-retrieval-layered,model sensitivity,reference-retrieval,layered,gpt-5.6-terra,medium,codex-cli 0.144.1,8,8,5,1163,True,44.665,87315,82048,2726,0
+model-terra-01-stable-rules-baseline,model sensitivity,stable-rules,baseline,gpt-5.6-terra,medium,codex-cli 0.144.1,10,10,1,3628,True,29.839,44087,39168,2307,0
+model-terra-01-stable-rules-layered,model sensitivity,stable-rules,layered,gpt-5.6-terra,medium,codex-cli 0.144.1,10,10,1,1193,True,29.119,44373,25600,492,79

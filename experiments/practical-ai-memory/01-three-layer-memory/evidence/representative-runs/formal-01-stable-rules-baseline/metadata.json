@@ -1,0 +1,33 @@
+{
+  "run_name": "formal-01-stable-rules-baseline",
+  "condition": "baseline",
+  "fixture_set": "pilot-02",
+  "task": "stable-rules",
+  "purpose": "formal run",
+  "started_at_utc": "2026-07-17T07:28:24.905464+00:00",
+  "platform": "macOS-26.5-arm64-arm-64bit",
+  "python_version": "3.9.6",
+  "codex_version": "codex-cli 0.144.1",
+  "requested_model": "gpt-5.6-sol",
+  "reasoning_effort": "medium",
+  "model_record_status": "explicit",
+  "fixture_sha256": "6d7dbc2ea5b4413d5d67a664fe95349216abbb76cc3cad1f0eb63f64830aeb47",
+  "prompt_sha256": "296067de9ef1738f7c4ef662cc20a059f5164654c7dc610aed23d80e9cadf26d",
+  "sandbox": "read-only",
+  "ephemeral": true,
+  "exit_code": 0,
+  "elapsed_seconds": 26.645,
+  "usage": {
+    "input_tokens": 44950,
+    "cached_input_tokens": 25088,
+    "output_tokens": 640,
+    "reasoning_output_tokens": 177
+  },
+  "completed_command_calls": 1,
+  "workspace_command_calls": 1,
+  "mixed_scope_command_calls": 0,
+  "workspace_output_bytes_reliable": true,
+  "mixed_scope_adjusted_bytes": 0,
+  "workspace_output_bytes": 3628,
+  "command_shape": "codex exec -C <isolated-workspace> --skip-git-repo-check --sandbox read-only --ephemeral --json --output-last-message <file> [--model <model>] [--config model_reasoning_effort=<effort>] <prompt>"
+}

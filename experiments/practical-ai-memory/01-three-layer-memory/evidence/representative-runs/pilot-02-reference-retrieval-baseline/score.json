@@ -1,0 +1,11 @@
+{
+  "run_name": "pilot-02-reference-retrieval-baseline",
+  "task": "reference-retrieval",
+  "condition": "baseline",
+  "correctness_score": 8,
+  "correctness_max": 8,
+  "protocol_valid": false,
+  "unsupported_claims": 0,
+  "manual_review_status": "reviewed",
+  "notes": "答案内容正确，但夹具中声明的两个原始资料文件不存在，与 Layered 条件不等价。"
+}

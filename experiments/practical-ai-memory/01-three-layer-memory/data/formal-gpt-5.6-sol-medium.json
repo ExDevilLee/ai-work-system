@@ -1,0 +1,269 @@
+{
+  "selection_prefix": "formal-0[1-3]-",
+  "run_count": 18,
+  "model_configuration": {
+    "model": "gpt-5.6-sol",
+    "reasoning_effort": "medium",
+    "codex_version": "codex-cli 0.144.1"
+  },
+  "groups": {
+    "current-task:baseline": {
+      "n": 3,
+      "correctness": {
+        "score": 15,
+        "max_score": 15
+      },
+      "workspace_command_calls": {
+        "min": 1.0,
+        "median": 1.0,
+        "mean": 1.0,
+        "max": 1.0
+      },
+      "workspace_output_bytes": {
+        "min": 3628.0,
+        "median": 3628.0,
+        "mean": 3628.0,
+        "max": 3628.0
+      },
+      "elapsed_seconds": {
+        "min": 24.503,
+        "median": 25.273,
+        "mean": 26.379,
+        "max": 29.36
+      },
+      "input_tokens": {
+        "min": 44862.0,
+        "median": 44863.0,
+        "mean": 44899.667,
+        "max": 44974.0
+      },
+      "output_tokens": {
+        "min": 440.0,
+        "median": 444.0,
+        "mean": 497.0,
+        "max": 607.0
+      },
+      "reasoning_output_tokens": {
+        "min": 53.0,
+        "median": 70.0,
+        "mean": 114.667,
+        "max": 221.0
+      }
+    },
+    "current-task:layered": {
+      "n": 3,
+      "correctness": {
+        "score": 15,
+        "max_score": 15
+      },
+      "workspace_command_calls": {
+        "min": 1.0,
+        "median": 1.0,
+        "mean": 1.333,
+        "max": 2.0
+      },
+      "workspace_output_bytes": {
+        "min": 575.0,
+        "median": 575.0,
+        "mean": 709.0,
+        "max": 977.0
+      },
+      "elapsed_seconds": {
+        "min": 23.226,
+        "median": 29.547,
+        "mean": 29.82,
+        "max": 36.686
+      },
+      "input_tokens": {
+        "min": 44188.0,
+        "median": 44198.0,
+        "mean": 51788.667,
+        "max": 66980.0
+      },
+      "output_tokens": {
+        "min": 420.0,
+        "median": 459.0,
+        "mean": 575.333,
+        "max": 847.0
+      },
+      "reasoning_output_tokens": {
+        "min": 48.0,
+        "median": 96.0,
+        "mean": 138.667,
+        "max": 272.0
+      }
+    },
+    "reference-retrieval:baseline": {
+      "n": 3,
+      "correctness": {
+        "score": 24,
+        "max_score": 24
+      },
+      "workspace_command_calls": {
+        "min": 3.0,
+        "median": 3.0,
+        "mean": 3.0,
+        "max": 3.0
+      },
+      "workspace_output_bytes": {
+        "min": 3809.0,
+        "median": 4058.0,
+        "mean": 4140.667,
+        "max": 4555.0
+      },
+      "elapsed_seconds": {
+        "min": 36.389,
+        "median": 36.465,
+        "mean": 39.442,
+        "max": 45.471
+      },
+      "input_tokens": {
+        "min": 68673.0,
+        "median": 71317.0,
+        "mean": 78629.0,
+        "max": 95897.0
+      },
+      "output_tokens": {
+        "min": 898.0,
+        "median": 966.0,
+        "mean": 1015.667,
+        "max": 1183.0
+      },
+      "reasoning_output_tokens": {
+        "min": 216.0,
+        "median": 262.0,
+        "mean": 262.0,
+        "max": 308.0
+      }
+    },
+    "reference-retrieval:layered": {
+      "n": 3,
+      "correctness": {
+        "score": 24,
+        "max_score": 24
+      },
+      "workspace_command_calls": {
+        "min": 3.0,
+        "median": 3.0,
+        "mean": 3.667,
+        "max": 5.0
+      },
+      "workspace_output_bytes": {
+        "min": 895.0,
+        "median": 895.0,
+        "mean": 1110.667,
+        "max": 1542.0
+      },
+      "elapsed_seconds": {
+        "min": 31.783,
+        "median": 40.552,
+        "mean": 39.825,
+        "max": 47.139
+      },
+      "input_tokens": {
+        "min": 66926.0,
+        "median": 66951.0,
+        "mean": 74621.667,
+        "max": 89988.0
+      },
+      "output_tokens": {
+        "min": 768.0,
+        "median": 783.0,
+        "mean": 858.333,
+        "max": 1024.0
+      },
+      "reasoning_output_tokens": {
+        "min": 120.0,
+        "median": 121.0,
+        "mean": 128.333,
+        "max": 144.0
+      }
+    },
+    "stable-rules:baseline": {
+      "n": 3,
+      "correctness": {
+        "score": 30,
+        "max_score": 30
+      },
+      "workspace_command_calls": {
+        "min": 1.0,
+        "median": 1.0,
+        "mean": 1.667,
+        "max": 3.0
+      },
+      "workspace_output_bytes": {
+        "min": 3628.0,
+        "median": 3628.0,
+        "mean": 4323.333,
+        "max": 5714.0
+      },
+      "elapsed_seconds": {
+        "min": 26.645,
+        "median": 38.504,
+        "mean": 40.999,
+        "max": 57.848
+      },
+      "input_tokens": {
+        "min": 44950.0,
+        "median": 70031.0,
+        "mean": 78243.667,
+        "max": 119750.0
+      },
+      "output_tokens": {
+        "min": 640.0,
+        "median": 833.0,
+        "mean": 932.667,
+        "max": 1325.0
+      },
+      "reasoning_output_tokens": {
+        "min": 177.0,
+        "median": 229.0,
+        "mean": 270.333,
+        "max": 405.0
+      }
+    },
+    "stable-rules:layered": {
+      "n": 3,
+      "correctness": {
+        "score": 30,
+        "max_score": 30
+      },
+      "workspace_command_calls": {
+        "min": 1.0,
+        "median": 2.0,
+        "mean": 2.0,
+        "max": 3.0
+      },
+      "workspace_output_bytes": {
+        "min": 1595.0,
+        "median": 1595.0,
+        "mean": 1635.667,
+        "max": 1717.0
+      },
+      "elapsed_seconds": {
+        "min": 29.826,
+        "median": 39.902,
+        "mean": 37.055,
+        "max": 41.438
+      },
+      "input_tokens": {
+        "min": 44626.0,
+        "median": 67287.0,
+        "mean": 60616.0,
+        "max": 69935.0
+      },
+      "output_tokens": {
+        "min": 743.0,
+        "median": 1057.0,
+        "mean": 960.667,
+        "max": 1082.0
+      },
+      "reasoning_output_tokens": {
+        "min": 204.0,
+        "median": 298.0,
+        "mean": 274.0,
+        "max": 320.0
+      }
+    }
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "run_name": "pilot-02-reference-retrieval-layered",
+  "task": "reference-retrieval",
+  "condition": "layered",
+  "correctness_score": 8,
+  "correctness_max": 8,
+  "protocol_valid": false,
+  "unsupported_claims": 0,
+  "manual_review_status": "reviewed",
+  "notes": "答案和来源正确；配对的 Baseline 夹具不等价，因此整对结果不能比较。"
+}

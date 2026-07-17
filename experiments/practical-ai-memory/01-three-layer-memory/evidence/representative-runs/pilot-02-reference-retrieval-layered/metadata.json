@@ -1,0 +1,29 @@
+{
+  "run_name": "pilot-02-reference-retrieval-layered",
+  "condition": "layered",
+  "fixture_set": "pilot-02",
+  "task": "reference-retrieval",
+  "purpose": "protocol pilot",
+  "started_at_utc": "2026-07-17T07:05:04.953362+00:00",
+  "platform": "macOS-26.5-arm64-arm-64bit",
+  "python_version": "3.9.6",
+  "codex_version": "codex-cli 0.144.1",
+  "requested_model": "gpt-5.6-sol",
+  "model_record_status": "explicit",
+  "fixture_sha256": "29b9fd5382e73ae0a3b971c7a58299d0f99a8508a1ecd91b14a88f9412d514c4",
+  "prompt_sha256": "ae841e88c2f27ab8943cd28b81aa1f63e6e97f6034fa8104218901b22d53952d",
+  "sandbox": "read-only",
+  "ephemeral": true,
+  "exit_code": 0,
+  "elapsed_seconds": 46.063,
+  "usage": {
+    "input_tokens": 90076,
+    "cached_input_tokens": 50176,
+    "output_tokens": 1034,
+    "reasoning_output_tokens": 163
+  },
+  "completed_command_calls": 5,
+  "workspace_command_calls": 5,
+  "workspace_output_bytes": 1542,
+  "command_shape": "codex exec -C <isolated-workspace> --skip-git-repo-check --sandbox read-only --ephemeral --json --output-last-message <file> [--model <model>] <prompt>"
+}

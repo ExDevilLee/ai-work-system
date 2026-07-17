@@ -1,0 +1,9 @@
+run_name,task,condition,protocol_valid,score,max_score,elapsed_seconds,workspace_command_calls,workspace_output_bytes,input_tokens,cached_input_tokens,output_tokens
+pilot-02-current-task-baseline,current-task,baseline,true,5,5,37.876,1,3628,44828,25088,434
+pilot-02-current-task-layered,current-task,layered,true,5,5,23.020,1,575,44186,25088,405
+pilot-02-stable-rules-baseline,stable-rules,baseline,true,10,10,42.098,2,1650,93376,54272,1029
+pilot-02-stable-rules-layered,stable-rules,layered,true,10,10,138.829,1,1193,44433,42496,633
+pilot-02-reference-retrieval-baseline,reference-retrieval,baseline,false,8,8,43.574,4,3783,92037,70656,1103
+pilot-02-reference-retrieval-layered,reference-retrieval,layered,false,8,8,46.063,5,1542,90076,50176,1034
+pilot-02b-reference-retrieval-baseline,reference-retrieval,baseline,true,8,8,41.970,3,4142,95187,72704,1071
+pilot-02b-reference-retrieval-layered,reference-retrieval,layered,true,8,8,420.581,5,1542,90047,68608,1028

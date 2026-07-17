@@ -1,0 +1,25 @@
+{
+  "raw_event_count": 13,
+  "event_type_counts": {
+    "item.completed": 7,
+    "item.started": 3,
+    "thread.started": 1,
+    "turn.completed": 1,
+    "turn.started": 1
+  },
+  "completed_commands": [
+    {
+      "scope": "workspace",
+      "command": "/bin/zsh -lc \"rg -n -C 3 'Wiki 发布后检查|macOS|Windows|验证节奏|原始资料|资料路径' PROJECT_NOTES.md\""
+    },
+    {
+      "scope": "workspace",
+      "command": "/bin/zsh -lc \"sed -n '1,220p' references/platform-validation-policy.md\""
+    },
+    {
+      "scope": "workspace",
+      "command": "/bin/zsh -lc \"sed -n '1,220p' references/wiki-publishing-checklist.md\""
+    }
+  ],
+  "raw_jsonl_publication": "withheld because it contains local paths, thread identifiers, and unrelated global runtime context"
+}

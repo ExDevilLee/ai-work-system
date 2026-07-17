@@ -1,0 +1,11 @@
+{
+  "run_name": "formal-01-reference-retrieval-baseline",
+  "task": "reference-retrieval",
+  "condition": "baseline",
+  "correctness_score": 8,
+  "correctness_max": 8,
+  "protocol_valid": true,
+  "unsupported_claims": 0,
+  "manual_review_status": "reviewed",
+  "notes": "三项 Wiki 检查、平台节奏、限制声明和两个真实来源路径均正确。"
+}

@@ -1,0 +1,39 @@
+{
+  "current-task": {
+    "current_goal": "在 macOS 验证三层记忆是否支持按任务类型加载信息",
+    "next_action": "分别为 baseline 和 layered 运行当前任务、稳定规则、参考资料三个独立新会话，并保存完整证据",
+    "pilot_01_blocker": "Pilot 01 夹具过小且综合提示要求一次读取全部信息，出现正确性天花板效应",
+    "recent_completed": "私有原始证据到公开脱敏 POC 的导出链路已经通过 Pilot 01 验证"
+  },
+  "stable-rules": {
+    "stable_rules": [
+      "公开文章中的实践结论必须来自已经运行的真实实验",
+      "文章进入 review 前必须完成配图必要性判断",
+      "文章中的平台兼容性结论只能覆盖已经完成真实验证的平台",
+      "完成阶段性 POC 后，优先公开可复现且已经脱敏的实验子项目",
+      "完整原始运行证据保留在本地私有区，公开区只提交复现所需的脱敏证据"
+    ],
+    "unverified_observations": [
+      "分层结构可能减少单一任务读取的工作区输出字节数",
+      "多维度对比图可能比纯文字更容易解释实验结果"
+    ],
+    "superseded_claims": [
+      "第一篇必须等 macOS 和 Windows 都验证完成后才能开始写作",
+      "一个综合提示足以验证三层记忆是否实现按需加载"
+    ]
+  },
+  "reference-retrieval": {
+    "wiki_checks": [
+      "文章页面可以访问",
+      "正文图片可以加载",
+      "上一篇、目录、下一篇导航链接正确"
+    ],
+    "macos_policy": "当前主体实验以 macOS 的重复运行结果作为首版文章证据",
+    "windows_policy": "Windows 兼容性验证延后执行，不阻塞当前 macOS 主实验",
+    "forbidden_claim": "未完成 Windows 验证前，不声称方案已经跨平台实测通过",
+    "source_paths": [
+      "references/wiki-publishing-checklist.md",
+      "references/platform-validation-policy.md"
+    ]
+  }
+}
