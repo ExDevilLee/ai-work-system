@@ -345,19 +345,19 @@ class SyncMowenTest(unittest.TestCase):
         self.assertEqual(existing, [old])
 
     def test_relative_article_assets_are_rewritten_for_mowen(self) -> None:
-        markdown = "![结构图](images/04/memory.png)"
+        markdown = "![结构图](series-one/images/04/memory.png)"
 
         rewritten = rewrite_article_asset_urls(markdown)
 
         self.assertEqual(
             rewritten,
-            "![结构图](https://gitee.com/ExDevilLee/ai-work-system/raw/main/content/articles/images/04/memory.png)",
+            "![结构图](https://gitee.com/ExDevilLee/ai-work-system/raw/main/content/articles/series-one/images/04/memory.png)",
         )
 
     def test_article_images_are_uploaded_cached_and_applied_to_document(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             article_path = Path(tmp) / "content" / "articles" / "article.md"
-            image_path = article_path.parent / "images" / "04" / "memory.png"
+            image_path = article_path.parent / "series-one" / "images" / "04" / "memory.png"
             image_path.parent.mkdir(parents=True)
             image_path.write_bytes(b"article-image")
             article = Article(
@@ -367,7 +367,8 @@ class SyncMowenTest(unittest.TestCase):
                 "2026-07-11",
                 "",
                 ["AI"],
-                "# 文章\n\n![结构图](images/04/memory.png)\n",
+                "# 文章\n\n![结构图](series-one/images/04/memory.png)\n",
+                series="series-one",
             )
             mapping = {"version": 1, "directory": {}, "articles": {}}
             client = FakeMowenClient()
@@ -399,6 +400,56 @@ class SyncMowenTest(unittest.TestCase):
                 [call[0] for call in client.calls],
                 ["upload"],
             )
+
+    def test_moved_image_reuses_cached_uuid_by_hash(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            article_path = Path(tmp) / "content" / "articles" / "article.md"
+            image_path = article_path.parent / "series-one" / "images" / "04" / "memory.png"
+            image_path.parent.mkdir(parents=True)
+            image_path.write_bytes(b"article-image")
+            article = Article(
+                article_path,
+                "content/articles/article.md",
+                "文章",
+                "2026-07-11",
+                "",
+                ["AI"],
+                "# 文章\n\n![结构图](series-one/images/04/memory.png)\n",
+                series="series-one",
+            )
+            digest = hashlib.sha256(b"article-image").hexdigest()
+            mapping = {
+                "version": 1,
+                "articles": {
+                    article.source: {
+                        "assets": {
+                            "images/04/memory.png": {
+                                "uuid": "existing-uuid",
+                                "sha256": digest,
+                                "source_url": "https://example.test/old.png",
+                            }
+                        }
+                    }
+                },
+            }
+            client = FakeMowenClient()
+
+            uuids = ensure_article_images_uploaded(
+                article,
+                mapping,
+                client,
+                fetcher=lambda _: b"stale-image",
+                attempts=1,
+            )
+
+            assets = mapping["articles"][article.source]["assets"]
+            self.assertEqual(uuids, ["existing-uuid"])
+            self.assertNotIn("images/04/memory.png", assets)
+            self.assertEqual(
+                assets["series-one/images/04/memory.png"]["uuid"],
+                "existing-uuid",
+            )
+            self.assertEqual(client.calls, [])
 
     @mock.patch("scripts.sync_mowen.time.sleep")
     def test_remote_asset_retries_404_then_succeeds(self, sleep: mock.Mock) -> None:

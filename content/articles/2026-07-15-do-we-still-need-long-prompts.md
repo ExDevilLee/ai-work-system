@@ -115,7 +115,7 @@ tags:
 
 两者的关系可以简单理解为：系统保存地图，提示词说明这一次要去哪里。
 
-![一次性长提示词需要搬运全部背景，而长期工作系统保存稳定上下文，让提示词只说明当前任务和变化](images/13/system-context-vs-current-prompt.png)
+![一次性长提示词需要搬运全部背景，而长期工作系统保存稳定上下文，让提示词只说明当前任务和变化](long-term-ai-work-system/images/13/system-context-vs-current-prompt.png)
 
 提示词变短，不是因为 AI 可以读心，而是因为稳定信息已经有了可信位置。
 

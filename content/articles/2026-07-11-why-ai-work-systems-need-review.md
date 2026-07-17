@@ -58,7 +58,7 @@ AI 给出了文章、代码、方案或配置文件。
 
 从生成结果到真正可以接受，中间还需要证据和 Review：
 
-![AI 生成结果并完成执行后，还需要收集证据和进行 Review，才能判断结果可以接受](images/07/from-generation-to-acceptance.png)
+![AI 生成结果并完成执行后，还需要收集证据和进行 Review，才能判断结果可以接受](long-term-ai-work-system/images/07/from-generation-to-acceptance.png)
 
 流水线成功只能证明动作已经完成，不能单独证明结果正确。
 

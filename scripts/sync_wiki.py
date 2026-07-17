@@ -162,15 +162,16 @@ def align_wiki_repo_with_remote(wiki_dir: Path) -> None:
 
 def rewrite_asset_urls(markdown: str, asset_base_url: str) -> str:
     pattern = re.compile(
-        r"(?P<prefix>\]\()(?P<path>(?:(?:\.\./)+assets/|images/)[^)\s]+)"
+        r"(?P<prefix>\]\()(?P<path>(?:(?:\.\./)+assets/|"
+        r"(?:[a-z0-9][a-z0-9-]*/)?images/)[^)\s]+)"
     )
 
     def replace(match: re.Match[str]) -> str:
         path = match.group("path")
         asset_path = (
-            f"content/articles/{path}"
-            if path.startswith("images/")
-            else path[path.index("assets/") :]
+            path[path.index("assets/") :]
+            if "assets/" in path
+            else f"content/articles/{path}"
         )
         return f"{match.group('prefix')}{asset_base_url.rstrip('/')}/{asset_path}"
 

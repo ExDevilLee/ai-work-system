@@ -1,0 +1,68 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900" viewBox="0 0 1600 900" role="img" aria-labelledby="title desc">
+  <title id="title">最小工作流五要素</title>
+  <desc id="desc">一个最小工作流依次包含触发条件、可信输入、执行步骤、结果验证、失败处理与人工确认。</desc>
+  <style>
+    text { font-family: "PingFang SC", "Microsoft YaHei", sans-serif; }
+    .title { font-size: 42px; font-weight: 700; fill: #18212b; }
+    .subtitle { font-size: 22px; fill: #5b6573; }
+    .number { font-size: 19px; font-weight: 700; }
+    .head { font-size: 27px; font-weight: 700; }
+    .body { font-size: 19px; fill: #5e6976; }
+  </style>
+
+  <rect width="1600" height="900" fill="#f7f8fa"/>
+  <text class="title" x="80" y="86">一个最小工作流，需要五个部分</text>
+  <text class="subtitle" x="80" y="130">不是把提醒写得更长，而是让每一步都知道从哪里开始、如何证明、何时停下</text>
+
+  <path d="M330 420 H365" stroke="#aeb7c2" stroke-width="4"/>
+  <path d="M353 408 L365 420 L353 432" fill="none" stroke="#aeb7c2" stroke-width="4"/>
+  <path d="M625 420 H660" stroke="#aeb7c2" stroke-width="4"/>
+  <path d="M648 408 L660 420 L648 432" fill="none" stroke="#aeb7c2" stroke-width="4"/>
+  <path d="M920 420 H955" stroke="#aeb7c2" stroke-width="4"/>
+  <path d="M943 408 L955 420 L943 432" fill="none" stroke="#aeb7c2" stroke-width="4"/>
+  <path d="M1215 420 H1250" stroke="#aeb7c2" stroke-width="4"/>
+  <path d="M1238 408 L1250 420 L1238 432" fill="none" stroke="#aeb7c2" stroke-width="4"/>
+
+  <rect x="70" y="235" width="260" height="370" rx="8" fill="#ffffff" stroke="#1f8a70" stroke-width="3"/>
+  <rect x="70" y="235" width="260" height="16" rx="8" fill="#1f8a70"/>
+  <text class="number" x="105" y="298" fill="#176b58">01</text>
+  <text class="head" x="105" y="350" fill="#176b58">触发条件</text>
+  <text class="body" x="105" y="420">什么时候开始？</text>
+  <text class="body" x="105" y="464">由文件变化、人工确认</text>
+  <text class="body" x="105" y="497">或固定事件触发</text>
+
+  <rect x="365" y="235" width="260" height="370" rx="8" fill="#ffffff" stroke="#3772b9" stroke-width="3"/>
+  <rect x="365" y="235" width="260" height="16" rx="8" fill="#3772b9"/>
+  <text class="number" x="400" y="298" fill="#285b96">02</text>
+  <text class="head" x="400" y="350" fill="#285b96">可信输入</text>
+  <text class="body" x="400" y="420">应该相信哪一份？</text>
+  <text class="body" x="400" y="464">明确唯一内容源头</text>
+  <text class="body" x="400" y="497">避免多个版本互相冲突</text>
+
+  <rect x="660" y="235" width="260" height="370" rx="8" fill="#ffffff" stroke="#d98138" stroke-width="3"/>
+  <rect x="660" y="235" width="260" height="16" rx="8" fill="#d98138"/>
+  <text class="number" x="695" y="298" fill="#aa5c21">03</text>
+  <text class="head" x="695" y="350" fill="#aa5c21">执行步骤</text>
+  <text class="body" x="695" y="420">先做什么，再做什么？</text>
+  <text class="body" x="695" y="464">步骤有顺序</text>
+  <text class="body" x="695" y="497">也能拆开检查</text>
+
+  <rect x="955" y="235" width="260" height="370" rx="8" fill="#ffffff" stroke="#b65f76" stroke-width="3"/>
+  <rect x="955" y="235" width="260" height="16" rx="8" fill="#b65f76"/>
+  <text class="number" x="990" y="298" fill="#91455a">04</text>
+  <text class="head" x="990" y="350" fill="#91455a">结果验证</text>
+  <text class="body" x="990" y="420">怎样证明结果正确？</text>
+  <text class="body" x="990" y="464">收集测试、差异</text>
+  <text class="body" x="990" y="497">或真实页面证据</text>
+
+  <rect x="1250" y="235" width="280" height="370" rx="8" fill="#ffffff" stroke="#c6534d" stroke-width="3"/>
+  <rect x="1250" y="235" width="280" height="16" rx="8" fill="#c6534d"/>
+  <text class="number" x="1285" y="298" fill="#a13f3a">05</text>
+  <text class="head" x="1285" y="350" fill="#a13f3a">失败与人工确认</text>
+  <text class="body" x="1285" y="420">失败后怎样恢复？</text>
+  <text class="body" x="1285" y="464">哪里可以自动继续</text>
+  <text class="body" x="1285" y="497">哪里必须停下来等人</text>
+
+  <rect x="245" y="700" width="1110" height="80" rx="8" fill="#ffffff" stroke="#c5ccd4" stroke-width="2"/>
+  <text x="800" y="751" text-anchor="middle" fill="#33404d" font-size="24" font-weight="700">能触发、能执行、能证明，也知道失败后如何处理和何时停下</text>
+</svg>

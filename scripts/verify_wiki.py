@@ -25,7 +25,8 @@ except ModuleNotFoundError:
 
 ARTICLE_IMAGE_PATTERN = re.compile(r"!\[[^\]]*\]\((?P<path>[^)\s]+)\)")
 NUMBERED_IMAGE_PATTERN = re.compile(
-    r"images/(?P<number>\d{2})/(?P<filename>[^/\s)]+)$"
+    r"(?P<series>[a-z0-9][a-z0-9-]*)/images/"
+    r"(?P<number>\d{2})/(?P<filename>[^/\s)]+)$"
 )
 
 
@@ -63,8 +64,9 @@ def expected_image_format(path: Path) -> str | None:
 
 def article_images(
     article: dict[str, str | Path],
-    sequence: int,
 ) -> list[tuple[str, Path]]:
+    series_id = str(article.get("series_id") or "")
+    sequence = int(article.get("series_sequence") or 0)
     images: list[tuple[str, Path]] = []
     for match in ARTICLE_IMAGE_PATTERN.finditer(str(article["body"])):
         relative_path = match.group("path")
@@ -74,7 +76,12 @@ def article_images(
         if not numbered:
             raise ValueError(
                 "[pre-publish] article image path must use "
-                f"images/<two-digit-number>/<filename>: {relative_path}"
+                f"<series-id>/images/<two-digit-number>/<filename>: {relative_path}"
+            )
+        if numbered.group("series") != series_id:
+            raise ValueError(
+                "[pre-publish] article image series does not match article frontmatter: "
+                f"{relative_path}"
             )
         if numbered.group("number") != f"{sequence:02d}":
             raise ValueError(
@@ -154,9 +161,9 @@ def verify_pre_publish(
     articles = ready_articles(repo_root)
     images_by_source: dict[str, list[tuple[str, Path]]] = {}
     image_count = 0
-    for sequence, article in enumerate(articles, start=1):
+    for article in articles:
         source = str(Path(article["path"]).relative_to(repo_root))
-        images = article_images(article, sequence)
+        images = article_images(article)
         images_by_source[source] = images
         image_count += len(images)
 
@@ -268,9 +275,9 @@ def collect_image_references(
 ) -> tuple[dict[str, list[tuple[str, Path]]], list[ImageReference]]:
     images_by_source: dict[str, list[tuple[str, Path]]] = {}
     remote_images: list[ImageReference] = []
-    for sequence, article in enumerate(articles, start=1):
+    for article in articles:
         source = str(Path(article["path"]).relative_to(repo_root))
-        images = article_images(article, sequence)
+        images = article_images(article)
         images_by_source[source] = images
         for relative_path, local_path in images:
             public_path = (Path(source).parent / relative_path).as_posix()

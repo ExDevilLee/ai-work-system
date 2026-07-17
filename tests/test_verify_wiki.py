@@ -22,6 +22,7 @@ def write_article(
     filename: str,
     title: str,
     body: str,
+    series: str = "series-one",
 ) -> Path:
     catalog_path = repo_root / "content" / "series.json"
     catalog_path.parent.mkdir(parents=True, exist_ok=True)
@@ -42,6 +43,18 @@ def write_article(
                             "wiki_page": "Series-01-Series-One",
                             "mowen_directory_title": "系列一目录",
                             "mowen_directory_url": "",
+                        },
+                        {
+                            "id": "series-two",
+                            "order": 2,
+                            "title": "系列二",
+                            "title_en": "Series Two",
+                            "description": "第二组",
+                            "description_en": "Second group",
+                            "status": "active",
+                            "wiki_page": "Series-02-Series-Two",
+                            "mowen_directory_title": "系列二目录",
+                            "mowen_directory_url": "",
                         }
                     ],
                 },
@@ -52,7 +65,7 @@ def write_article(
     path = repo_root / "content" / "articles" / filename
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(
-        f"---\ntitle: {title}\nstatus: ready\nseries: series-one\nsummary: 摘要\n---\n\n# {title}\n\n{body}\n",
+        f"---\ntitle: {title}\nstatus: ready\nseries: {series}\nsummary: 摘要\n---\n\n# {title}\n\n{body}\n",
         encoding="utf-8",
     )
     return path
@@ -62,7 +75,7 @@ class VerifyWikiTest(unittest.TestCase):
     def test_pre_publish_rejects_missing_article_image(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
-            write_article(root, "2026-07-01-first.md", "第一篇", "![图](images/01/missing.png)")
+            write_article(root, "2026-07-01-first.md", "第一篇", "![图](series-one/images/01/missing.png)")
 
             with self.assertRaisesRegex(ValueError, "image does not exist"):
                 verify_pre_publish(
@@ -75,8 +88,8 @@ class VerifyWikiTest(unittest.TestCase):
     def test_pre_publish_rejects_non_numbered_image_path(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
-            article = write_article(root, "2026-07-01-first.md", "第一篇", "![图](images/1/diagram.png)")
-            image = article.parent / "images" / "1" / "diagram.png"
+            article = write_article(root, "2026-07-01-first.md", "第一篇", "![图](series-one/images/1/diagram.png)")
+            image = article.parent / "series-one" / "images" / "1" / "diagram.png"
             image.parent.mkdir(parents=True)
             image.write_bytes(PNG_BYTES)
 
@@ -104,8 +117,8 @@ class VerifyWikiTest(unittest.TestCase):
     def test_pre_publish_rejects_image_extension_signature_mismatch(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
-            article = write_article(root, "2026-07-01-first.md", "第一篇", "![图](images/01/diagram.png)")
-            image = article.parent / "images" / "01" / "diagram.png"
+            article = write_article(root, "2026-07-01-first.md", "第一篇", "![图](series-one/images/01/diagram.png)")
+            image = article.parent / "series-one" / "images" / "01" / "diagram.png"
             image.parent.mkdir(parents=True)
             image.write_bytes(JPEG_BYTES)
 
@@ -120,8 +133,8 @@ class VerifyWikiTest(unittest.TestCase):
     def test_pre_publish_accepts_valid_pages_images_and_navigation(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
-            first = write_article(root, "2026-07-01-first.md", "第一篇", "![图](images/01/diagram.png)")
-            image = first.parent / "images" / "01" / "diagram.png"
+            first = write_article(root, "2026-07-01-first.md", "第一篇", "![图](series-one/images/01/diagram.png)")
+            image = first.parent / "series-one" / "images" / "01" / "diagram.png"
             image.parent.mkdir(parents=True)
             image.write_bytes(PNG_BYTES)
             write_article(root, "2026-07-02-second.md", "第二篇", "正文")
@@ -135,6 +148,39 @@ class VerifyWikiTest(unittest.TestCase):
 
             self.assertEqual(report.article_count, 2)
             self.assertEqual(report.image_count, 1)
+
+    def test_each_series_can_start_image_numbering_at_one(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            first = write_article(
+                root,
+                "2026-07-01-first.md",
+                "系列一首篇",
+                "![图](series-one/images/01/first.png)",
+            )
+            second = write_article(
+                root,
+                "2026-07-02-second.md",
+                "系列二首篇",
+                "![图](series-two/images/01/second.png)",
+                series="series-two",
+            )
+            first_image = first.parent / "series-one" / "images" / "01" / "first.png"
+            second_image = second.parent / "series-two" / "images" / "01" / "second.png"
+            first_image.parent.mkdir(parents=True)
+            second_image.parent.mkdir(parents=True)
+            first_image.write_bytes(PNG_BYTES)
+            second_image.write_bytes(PNG_BYTES)
+
+            report = verify_pre_publish(
+                root,
+                "Test Wiki",
+                "https://example.test/wiki",
+                "https://example.test/raw/main",
+            )
+
+            self.assertEqual(report.article_count, 2)
+            self.assertEqual(report.image_count, 2)
 
     def test_post_publish_rejects_stale_remote_markdown(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:

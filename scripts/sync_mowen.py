@@ -125,15 +125,16 @@ def rewrite_article_asset_urls(
     asset_base_url: str = ARTICLE_ASSET_BASE_URL,
 ) -> str:
     pattern = re.compile(
-        r"(?P<prefix>\]\()(?P<path>(?:(?:\.\./)+assets/|images/)[^)\s]+)"
+        r"(?P<prefix>\]\()(?P<path>(?:(?:\.\./)+assets/|"
+        r"(?:[a-z0-9][a-z0-9-]*/)?images/)[^)\s]+)"
     )
 
     def replace(match: re.Match[str]) -> str:
         path = match.group("path")
         asset_path = (
-            f"content/articles/{path}"
-            if path.startswith("images/")
-            else path[path.index("assets/") :]
+            path[path.index("assets/") :]
+            if "assets/" in path
+            else f"content/articles/{path}"
         )
         return f"{match.group('prefix')}{asset_base_url.rstrip('/')}/{asset_path}"
 
@@ -141,7 +142,9 @@ def rewrite_article_asset_urls(
 
 
 def discover_article_images(article: Article) -> list[tuple[str, Path, str]]:
-    pattern = re.compile(r"!\[[^\]]*\]\((?P<path>images/[^)\s]+)\)")
+    pattern = re.compile(
+        r"!\[[^\]]*\]\((?P<path>[a-z0-9][a-z0-9-]*/images/[^)\s]+)\)"
+    )
     images: list[tuple[str, Path, str]] = []
     for match in pattern.finditer(article.body):
         relative_path = match.group("path")
@@ -532,6 +535,23 @@ def ensure_article_images_uploaded(
             and cached.get("source_url") == public_url
         ):
             image_uuids.append(str(cached["uuid"]))
+            continue
+
+        series_prefix = f"{article.series}/"
+        legacy_path = (
+            relative_path[len(series_prefix) :]
+            if relative_path.startswith(series_prefix)
+            else ""
+        )
+        legacy = asset_mapping.get(legacy_path, {}) if legacy_path else {}
+        if legacy.get("uuid") and legacy.get("sha256") == digest:
+            asset_mapping[relative_path] = {
+                "uuid": legacy["uuid"],
+                "sha256": digest,
+                "source_url": public_url,
+            }
+            del asset_mapping[legacy_path]
+            image_uuids.append(str(legacy["uuid"]))
             continue
 
         wait_for_remote_asset(

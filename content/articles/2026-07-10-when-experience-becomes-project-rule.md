@@ -98,7 +98,7 @@ tags:
 
 这条从观察到自动化的路径，可以用一张图概括：
 
-![一次观察经过验证后，可以逐步成为项目规则、工作流和自动化脚本，也可以在任何阶段停止](images/05/experience-promotion-path.png)
+![一次观察经过验证后，可以逐步成为项目规则、工作流和自动化脚本，也可以在任何阶段停止](long-term-ai-work-system/images/05/experience-promotion-path.png)
 
 向右走并不代表更高级，只代表有效期更长、影响范围更大，因此也需要更强的证据。
 
