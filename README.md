@@ -121,8 +121,8 @@ python3 scripts/sync_wiki.py
 
 本仓库采用双许可证：
 
-- `.github/workflows/`、`scripts/`、`tests/` 和实验目录中的可执行代码采用 [MIT License](LICENSE-CODE)。
-- 文章、文档、模板、自制图片和非代码实验记录采用 [Creative Commons Attribution 4.0 International License](LICENSE-CONTENT)。
+- `.github/workflows/`、`scripts/`、`tests/` 和实验目录中的可执行代码采用 [MIT License](legal/MIT-LICENSE.md)。
+- 文章、文档、模板、自制图片和非代码实验记录采用 [Creative Commons Attribution 4.0 International License](LICENSE)。
 - 第三方素材继续遵守各自的许可和署名说明。
 
-除非文件另有声明，上述目录边界作为默认授权规则。
+除非文件另有声明，上述目录边界作为默认授权规则。详细范围见[许可证说明](legal/README.md)。

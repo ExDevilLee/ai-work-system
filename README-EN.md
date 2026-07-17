@@ -123,8 +123,8 @@ The script only syncs articles with `status: ready`. By default it only updates 
 
 This repository uses separate licenses for code and content:
 
-- `.github/workflows/`, `scripts/`, `tests/`, and executable code under experiment directories use the [MIT License](LICENSE-CODE).
-- Articles, documentation, templates, original images, and non-code experiment records use the [Creative Commons Attribution 4.0 International License](LICENSE-CONTENT).
+- `.github/workflows/`, `scripts/`, `tests/`, and executable code under experiment directories use the [MIT License](legal/MIT-LICENSE.md).
+- Articles, documentation, templates, original images, and non-code experiment records use the [Creative Commons Attribution 4.0 International License](LICENSE).
 - Third-party assets retain their original licenses and attribution requirements.
 
-Unless a file states otherwise, these directory boundaries define the default license.
+Unless a file states otherwise, these directory boundaries define the default license. See the [license scope](legal/README.md) for details.
