@@ -53,7 +53,7 @@ def write_series_catalog(root: Path) -> None:
 
 
 def write_ready_article(root: Path, filename: str, title: str, series: str) -> None:
-    path = root / "content" / "articles" / filename
+    path = root / "content" / "articles" / series / filename
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(
         f"---\ntitle: {title}\nstatus: ready\nseries: {series}\nsummary: 摘要\n---\n\n# {title}\n",
@@ -145,9 +145,13 @@ class SyncWikiTest(unittest.TestCase):
                 parse_frontmatter(article)
 
     def test_relative_article_assets_are_rewritten_for_wiki(self) -> None:
-        markdown = "![结构图](series-one/images/04/memory.png)"
+        markdown = "![结构图](images/04/memory.png)"
 
-        rewritten = rewrite_asset_urls(markdown, "https://example.test/repo/main")
+        rewritten = rewrite_asset_urls(
+            markdown,
+            "https://example.test/repo/main",
+            "content/articles/series-one",
+        )
 
         self.assertEqual(
             rewritten,
@@ -156,8 +160,8 @@ class SyncWikiTest(unittest.TestCase):
 
     def test_render_article_uses_public_asset_url(self) -> None:
         article = {
-            "path": Path.cwd() / "content/articles/example.md",
-            "body": "# 示例\n\n![结构图](series-one/images/01/example.png)\n",
+            "path": Path.cwd() / "content/articles/series-one/example.md",
+            "body": "# 示例\n\n![结构图](images/01/example.png)\n",
         }
 
         rendered = render_article(article, "https://example.test/repo/main")

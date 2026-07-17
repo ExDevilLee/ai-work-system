@@ -4,7 +4,7 @@
 
 ## 日常发布步骤
 
-1. 在 `content/articles/*.md` 写文章。
+1. 在 `content/articles/<series-id>/*.md` 写文章。
 1. 草稿阶段保持 `status: draft`。
 1. 初稿完成后判断配图是否能明显降低理解成本；需要时先生成图片、插入正文并完成本地预览，不需要时在阶段汇总中说明理由。
 1. 完成配图判断后，发布前审阅时可改为 `status: review`。
@@ -114,7 +114,7 @@ python3 scripts/sync_wiki.py --dry-run
 
 不要直接修改 Wiki 页面。
 
-回到主仓库修改 `content/articles/*.md`，保持源文为唯一内容源头，然后重新 push 触发同步。
+回到主仓库修改 `content/articles/<series-id>/*.md`，保持源文为唯一内容源头，然后重新 push 触发同步。
 
 ### 墨问文章或目录没有更新
 

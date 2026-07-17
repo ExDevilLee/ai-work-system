@@ -62,7 +62,7 @@ def write_article(
             ),
             encoding="utf-8",
         )
-    path = repo_root / "content" / "articles" / filename
+    path = repo_root / "content" / "articles" / series / filename
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(
         f"---\ntitle: {title}\nstatus: ready\nseries: {series}\nsummary: 摘要\n---\n\n# {title}\n\n{body}\n",
@@ -75,7 +75,7 @@ class VerifyWikiTest(unittest.TestCase):
     def test_pre_publish_rejects_missing_article_image(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
-            write_article(root, "2026-07-01-first.md", "第一篇", "![图](series-one/images/01/missing.png)")
+            write_article(root, "2026-07-01-first.md", "第一篇", "![图](images/01/missing.png)")
 
             with self.assertRaisesRegex(ValueError, "image does not exist"):
                 verify_pre_publish(
@@ -88,8 +88,8 @@ class VerifyWikiTest(unittest.TestCase):
     def test_pre_publish_rejects_non_numbered_image_path(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
-            article = write_article(root, "2026-07-01-first.md", "第一篇", "![图](series-one/images/1/diagram.png)")
-            image = article.parent / "series-one" / "images" / "1" / "diagram.png"
+            article = write_article(root, "2026-07-01-first.md", "第一篇", "![图](images/1/diagram.png)")
+            image = article.parent / "images" / "1" / "diagram.png"
             image.parent.mkdir(parents=True)
             image.write_bytes(PNG_BYTES)
 
@@ -117,8 +117,8 @@ class VerifyWikiTest(unittest.TestCase):
     def test_pre_publish_rejects_image_extension_signature_mismatch(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
-            article = write_article(root, "2026-07-01-first.md", "第一篇", "![图](series-one/images/01/diagram.png)")
-            image = article.parent / "series-one" / "images" / "01" / "diagram.png"
+            article = write_article(root, "2026-07-01-first.md", "第一篇", "![图](images/01/diagram.png)")
+            image = article.parent / "images" / "01" / "diagram.png"
             image.parent.mkdir(parents=True)
             image.write_bytes(JPEG_BYTES)
 
@@ -133,8 +133,8 @@ class VerifyWikiTest(unittest.TestCase):
     def test_pre_publish_accepts_valid_pages_images_and_navigation(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
-            first = write_article(root, "2026-07-01-first.md", "第一篇", "![图](series-one/images/01/diagram.png)")
-            image = first.parent / "series-one" / "images" / "01" / "diagram.png"
+            first = write_article(root, "2026-07-01-first.md", "第一篇", "![图](images/01/diagram.png)")
+            image = first.parent / "images" / "01" / "diagram.png"
             image.parent.mkdir(parents=True)
             image.write_bytes(PNG_BYTES)
             write_article(root, "2026-07-02-second.md", "第二篇", "正文")
@@ -156,17 +156,17 @@ class VerifyWikiTest(unittest.TestCase):
                 root,
                 "2026-07-01-first.md",
                 "系列一首篇",
-                "![图](series-one/images/01/first.png)",
+                "![图](images/01/first.png)",
             )
             second = write_article(
                 root,
                 "2026-07-02-second.md",
                 "系列二首篇",
-                "![图](series-two/images/01/second.png)",
+                "![图](images/01/second.png)",
                 series="series-two",
             )
-            first_image = first.parent / "series-one" / "images" / "01" / "first.png"
-            second_image = second.parent / "series-two" / "images" / "01" / "second.png"
+            first_image = first.parent / "images" / "01" / "first.png"
+            second_image = second.parent / "images" / "01" / "second.png"
             first_image.parent.mkdir(parents=True)
             second_image.parent.mkdir(parents=True)
             first_image.write_bytes(PNG_BYTES)

@@ -25,8 +25,7 @@ except ModuleNotFoundError:
 
 ARTICLE_IMAGE_PATTERN = re.compile(r"!\[[^\]]*\]\((?P<path>[^)\s]+)\)")
 NUMBERED_IMAGE_PATTERN = re.compile(
-    r"(?P<series>[a-z0-9][a-z0-9-]*)/images/"
-    r"(?P<number>\d{2})/(?P<filename>[^/\s)]+)$"
+    r"images/(?P<number>\d{2})/(?P<filename>[^/\s)]+)$"
 )
 
 
@@ -67,6 +66,12 @@ def article_images(
 ) -> list[tuple[str, Path]]:
     series_id = str(article.get("series_id") or "")
     sequence = int(article.get("series_sequence") or 0)
+    article_path = Path(article["path"])
+    if article_path.parent.name != series_id:
+        raise ValueError(
+            "[pre-publish] article directory does not match article series: "
+            f"{article_path}"
+        )
     images: list[tuple[str, Path]] = []
     for match in ARTICLE_IMAGE_PATTERN.finditer(str(article["body"])):
         relative_path = match.group("path")
@@ -76,12 +81,7 @@ def article_images(
         if not numbered:
             raise ValueError(
                 "[pre-publish] article image path must use "
-                f"<series-id>/images/<two-digit-number>/<filename>: {relative_path}"
-            )
-        if numbered.group("series") != series_id:
-            raise ValueError(
-                "[pre-publish] article image series does not match article frontmatter: "
-                f"{relative_path}"
+                f"images/<two-digit-number>/<filename>: {relative_path}"
             )
         if numbered.group("number") != f"{sequence:02d}":
             raise ValueError(
@@ -143,9 +143,8 @@ def validate_generated_wiki(
                 raise ValueError(f"[pre-publish] generated navigation mismatch: {page_path}")
             source = str(Path(article["path"]).relative_to(repo_root))
             for relative_path, _ in images_by_source[source]:
-                expected_url = (
-                    f"{asset_base_url.rstrip('/')}/content/articles/{relative_path}"
-                )
+                public_path = (Path(source).parent / relative_path).as_posix()
+                expected_url = f"{asset_base_url.rstrip('/')}/{public_path}"
                 if expected_url not in page:
                     raise ValueError(
                         f"[pre-publish] generated article image URL mismatch: {page_path}"

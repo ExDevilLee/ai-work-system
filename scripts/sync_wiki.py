@@ -77,14 +77,27 @@ def ready_articles(repo_root: Path = REPO_ROOT) -> list[dict[str, Any]]:
     catalog = load_series_catalog(repo_root)
     catalog_by_id = {entry["id"]: entry for entry in catalog}
     rows: list[tuple[Path, dict[str, object], str]] = []
-    for path in sorted((repo_root / "content" / "articles").glob("*.md")):
+    articles_dir = repo_root / "content" / "articles"
+    for path in articles_dir.rglob("*.md"):
         metadata, body = parse_frontmatter(path)
         if metadata.get("status") != "ready":
             continue
         series_id = str(metadata.get("series") or "")
         if series_id not in catalog_by_id:
             raise ValueError(f"Unknown article series '{series_id}' in {path.name}")
+        if path.parent != articles_dir / series_id:
+            raise ValueError(
+                f"Article must be stored under content/articles/{series_id}: {path}"
+            )
         rows.append((path, metadata, body))
+
+    rows.sort(
+        key=lambda item: (
+            int(catalog_by_id[str(item[1]["series"])]["order"]),
+            item[0].name,
+            item[0].as_posix(),
+        )
+    )
 
     series_counts: dict[str, int] = {}
     articles: list[dict[str, Any]] = []
@@ -160,7 +173,11 @@ def align_wiki_repo_with_remote(wiki_dir: Path) -> None:
         run(["git", "reset", "--hard", "origin/master"], cwd=wiki_dir)
 
 
-def rewrite_asset_urls(markdown: str, asset_base_url: str) -> str:
+def rewrite_asset_urls(
+    markdown: str,
+    asset_base_url: str,
+    article_source_dir: str = "content/articles",
+) -> str:
     pattern = re.compile(
         r"(?P<prefix>\]\()(?P<path>(?:(?:\.\./)+assets/|"
         r"(?:[a-z0-9][a-z0-9-]*/)?images/)[^)\s]+)"
@@ -171,7 +188,7 @@ def rewrite_asset_urls(markdown: str, asset_base_url: str) -> str:
         asset_path = (
             path[path.index("assets/") :]
             if "assets/" in path
-            else f"content/articles/{path}"
+            else f"{article_source_dir.rstrip('/')}/{path}"
         )
         return f"{match.group('prefix')}{asset_base_url.rstrip('/')}/{asset_path}"
 
@@ -212,7 +229,11 @@ def render_article(
     repo_root: Path = REPO_ROOT,
 ) -> str:
     source = Path(article["path"]).relative_to(repo_root)
-    body = rewrite_asset_urls(str(article["body"]), asset_base_url)
+    body = rewrite_asset_urls(
+        str(article["body"]),
+        asset_base_url,
+        Path(source).parent.as_posix(),
+    )
     navigation = render_article_navigation(
         wiki_base_url,
         previous_page,

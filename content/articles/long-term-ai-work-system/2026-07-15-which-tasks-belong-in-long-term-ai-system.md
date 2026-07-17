@@ -91,7 +91,7 @@ tags:
 
 重复频率和前后连续性组合起来，会得到四种不同的处理方式：
 
-![根据任务的重复频率和前后连续性，选择临时对话、复用模板、项目状态或长期工作系统](long-term-ai-work-system/images/14/task-systemization-matrix.png)
+![根据任务的重复频率和前后连续性，选择临时对话、复用模板、项目状态或长期工作系统](images/14/task-systemization-matrix.png)
 
 这说明“要不要进入系统”并不是一个简单的是非题。
 

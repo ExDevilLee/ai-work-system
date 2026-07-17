@@ -49,7 +49,7 @@ def write_series_catalog(root: Path) -> None:
 
 
 def write_article(root: Path, filename: str, title: str, series: str) -> None:
-    path = root / "content" / "articles" / filename
+    path = root / "content" / "articles" / series / filename
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(
         f"""---
@@ -83,6 +83,10 @@ class UpdateReadmeIndexTest(unittest.TestCase):
             self.assertEqual(
                 [(row["series_id"], row["series_sequence"]) for row in rows],
                 [("series-one", 1), ("series-one", 2), ("series-two", 1)],
+            )
+            self.assertEqual(
+                rows[0]["source"],
+                "content/articles/series-one/2026-07-01-one.md",
             )
 
     def test_index_lines_group_articles_and_use_series_directory_urls(self) -> None:

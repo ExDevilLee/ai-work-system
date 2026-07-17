@@ -52,7 +52,7 @@ tags:
 
 这些问题比“自动化程度有多高”更接近系统的真实价值。
 
-![真正减负的信号与系统变复杂的信号对照](long-term-ai-work-system/images/10/ai-work-system-value-signals.png)
+![真正减负的信号与系统变复杂的信号对照](images/10/ai-work-system-value-signals.png)
 
 ## 2. 用五个指标观察系统是否真的减负
 

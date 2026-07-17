@@ -345,9 +345,12 @@ class SyncMowenTest(unittest.TestCase):
         self.assertEqual(existing, [old])
 
     def test_relative_article_assets_are_rewritten_for_mowen(self) -> None:
-        markdown = "![结构图](series-one/images/04/memory.png)"
+        markdown = "![结构图](images/04/memory.png)"
 
-        rewritten = rewrite_article_asset_urls(markdown)
+        rewritten = rewrite_article_asset_urls(
+            markdown,
+            article_source_dir="content/articles/series-one",
+        )
 
         self.assertEqual(
             rewritten,
@@ -356,18 +359,18 @@ class SyncMowenTest(unittest.TestCase):
 
     def test_article_images_are_uploaded_cached_and_applied_to_document(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
-            article_path = Path(tmp) / "content" / "articles" / "article.md"
-            image_path = article_path.parent / "series-one" / "images" / "04" / "memory.png"
+            article_path = Path(tmp) / "content" / "articles" / "series-one" / "article.md"
+            image_path = article_path.parent / "images" / "04" / "memory.png"
             image_path.parent.mkdir(parents=True)
             image_path.write_bytes(b"article-image")
             article = Article(
                 article_path,
-                "content/articles/article.md",
+                "content/articles/series-one/article.md",
                 "文章",
                 "2026-07-11",
                 "",
                 ["AI"],
-                "# 文章\n\n![结构图](series-one/images/04/memory.png)\n",
+                "# 文章\n\n![结构图](images/04/memory.png)\n",
                 series="series-one",
             )
             mapping = {"version": 1, "directory": {}, "articles": {}}
@@ -403,18 +406,18 @@ class SyncMowenTest(unittest.TestCase):
 
     def test_moved_image_reuses_cached_uuid_by_hash(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
-            article_path = Path(tmp) / "content" / "articles" / "article.md"
-            image_path = article_path.parent / "series-one" / "images" / "04" / "memory.png"
+            article_path = Path(tmp) / "content" / "articles" / "series-one" / "article.md"
+            image_path = article_path.parent / "images" / "04" / "memory.png"
             image_path.parent.mkdir(parents=True)
             image_path.write_bytes(b"article-image")
             article = Article(
                 article_path,
-                "content/articles/article.md",
+                "content/articles/series-one/article.md",
                 "文章",
                 "2026-07-11",
                 "",
                 ["AI"],
-                "# 文章\n\n![结构图](series-one/images/04/memory.png)\n",
+                "# 文章\n\n![结构图](images/04/memory.png)\n",
                 series="series-one",
             )
             digest = hashlib.sha256(b"article-image").hexdigest()
@@ -423,7 +426,7 @@ class SyncMowenTest(unittest.TestCase):
                 "articles": {
                     article.source: {
                         "assets": {
-                            "images/04/memory.png": {
+                            "series-one/images/04/memory.png": {
                                 "uuid": "existing-uuid",
                                 "sha256": digest,
                                 "source_url": "https://example.test/old.png",
@@ -444,9 +447,9 @@ class SyncMowenTest(unittest.TestCase):
 
             assets = mapping["articles"][article.source]["assets"]
             self.assertEqual(uuids, ["existing-uuid"])
-            self.assertNotIn("images/04/memory.png", assets)
+            self.assertNotIn("series-one/images/04/memory.png", assets)
             self.assertEqual(
-                assets["series-one/images/04/memory.png"]["uuid"],
+                assets["images/04/memory.png"]["uuid"],
                 "existing-uuid",
             )
             self.assertEqual(client.calls, [])
@@ -503,7 +506,7 @@ class SyncMowenTest(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
             write_series_catalog(root)
-            articles_dir = root / "content" / "articles"
+            articles_dir = root / "content" / "articles" / "series-one"
             articles_dir.mkdir(parents=True)
             (articles_dir / "2026-07-09-old.md").write_text(
                 article_text("旧文章", "2026-07-09"), encoding="utf-8"
@@ -521,7 +524,10 @@ class SyncMowenTest(unittest.TestCase):
             articles = discover_ready_articles(root)
 
             self.assertEqual([item.title for item in articles], ["同日较新", "同日较早", "旧文章"])
-            self.assertEqual(articles[0].source, "content/articles/2026-07-10-zulu.md")
+            self.assertEqual(
+                articles[0].source,
+                "content/articles/series-one/2026-07-10-zulu.md",
+            )
             self.assertEqual([item.sequence for item in articles], [3, 2, 1])
 
     def test_discovery_resets_sequence_for_each_series(self) -> None:
@@ -529,16 +535,19 @@ class SyncMowenTest(unittest.TestCase):
             root = Path(tmp)
             write_series_catalog(root)
             articles_dir = root / "content" / "articles"
-            articles_dir.mkdir(parents=True, exist_ok=True)
-            (articles_dir / "2026-07-01-one.md").write_text(
+            series_one_dir = articles_dir / "series-one"
+            series_two_dir = articles_dir / "series-two"
+            series_one_dir.mkdir(parents=True, exist_ok=True)
+            series_two_dir.mkdir(parents=True, exist_ok=True)
+            (series_one_dir / "2026-07-01-one.md").write_text(
                 article_text("一之一", "2026-07-01", series="series-one"),
                 encoding="utf-8",
             )
-            (articles_dir / "2026-07-02-two.md").write_text(
+            (series_one_dir / "2026-07-02-two.md").write_text(
                 article_text("一之二", "2026-07-02", series="series-one"),
                 encoding="utf-8",
             )
-            (articles_dir / "2026-07-03-three.md").write_text(
+            (series_two_dir / "2026-07-03-three.md").write_text(
                 article_text("二之一", "2026-07-03", series="series-two"),
                 encoding="utf-8",
             )

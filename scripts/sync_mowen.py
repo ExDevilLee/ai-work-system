@@ -81,7 +81,8 @@ def discover_ready_articles(repo_root: Path = REPO_ROOT) -> list[Article]:
     catalog = load_series_catalog(repo_root)
     known_series = {entry["id"] for entry in catalog}
     articles: list[Article] = []
-    for path in (repo_root / "content" / "articles").glob("*.md"):
+    articles_dir = repo_root / "content" / "articles"
+    for path in articles_dir.rglob("*.md"):
         text = path.read_text(encoding="utf-8")
         if not text.startswith("---\n"):
             continue
@@ -94,6 +95,10 @@ def discover_ready_articles(repo_root: Path = REPO_ROOT) -> list[Article]:
         article = parse_article(path, repo_root)
         if article.series not in known_series:
             raise ValueError(f"Unknown article series '{article.series}' in {path.name}")
+        if path.parent != articles_dir / article.series:
+            raise ValueError(
+                f"Article must be stored under content/articles/{article.series}: {path}"
+            )
         articles.append(article)
     ordered = sorted(articles, key=lambda item: (item.date, item.source), reverse=True)
     series_counts: dict[str, int] = {}
@@ -123,6 +128,7 @@ def build_numbered_article_body(article: Article) -> str:
 def rewrite_article_asset_urls(
     markdown: str,
     asset_base_url: str = ARTICLE_ASSET_BASE_URL,
+    article_source_dir: str = "content/articles",
 ) -> str:
     pattern = re.compile(
         r"(?P<prefix>\]\()(?P<path>(?:(?:\.\./)+assets/|"
@@ -134,7 +140,7 @@ def rewrite_article_asset_urls(
         asset_path = (
             path[path.index("assets/") :]
             if "assets/" in path
-            else f"content/articles/{path}"
+            else f"{article_source_dir.rstrip('/')}/{path}"
         )
         return f"{match.group('prefix')}{asset_base_url.rstrip('/')}/{asset_path}"
 
@@ -142,9 +148,7 @@ def rewrite_article_asset_urls(
 
 
 def discover_article_images(article: Article) -> list[tuple[str, Path, str]]:
-    pattern = re.compile(
-        r"!\[[^\]]*\]\((?P<path>[a-z0-9][a-z0-9-]*/images/[^)\s]+)\)"
-    )
+    pattern = re.compile(r"!\[[^\]]*\]\((?P<path>images/[^)\s]+)\)")
     images: list[tuple[str, Path, str]] = []
     for match in pattern.finditer(article.body):
         relative_path = match.group("path")
@@ -346,7 +350,8 @@ def convert_article(
         input_path = temporary / "article.md"
         cache_path = temporary / "cache"
         converted_body = rewrite_article_asset_urls(
-            build_numbered_article_body(article)
+            build_numbered_article_body(article),
+            article_source_dir=Path(article.source).parent.as_posix(),
         )
         input_path.write_text(converted_body, encoding="utf-8")
         command = [
@@ -538,20 +543,24 @@ def ensure_article_images_uploaded(
             continue
 
         series_prefix = f"{article.series}/"
-        legacy_path = (
-            relative_path[len(series_prefix) :]
+        previous_paths = (
+            [relative_path[len(series_prefix) :]]
             if relative_path.startswith(series_prefix)
-            else ""
+            else [f"{series_prefix}{relative_path}"]
         )
-        legacy = asset_mapping.get(legacy_path, {}) if legacy_path else {}
-        if legacy.get("uuid") and legacy.get("sha256") == digest:
+        previous_path = next(
+            (path for path in previous_paths if path in asset_mapping),
+            "",
+        )
+        previous = asset_mapping.get(previous_path, {}) if previous_path else {}
+        if previous.get("uuid") and previous.get("sha256") == digest:
             asset_mapping[relative_path] = {
-                "uuid": legacy["uuid"],
+                "uuid": previous["uuid"],
                 "sha256": digest,
                 "source_url": public_url,
             }
-            del asset_mapping[legacy_path]
-            image_uuids.append(str(legacy["uuid"]))
+            del asset_mapping[previous_path]
+            image_uuids.append(str(previous["uuid"]))
             continue
 
         wait_for_remote_asset(

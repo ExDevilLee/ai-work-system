@@ -55,14 +55,26 @@ def article_rows(repo_root: Path = REPO_ROOT) -> list[dict[str, Any]]:
     catalog = load_series_catalog(repo_root)
     catalog_by_id = {entry["id"]: entry for entry in catalog}
     ready_paths: list[tuple[Path, dict[str, str]]] = []
-    for path in sorted(articles_dir.glob("*.md")):
+    for path in articles_dir.rglob("*.md"):
         metadata = parse_frontmatter(path)
         if metadata.get("status") != "ready":
             continue
         series_id = metadata.get("series", "")
         if series_id not in catalog_by_id:
             raise ValueError(f"Unknown article series '{series_id}' in {path.name}")
+        if path.parent != articles_dir / series_id:
+            raise ValueError(
+                f"Article must be stored under content/articles/{series_id}: {path}"
+            )
         ready_paths.append((path, metadata))
+
+    ready_paths.sort(
+        key=lambda item: (
+            int(catalog_by_id[item[1]["series"]]["order"]),
+            item[0].name,
+            item[0].as_posix(),
+        )
+    )
 
     series_counts: dict[str, int] = {}
     rows: list[dict[str, Any]] = []

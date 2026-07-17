@@ -132,7 +132,7 @@ tags:
 
 把这四种动作放在一起，内容在长期系统中的生命周期会更清楚：
 
-![一条经验从暂存观察到长期保留，再根据实际情况更新、合并、降级或删除](long-term-ai-work-system/images/11/content-lifecycle-and-cleanup.png)
+![一条经验从暂存观察到长期保留，再根据实际情况更新、合并、降级或删除](images/11/content-lifecycle-and-cleanup.png)
 
 清理不是否定过去的工作，而是让内容回到与它当前价值相匹配的位置。
 
