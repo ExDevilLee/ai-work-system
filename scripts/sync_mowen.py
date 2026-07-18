@@ -291,22 +291,6 @@ def directory_mapping(mapping: dict, series_id: str) -> dict:
     return mapping.setdefault("directories", {}).setdefault(series_id, {})
 
 
-def validate_registered_directories(
-    articles_by_series: dict[str, list[Article]],
-    mapping: dict,
-) -> None:
-    missing = [
-        series_id
-        for series_id in articles_by_series
-        if not directory_mapping(mapping, series_id).get("note_id")
-    ]
-    if missing:
-        raise ValueError(
-            "Register MoWen directory note IDs before publishing: "
-            + ", ".join(sorted(missing))
-        )
-
-
 def save_mapping(path: Path, mapping: dict) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     temporary = path.with_suffix(path.suffix + ".tmp")
@@ -849,7 +833,6 @@ def main() -> int:
         mcp_url=os.environ.get("MOWEN_MCP_URL"),
     )
     mapping = load_mapping(args.mapping)
-    validate_registered_directories(articles_by_series, mapping)
     update_existing = args.publish
     missing_articles, existing_articles = split_articles_by_mapping(articles, mapping)
     sync_article_batch(

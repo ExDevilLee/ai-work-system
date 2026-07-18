@@ -27,7 +27,6 @@ from scripts.sync_mowen import (
     split_articles_by_mapping,
     sync_articles,
     sync_directory,
-    validate_registered_directories,
     wait_for_remote_asset,
 )
 
@@ -269,25 +268,6 @@ class SyncMowenTest(unittest.TestCase):
 
         self.assertEqual(second, {})
         self.assertNotIn("note_id", second)
-
-    def test_remote_sync_requires_registered_directory_for_every_series(self) -> None:
-        mapping = {
-            "version": 2,
-            "directories": {
-                "series-one": {"note_id": "first-directory"},
-                "series-two": {},
-            },
-            "articles": {},
-        }
-
-        with self.assertRaisesRegex(
-            ValueError,
-            "Register MoWen directory note IDs.*series-two",
-        ):
-            validate_registered_directories(
-                {"series-one": [], "series-two": []},
-                mapping,
-            )
 
     @mock.patch("scripts.sync_mowen.urllib.request.urlopen")
     def test_client_logs_successful_call_count_without_quota_limit(self, urlopen: mock.Mock) -> None:
@@ -837,6 +817,40 @@ class SyncMowenTest(unittest.TestCase):
         sync_directory([article], mapping, client, publish=True, cover_uuid=None)
 
         self.assertEqual(mapping["directory"]["note_id"], "new-note-1")
+        self.assertEqual([call[0] for call in client.calls], ["create", "public"])
+
+    def test_missing_series_directory_is_created_during_publish(self) -> None:
+        article = Article(
+            Path("new.md"),
+            "content/articles/series-two/new.md",
+            "新文章",
+            "2026-07-10",
+            "",
+            ["AI"],
+            "# 新文章",
+            series="series-two",
+        )
+        mapping = {
+            "version": 2,
+            "directories": {"series-one": {"note_id": "first-directory"}},
+            "articles": {article.source: {"note_id": "article-id"}},
+        }
+        client = FakeMowenClient()
+
+        sync_directory(
+            [article],
+            mapping,
+            client,
+            publish=True,
+            cover_uuid=None,
+            series_id="series-two",
+            title="系列二目录",
+        )
+
+        self.assertEqual(
+            mapping["directories"]["series-two"]["note_id"],
+            "new-note-1",
+        )
         self.assertEqual([call[0] for call in client.calls], ["create", "public"])
 
     def test_existing_directory_is_not_changed_during_register_mode(self) -> None:
