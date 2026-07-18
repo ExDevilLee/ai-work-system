@@ -143,7 +143,7 @@ python3 scripts/sync_wiki.py --push
 
 GitHub Wiki 与 Gitee Wiki 共用 `scripts/verify_wiki.py`，在同一条发布流水线中执行两阶段检查：
 
-- 发布前：用标准 YAML 解析 frontmatter，检查 ready 文章配图是否存在、非空、路径编号正确、扩展名与文件签名一致；随后在临时目录全量生成 Wiki，检查页面清单、连续阅读导航和目标平台图片 URL。
+- 发布前：用标准 YAML 解析 frontmatter，检查 ready 文章配图是否存在、非空、路径编号正确、扩展名与文件签名一致，并拦截 GitHub Wiki 可能原样显示 `**` 的歧义加粗写法；随后在临时目录全量生成 Wiki，检查页面清单、连续阅读导航和目标平台图片 URL。
 - 发布后：重新克隆目标 Wiki 仓库，与本次预期生成的 Markdown 逐页比较；再请求全部正文配图并比较 SHA-256，确认远端不是可访问但内容陈旧的旧图。
 - 远端 Wiki 或图片存在短暂可见性延迟时，默认最多检查 6 次、每次间隔 10 秒。超过窗口后 workflow 失败，日志会标明 `pre-publish` / `post-publish` 以及具体页面或图片。
 

@@ -116,6 +116,18 @@ python3 scripts/sync_wiki.py --dry-run
 
 回到主仓库修改 `content/articles/<series-id>/*.md`，保持源文为唯一内容源头，然后重新 push 触发同步。
 
+如果 GitHub Wiki 把 `**` 原样显示，而不是渲染成加粗文字，检查结束标记前后是否直接连接了中文标点和正文。例如：
+
+```markdown
+<!-- 不稳定：中文右括号后结束加粗，结束标记后立即接正文 -->
+**Baseline（对照组）**把信息放在同一个文件中。
+
+<!-- 推荐：把冒号放进加粗范围，结束标记后留一个空格 -->
+**Baseline（对照组）：** 把信息放在同一个文件中。
+```
+
+GitHub Wiki 的 Markdown 解析器可能把 `）**把` 识别为普通文本。发布前检查会拦截这类“加粗内容以标点结束、结束标记后立即连接文字”的歧义写法；GitHub 仓库文件页能正常显示，也不能代替 Wiki 页面验证。
+
 ### 墨问文章或目录没有更新
 
 检查 `Sync MoWen` workflow，并确认仓库 Secret `MOWEN_API_KEY` 存在且有效。

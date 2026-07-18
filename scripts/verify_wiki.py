@@ -27,6 +27,9 @@ ARTICLE_IMAGE_PATTERN = re.compile(r"!\[[^\]]*\]\((?P<path>[^)\s]+)\)")
 NUMBERED_IMAGE_PATTERN = re.compile(
     r"images/(?P<number>\d{2})/(?P<filename>[^/\s)]+)$"
 )
+AMBIGUOUS_STRONG_EMPHASIS_PATTERN = re.compile(
+    r"\*\*[^*\n]*[^\w\s]\*\*(?=\w)"
+)
 
 
 @dataclass(frozen=True)
@@ -36,6 +39,16 @@ class VerificationReport:
 
 
 ImageReference = tuple[str, Path]
+
+
+def validate_markdown_emphasis(article: dict[str, str | Path]) -> None:
+    for line_number, line in enumerate(str(article["body"]).splitlines(), start=1):
+        if AMBIGUOUS_STRONG_EMPHASIS_PATTERN.search(line):
+            raise ValueError(
+                "[pre-publish] ambiguous strong emphasis may render as literal Markdown; "
+                "put punctuation inside the bold text and add a space after the closing **: "
+                f"{article['path']}:{line_number}"
+            )
 
 
 def detect_image_format(data: bytes) -> str | None:
@@ -162,6 +175,7 @@ def verify_pre_publish(
     image_count = 0
     for article in articles:
         source = str(Path(article["path"]).relative_to(repo_root))
+        validate_markdown_emphasis(article)
         images = article_images(article)
         images_by_source[source] = images
         image_count += len(images)

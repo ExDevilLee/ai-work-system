@@ -130,6 +130,43 @@ class VerifyWikiTest(unittest.TestCase):
                     "https://example.test/raw/main",
                 )
 
+    def test_pre_publish_rejects_ambiguous_strong_emphasis(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            write_article(
+                root,
+                "2026-07-01-first.md",
+                "第一篇",
+                "**Baseline（对照组）**把信息放在同一个文件中。",
+            )
+
+            with self.assertRaisesRegex(ValueError, "ambiguous strong emphasis"):
+                verify_pre_publish(
+                    root,
+                    "Test Wiki",
+                    "https://example.test/wiki",
+                    "https://example.test/raw/main",
+                )
+
+    def test_pre_publish_accepts_cross_platform_strong_emphasis(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            write_article(
+                root,
+                "2026-07-01-first.md",
+                "第一篇",
+                "**Baseline（对照组）：** 把信息放在同一个文件中。",
+            )
+
+            report = verify_pre_publish(
+                root,
+                "Test Wiki",
+                "https://example.test/wiki",
+                "https://example.test/raw/main",
+            )
+
+            self.assertEqual(report.article_count, 1)
+
     def test_pre_publish_accepts_valid_pages_images_and_navigation(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
