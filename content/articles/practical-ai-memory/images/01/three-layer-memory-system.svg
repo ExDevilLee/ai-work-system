@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900" viewBox="0 0 1600 900" role="img" aria-labelledby="title desc">
+  <title id="title">最小可用的三层 AI 记忆系统</title>
+  <desc id="desc">当前工作状态、稳定长期记忆和可索引资料分别承担恢复任务、保存稳定规则和按需查找资料的职责。</desc>
+  <rect width="1600" height="900" fill="#f7f8fa"/>
+  <style>
+    text { font-family: "PingFang SC", "Microsoft YaHei", sans-serif; }
+    .title { font-size: 42px; font-weight: 700; fill: #18212b; }
+    .subtitle { font-size: 22px; fill: #5b6573; }
+    .head { font-size: 28px; font-weight: 700; }
+    .file { font-size: 21px; font-weight: 600; fill: #33404d; }
+    .body { font-size: 20px; fill: #66717e; }
+    .task { font-size: 24px; font-weight: 700; fill: #33404d; }
+    .foot { font-size: 21px; font-weight: 600; fill: #4c5865; }
+  </style>
+
+  <text x="80" y="86" class="title">最小可用的三层 AI 记忆系统</text>
+  <text x="80" y="130" class="subtitle">不是把所有内容都常驻，而是让每类任务读取它真正需要的一层</text>
+
+  <rect x="565" y="170" width="470" height="92" rx="8" fill="#ffffff" stroke="#aeb7c2" stroke-width="3"/>
+  <text x="800" y="226" text-anchor="middle" class="task">新会话先判断：当前任务需要什么？</text>
+
+  <path d="M800 262 V310 M800 310 H300 V360 M800 310 V360 M800 310 H1300 V360" fill="none" stroke="#b8c0ca" stroke-width="4"/>
+  <circle cx="300" cy="360" r="7" fill="#1f8a70"/>
+  <circle cx="800" cy="360" r="7" fill="#d98138"/>
+  <circle cx="1300" cy="360" r="7" fill="#3772b9"/>
+
+  <rect x="80" y="370" width="440" height="330" rx="8" fill="#ffffff" stroke="#1f8a70" stroke-width="3"/>
+  <rect x="80" y="370" width="440" height="16" rx="8" fill="#1f8a70"/>
+  <text x="300" y="455" text-anchor="middle" class="head" fill="#176b58">当前工作状态</text>
+  <text x="300" y="505" text-anchor="middle" class="file">memory/CURRENT.md</text>
+  <text x="300" y="565" text-anchor="middle" class="body">当前目标、最近进展</text>
+  <text x="300" y="607" text-anchor="middle" class="body">下一步动作、阻塞项</text>
+  <text x="300" y="660" text-anchor="middle" class="body">变化快，任务恢复时读取</text>
+
+  <rect x="580" y="370" width="440" height="330" rx="8" fill="#ffffff" stroke="#d98138" stroke-width="3"/>
+  <rect x="580" y="370" width="440" height="16" rx="8" fill="#d98138"/>
+  <text x="800" y="455" text-anchor="middle" class="head" fill="#aa5c21">稳定长期记忆</text>
+  <text x="800" y="505" text-anchor="middle" class="file">memory/MEMORY.md</text>
+  <text x="800" y="565" text-anchor="middle" class="body">已确认事实、决定与规则</text>
+  <text x="800" y="607" text-anchor="middle" class="body">待验证观察、失效结论要标明</text>
+  <text x="800" y="660" text-anchor="middle" class="body">经过验证后更新，不频繁改写</text>
+
+  <rect x="1080" y="370" width="440" height="330" rx="8" fill="#ffffff" stroke="#3772b9" stroke-width="3"/>
+  <rect x="1080" y="370" width="440" height="16" rx="8" fill="#3772b9"/>
+  <text x="1300" y="455" text-anchor="middle" class="head" fill="#285b96">可索引资料</text>
+  <text x="1300" y="505" text-anchor="middle" class="file">references/INDEX.md</text>
+  <text x="1300" y="565" text-anchor="middle" class="body">清单、研究与原始资料</text>
+  <text x="1300" y="607" text-anchor="middle" class="body">通过索引找到目标文件</text>
+  <text x="1300" y="660" text-anchor="middle" class="body">需要时读取，不默认常驻</text>
+
+  <rect x="245" y="770" width="1110" height="70" rx="8" fill="#ffffff" stroke="#c5ccd4" stroke-width="2"/>
+  <text x="800" y="814" text-anchor="middle" class="foot">三层不是重要性排序，而是职责分工；规则入口负责告诉 AI 何时读取哪一层</text>
+</svg>

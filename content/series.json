@@ -16,6 +16,22 @@
         "文章按发布时间倒序排列，最新内容在最上方；第一次阅读时，也可以从最早的一篇开始。"
       ],
       "mowen_directory_url": "https://note.mowen.cn/detail/CGAIy3ZJS0VwC6wlH3je-"
+    },
+    {
+      "id": "practical-ai-memory",
+      "order": 2,
+      "title": "AI 长期记忆实战",
+      "title_en": "Practical AI Long-Term Memory",
+      "description": "用经过本地验证的 POC，逐步搭建可分层、可检索、可治理、可恢复的 AI 长期记忆系统。",
+      "description_en": "Build a layered, searchable, governable, and recoverable AI long-term memory system through locally validated POCs.",
+      "status": "active",
+      "wiki_page": "Series-02-Practical-AI-Memory",
+      "mowen_directory_title": "AI 长期记忆实战",
+      "mowen_directory_introduction": [
+        "这个系列不从复杂数据库开始，而是用真实 POC 验证长期记忆如何分层、检索、治理和恢复。",
+        "每篇文章都附带实验范围、数据、限制和可复现入口；文章按发布时间倒序排列。"
+      ],
+      "mowen_directory_url": ""
     }
   ]
 }
