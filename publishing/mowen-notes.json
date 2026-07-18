@@ -198,6 +198,24 @@
       "note_id": "F6hycW26Ax5NRwEknDab9",
       "published": true,
       "url": "https://note.mowen.cn/detail/F6hycW26Ax5NRwEknDab9"
+    },
+    "content/articles/practical-ai-memory/2026-07-17-three-layer-ai-memory-system.md": {
+      "assets": {
+        "images/01/three-layer-memory-system.png": {
+          "sha256": "a094a84d9f46451ef40e5a1a5ba6df688cfc5bdd538003aeeaef4ae7803ebfb8",
+          "source_url": "https://gitee.com/ExDevilLee/ai-work-system/raw/main/content/articles/practical-ai-memory/images/01/three-layer-memory-system.png",
+          "uuid": "WhMJXaEAYFpbVLrlDaqHQ-TMP"
+        }
+      },
+      "content_sha256": "76cba514aab983312a5586b1e44d465d6cb0e3ddd098be24968bf6d416e52d58",
+      "note_id": "6lD9GoSg8TA8e1CjQ4kC9",
+      "publication_blocked": {
+        "content_sha256": "76cba514aab983312a5586b1e44d465d6cb0e3ddd098be24968bf6d416e52d58",
+        "message": "MoWen MCP error: error: code = 403 reason = RISKY message = svc [NoteSvc.SetPrivacy]: note risky. metadata = map[] cause = <nil>",
+        "reason": "RISKY"
+      },
+      "published": false,
+      "url": "https://note.mowen.cn/detail/6lD9GoSg8TA8e1CjQ4kC9"
     }
   },
   "directories": {
