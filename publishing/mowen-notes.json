@@ -207,14 +207,9 @@
           "uuid": "WhMJXaEAYFpbVLrlDaqHQ-TMP"
         }
       },
-      "content_sha256": "76cba514aab983312a5586b1e44d465d6cb0e3ddd098be24968bf6d416e52d58",
+      "content_sha256": "dfd72a08934a2a2862fb4b885c98cbd8beea0791a85f69ca030159913d8310ad",
       "note_id": "6lD9GoSg8TA8e1CjQ4kC9",
-      "publication_blocked": {
-        "content_sha256": "76cba514aab983312a5586b1e44d465d6cb0e3ddd098be24968bf6d416e52d58",
-        "message": "MoWen MCP error: error: code = 403 reason = RISKY message = svc [NoteSvc.SetPrivacy]: note risky. metadata = map[] cause = <nil>",
-        "reason": "RISKY"
-      },
-      "published": false,
+      "published": true,
       "url": "https://note.mowen.cn/detail/6lD9GoSg8TA8e1CjQ4kC9"
     }
   },
@@ -227,6 +222,12 @@
       "note_id": "CGAIy3ZJS0VwC6wlH3je-",
       "published": true,
       "url": "https://note.mowen.cn/detail/CGAIy3ZJS0VwC6wlH3je-"
+    },
+    "practical-ai-memory": {
+      "content_sha256": "fc99f55f774caa3cb26149c627887944c73a25f4cce011bc40f8654a548a47f0",
+      "note_id": "IH2-o1ke6IjnS1LnhX2fJ",
+      "published": true,
+      "url": "https://note.mowen.cn/detail/IH2-o1ke6IjnS1LnhX2fJ"
     }
   },
   "version": 2
