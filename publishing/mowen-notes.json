@@ -224,7 +224,10 @@
       "url": "https://note.mowen.cn/detail/CGAIy3ZJS0VwC6wlH3je-"
     },
     "practical-ai-memory": {
-      "content_sha256": "fc99f55f774caa3cb26149c627887944c73a25f4cce011bc40f8654a548a47f0",
+      "content_sha256": "d03bf59ae48b538a083a5f72a58e900ede4409358a239a9a042bf5456a4f4b93",
+      "cover_sha256": "a094a84d9f46451ef40e5a1a5ba6df688cfc5bdd538003aeeaef4ae7803ebfb8",
+      "cover_source_url": "https://gitee.com/ExDevilLee/ai-work-system/raw/main/content/articles/practical-ai-memory/images/01/three-layer-memory-system.png",
+      "cover_uuid": "n_fKIeIyNXYrZr2Si3y_c-TMP",
       "note_id": "IH2-o1ke6IjnS1LnhX2fJ",
       "published": true,
       "url": "https://note.mowen.cn/detail/IH2-o1ke6IjnS1LnhX2fJ"
