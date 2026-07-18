@@ -147,6 +147,64 @@ def rewrite_article_asset_urls(
     return pattern.sub(replace, markdown)
 
 
+def rewrite_markdown_tables_as_lists(markdown: str) -> str:
+    """Keep table data readable without md-to-mowen generated image assets."""
+
+    def split_row(line: str) -> list[str]:
+        content = line.strip().strip("|")
+        return [cell.replace(r"\|", "|").strip() for cell in re.split(r"(?<!\\)\|", content)]
+
+    def is_separator(cells: list[str]) -> bool:
+        return bool(cells) and all(re.fullmatch(r":?-{3,}:?", cell) for cell in cells)
+
+    lines = markdown.splitlines()
+    rewritten: list[str] = []
+    index = 0
+    fence: str | None = None
+    while index < len(lines):
+        line = lines[index]
+        stripped = line.lstrip()
+        marker = stripped[:3]
+        if marker in {"```", "~~~"}:
+            fence = None if fence == marker else marker
+            rewritten.append(line)
+            index += 1
+            continue
+
+        if (
+            fence is None
+            and line.strip().startswith("|")
+            and index + 1 < len(lines)
+        ):
+            headers = split_row(line)
+            separators = split_row(lines[index + 1])
+            if len(headers) == len(separators) and is_separator(separators):
+                rows: list[list[str]] = []
+                cursor = index + 2
+                while cursor < len(lines) and lines[cursor].strip().startswith("|"):
+                    cells = split_row(lines[cursor])
+                    if len(cells) != len(headers):
+                        break
+                    rows.append(cells)
+                    cursor += 1
+                if rows:
+                    for cells in rows:
+                        fields = [
+                            f"{header}：{value}"
+                            for header, value in zip(headers, cells)
+                            if header and value
+                        ]
+                        rewritten.append("- " + "；".join(fields))
+                    index = cursor
+                    continue
+
+        rewritten.append(line)
+        index += 1
+
+    suffix = "\n" if markdown.endswith("\n") else ""
+    return "\n".join(rewritten) + suffix
+
+
 def discover_article_images(article: Article) -> list[tuple[str, Path, str]]:
     pattern = re.compile(r"!\[[^\]]*\]\((?P<path>images/[^)\s]+)\)")
     images: list[tuple[str, Path, str]] = []
@@ -333,8 +391,10 @@ def convert_article(
         temporary = Path(tmp)
         input_path = temporary / "article.md"
         cache_path = temporary / "cache"
+        # The converter renders GFM tables as temporary images. Convert them to
+        # text lists so the custom URL-based image uploader sees only real assets.
         converted_body = rewrite_article_asset_urls(
-            build_numbered_article_body(article),
+            rewrite_markdown_tables_as_lists(build_numbered_article_body(article)),
             article_source_dir=Path(article.source).parent.as_posix(),
         )
         input_path.write_text(converted_body, encoding="utf-8")

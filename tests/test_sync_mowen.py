@@ -23,6 +23,7 @@ from scripts.sync_mowen import (
     load_mapping,
     replace_document_image_uuids,
     rewrite_article_asset_urls,
+    rewrite_markdown_tables_as_lists,
     save_mapping,
     split_articles_by_mapping,
     sync_articles,
@@ -336,6 +337,30 @@ class SyncMowenTest(unittest.TestCase):
             rewritten,
             "![结构图](https://gitee.com/ExDevilLee/ai-work-system/raw/main/content/articles/series-one/images/04/memory.png)",
         )
+
+    def test_rewrite_markdown_tables_as_lists_preserves_table_data(self) -> None:
+        markdown = """实验结果：
+
+| 任务 | Baseline | Layered | 减少比例 |
+| --- | ---: | ---: | ---: |
+| 恢复当前任务 | 3,628 B | 575 B | 84.2% |
+| 识别稳定规则 | 3,628 B | 1,595 B | 56.0% |
+
+后续说明。
+"""
+
+        rewritten = rewrite_markdown_tables_as_lists(markdown)
+
+        self.assertNotIn("| ---", rewritten)
+        self.assertIn(
+            "- 任务：恢复当前任务；Baseline：3,628 B；Layered：575 B；减少比例：84.2%",
+            rewritten,
+        )
+        self.assertIn(
+            "- 任务：识别稳定规则；Baseline：3,628 B；Layered：1,595 B；减少比例：56.0%",
+            rewritten,
+        )
+        self.assertIn("后续说明。", rewritten)
 
     def test_article_images_are_uploaded_cached_and_applied_to_document(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
