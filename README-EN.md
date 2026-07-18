@@ -82,6 +82,8 @@ Build a layered, searchable, governable, and recoverable AI long-term memory sys
 
 - [How Can You Build a Minimum Three-Layer AI Memory System with Folders and Markdown?](https://github.com/ExDevilLee/ai-work-system/wiki/16-%E5%8F%AA%E7%94%A8%E6%96%87%E4%BB%B6%E5%A4%B9%E5%92%8C-Markdown%EF%BC%8C%E6%80%8E%E4%B9%88%E6%90%AD%E4%B8%80%E4%B8%AA%E6%9C%80%E5%B0%8F%E5%8F%AF%E7%94%A8%E7%9A%84%E4%B8%89%E5%B1%82-AI-%E8%AE%B0%E5%BF%86%E7%B3%BB%E7%BB%9F%EF%BC%9F)
 
+[MoWen series collection](https://note.mowen.cn/detail/IH2-o1ke6IjnS1LnhX2fJ)
+
 Article titles link to the GitHub Wiki reading pages by default; [Gitee Wiki](https://gitee.com/ExDevilLee/ai-work-system/wikis/Home) stays in sync. Source Markdown is available from each Wiki page's source link.
 
 Article bodies are currently written in Chinese first. English titles are provided for navigation; full English translations may be added selectively.

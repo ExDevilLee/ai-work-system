@@ -960,6 +960,29 @@ class SyncMowenTest(unittest.TestCase):
             self.assertEqual(mapping["directory"]["cover_source_url"], "https://example.test/cover.jpg")
             self.assertEqual(len(mapping["directory"]["cover_sha256"]), 64)
 
+    def test_cover_upload_is_cached_per_series(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            cover = Path(tmp) / "cover.png"
+            cover.write_bytes(b"series-two-cover")
+            mapping = {"version": 2, "directories": {}, "articles": {}}
+            client = FakeMowenClient()
+
+            uuid = ensure_cover_uploaded(
+                cover,
+                "https://example.test/series-two-cover.png",
+                mapping,
+                client,
+                fetcher=lambda _: b"series-two-cover",
+                series_id="series-two",
+            )
+
+            self.assertEqual(uuid, "cover-uuid")
+            self.assertNotIn("cover_uuid", mapping["directories"].get("series-one", {}))
+            self.assertEqual(
+                mapping["directories"]["series-two"]["cover_uuid"],
+                "cover-uuid",
+            )
+
     def test_cover_upload_rejects_stale_remote_content(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             cover = Path(tmp) / "cover.jpg"

@@ -92,9 +92,7 @@ jobs:
         if: steps.changes.outputs.publish == 'true'
         env:
           MOWEN_API_KEY: ${{ secrets.MOWEN_API_KEY }}
-        run: |
-          python scripts/sync_mowen.py --publish \
-            --cover-url "https://gitee.com/ExDevilLee/ai-work-system/raw/main/assets/mowen/ai-work-system-cover.jpg"
+        run: python scripts/sync_mowen.py --publish
 
       # Preserve partial progress after quota, moderation, or other publishing
       # interruptions without triggering another CI run from the bot commit.

@@ -47,6 +47,20 @@ def load_series_catalog(repo_root: Path) -> list[dict[str, Any]]:
                 raise ValueError(f"Series field '{field}' must be a non-empty string")
         if not isinstance(entry.get("mowen_directory_url", ""), str):
             raise ValueError("Series field 'mowen_directory_url' must be a string")
+        cover_path = entry.get("mowen_cover_path")
+        cover_url = entry.get("mowen_cover_url")
+        if bool(cover_path) != bool(cover_url):
+            raise ValueError(
+                "Series fields 'mowen_cover_path' and 'mowen_cover_url' must be configured together"
+            )
+        if cover_path:
+            if not isinstance(cover_path, str):
+                raise ValueError("Series field 'mowen_cover_path' must be a string")
+            relative_cover = Path(cover_path)
+            if relative_cover.is_absolute() or ".." in relative_cover.parts:
+                raise ValueError("Series field 'mowen_cover_path' must stay inside the repository")
+            if not isinstance(cover_url, str) or not cover_url.startswith("https://"):
+                raise ValueError("Series field 'mowen_cover_url' must use HTTPS")
         introduction = entry.get("mowen_directory_introduction")
         if introduction is not None and (
             not isinstance(introduction, list)

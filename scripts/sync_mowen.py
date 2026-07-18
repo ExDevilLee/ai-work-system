@@ -903,14 +903,25 @@ def main() -> int:
         publish=args.publish,
         update_existing=update_existing,
     )
-    first_directory = directory_mapping(mapping, FIRST_SERIES_ID)
-    cover_uuid = first_directory.get("cover_uuid")
-    if args.cover_url:
-        cover_uuid = ensure_cover_uploaded(
-            args.cover_path,
-            args.cover_url,
+    cover_uuids: dict[str, str] = {}
+    for series in catalog:
+        series_id = str(series["id"])
+        configured_path = series.get("mowen_cover_path")
+        configured_url = series.get("mowen_cover_url")
+        if series_id == FIRST_SERIES_ID and args.cover_url:
+            cover_path = args.cover_path
+            cover_url = args.cover_url
+        elif configured_path and configured_url:
+            cover_path = REPO_ROOT / str(configured_path)
+            cover_url = str(configured_url)
+        else:
+            continue
+        cover_uuids[series_id] = ensure_cover_uploaded(
+            cover_path,
+            cover_url,
             mapping,
             client,
+            series_id=series_id,
         )
         save_mapping(args.mapping, mapping)
     missing_series = {article.series for article in missing_articles}
@@ -927,7 +938,7 @@ def main() -> int:
             mapping,
             client,
             publish=args.publish,
-            cover_uuid=cover_uuid if series_id == FIRST_SERIES_ID else None,
+            cover_uuid=cover_uuids.get(series_id),
             update_existing=update_existing,
             series_id=series_id,
             title=str(series["mowen_directory_title"]),
@@ -956,7 +967,7 @@ def main() -> int:
             mapping,
             client,
             publish=args.publish,
-            cover_uuid=cover_uuid if series_id == FIRST_SERIES_ID else None,
+            cover_uuid=cover_uuids.get(series_id),
             update_existing=update_existing,
             series_id=series_id,
             title=str(series["mowen_directory_title"]),

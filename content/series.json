@@ -15,6 +15,8 @@
         "这里记录我如何把 AI 从一次性聊天工具，逐步放进一个有记忆、有流程、有证据、有复盘的长期工作系统。",
         "文章按发布时间倒序排列，最新内容在最上方；第一次阅读时，也可以从最早的一篇开始。"
       ],
+      "mowen_cover_path": "assets/mowen/ai-work-system-cover.jpg",
+      "mowen_cover_url": "https://gitee.com/ExDevilLee/ai-work-system/raw/main/assets/mowen/ai-work-system-cover.jpg",
       "mowen_directory_url": "https://note.mowen.cn/detail/CGAIy3ZJS0VwC6wlH3je-"
     },
     {
@@ -31,7 +33,9 @@
         "这个系列不从复杂数据库开始，而是用真实 POC 验证长期记忆如何分层、检索、治理和恢复。",
         "每篇文章都附带实验范围、数据、限制和可复现入口；文章按发布时间倒序排列。"
       ],
-      "mowen_directory_url": ""
+      "mowen_cover_path": "content/articles/practical-ai-memory/images/01/three-layer-memory-system.png",
+      "mowen_cover_url": "https://gitee.com/ExDevilLee/ai-work-system/raw/main/content/articles/practical-ai-memory/images/01/three-layer-memory-system.png",
+      "mowen_directory_url": "https://note.mowen.cn/detail/IH2-o1ke6IjnS1LnhX2fJ"
     }
   ]
 }
