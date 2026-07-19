@@ -84,6 +84,8 @@ python run_experiment.py layered `
 
 只有 smoke test 全部通过后，执行 18 次正式矩阵：
 
+正式矩阵前，Win11 Codex CLI 应与 macOS 正式证据使用的 `0.144.1` 对齐。不同 CLI 版本可以用于 smoke 兼容性检查，但不能直接归因于平台差异；如果 Win11 无法安装相同版本，应停止正式矩阵，并把当前结果单列为版本不同的兼容性样本。
+
 ```powershell
 python run_formal_matrix.py `
   --platform-tag win11 `
@@ -159,5 +161,6 @@ python validate_public_runs.py --require-runs
 
 - 参数探测只使用已经确认支持 `argparse` 的脚本版本；拉取更新后先执行 `python run_formal_matrix.py --help`，帮助命令必须只显示帮助并以退出码 0 结束。
 - 如果旧脚本因 `--help` 误启动任务，在 Codex 调用前失败且仓库仍干净，可以把残留运行目录移出仓库并记录原路径、时间和失败阶段；不要删除或覆盖无法确认来源的目录。
+- Windows npm 的 `codex.cmd` 可能截断作为命令参数传入的多行 prompt。运行器必须向 Codex 传入 `-`，并通过 UTF-8 stdin 发送完整 prompt；不要恢复为把 prompt 文本直接追加到 `.cmd` 参数。
 - 任一运行目录已存在但缺少 `metadata.json` 时，矩阵脚本会停止。先隔离并检查该目录，不要通过修改脚本跳过不完整证据。
 - 任何门禁失败后都不要继续 smoke test；修复并重新记录环境检查结果后再执行。

@@ -55,6 +55,14 @@ class Utf8CommandTest(unittest.TestCase):
         self.assertEqual(result.stdout, "标准输出")
         self.assertEqual(result.stderr, "错误输出")
 
+    def test_forwards_multiline_utf8_stdin(self) -> None:
+        prompt = "第一行：恢复当前任务\n第二行：查找稳定规则\n第三行：给出来源"
+        script = "import sys; sys.stdout.buffer.write(sys.stdin.buffer.read())"
+        result = run_utf8_command(
+            [sys.executable, "-c", script], input_text=prompt
+        )
+        self.assertEqual(result.stdout, prompt)
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -48,7 +48,7 @@ def resolve_codex_executable() -> str:
 
 
 def run_utf8_command(
-    command: Sequence[str], *, check: bool = False
+    command: Sequence[str], *, check: bool = False, input_text: Optional[str] = None
 ) -> subprocess.CompletedProcess[str]:
     return subprocess.run(
         command,
@@ -56,6 +56,7 @@ def run_utf8_command(
         capture_output=True,
         text=True,
         encoding="utf-8",
+        input=input_text,
     )
 
 
@@ -157,10 +158,11 @@ def main() -> int:
             command.extend(
                 ["--config", f'model_reasoning_effort="{args.reasoning_effort}"']
             )
-        command.append(prompt_path.read_text(encoding="utf-8"))
+        prompt_text = prompt_path.read_text(encoding="utf-8")
+        command.append("-")
 
         started = time.monotonic()
-        result = run_utf8_command(command)
+        result = run_utf8_command(command, input_text=prompt_text)
         elapsed_seconds = round(time.monotonic() - started, 3)
 
     (run_dir / "raw.jsonl").write_text(result.stdout, encoding="utf-8")
@@ -234,7 +236,7 @@ def main() -> int:
             for item in workspace_commands
         )
         + sum(value for value in mixed_adjustments if value is not None),
-        "command_shape": "codex exec -C <isolated-workspace> --skip-git-repo-check --sandbox read-only --ephemeral --json --output-last-message <file> [--model <model>] [--config model_reasoning_effort=<effort>] <prompt>",
+        "command_shape": "codex exec -C <isolated-workspace> --skip-git-repo-check --sandbox read-only --ephemeral --json --output-last-message <file> [--model <model>] [--config model_reasoning_effort=<effort>] -; prompt transport: UTF-8 stdin",
     }
     (run_dir / "metadata.json").write_text(
         json.dumps(metadata, ensure_ascii=False, indent=2) + "\n",
