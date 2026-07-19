@@ -47,13 +47,16 @@ git check-attr eol -- prompts/current-task.md
 
 ## 3. 依赖与 smoke test
 
-先验证仓库已经提交的 macOS 精简公开证据包：
+先运行跨平台哈希回归测试，再验证仓库已经提交的 macOS 精简公开证据包：
 
 ```powershell
+python -m unittest test_run_experiment.py
 python validate_committed_evidence.py
 ```
 
 `runs/public/` 是被 Git 忽略的本地脱敏中间层，新检出的仓库没有该目录是正常状态。此时不要把 `0 public runs` 当作阻塞；`validate_public_runs.py` 只在本机完成脱敏导出后运行。
+
+`tree_checksum()` 必须按 POSIX 相对路径字符串排序，不能直接依赖 Windows 或 macOS 的 `Path` 排序。Windows 默认不区分大小写的路径顺序可能把 `references/INDEX.md` 排到小写文件之后，导致内容未变化但夹具哈希不同。
 
 然后执行 6 次 smoke test，每个任务各运行 Baseline 和 Layered 一次。下面的两条命令先用 `current-task`，再把任务名替换为 `stable-rules` 和 `reference-retrieval`：
 
