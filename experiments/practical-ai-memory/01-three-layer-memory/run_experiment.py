@@ -40,6 +40,13 @@ def tree_checksum(root: Path) -> str:
     return digest.hexdigest()
 
 
+def resolve_codex_executable() -> str:
+    executable = shutil.which("codex")
+    if executable is None:
+        raise SystemExit("codex executable was not found on PATH")
+    return executable
+
+
 def command_output(*args: str) -> str:
     result = subprocess.run(args, check=True, capture_output=True, text=True)
     return result.stdout.strip()
@@ -104,6 +111,7 @@ def main() -> int:
     if not prompt_path.is_file():
         raise SystemExit(f"prompt does not exist: {prompt_path}")
 
+    codex_executable = resolve_codex_executable()
     started_at = datetime.now(timezone.utc)
     run_name = f"{args.label}-{args.task}-{args.condition}"
     run_dir = ROOT / "runs" / "private" / args.platform_tag / run_name
@@ -119,7 +127,7 @@ def main() -> int:
         shutil.copytree(fixture, workspace)
 
         command = [
-            "codex",
+            codex_executable,
             "exec",
             "-C",
             str(workspace),
@@ -189,7 +197,7 @@ def main() -> int:
         "platform": platform.platform(),
         "platform_tag": args.platform_tag,
         "python_version": platform.python_version(),
-        "codex_version": command_output("codex", "--version"),
+        "codex_version": command_output(codex_executable, "--version"),
         "requested_model": args.model,
         "reasoning_effort": args.reasoning_effort,
         "model_record_status": "explicit" if args.model else "implicit default; model not emitted in JSONL",
