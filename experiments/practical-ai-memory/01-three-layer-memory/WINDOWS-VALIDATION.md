@@ -1,6 +1,6 @@
 # Win11 验证方案
 
-本文档用于在真实 Windows 11 设备上复现第一篇文章的三层 AI 记忆系统 POC。它是验证执行手册，不代表 Win11 结果已经完成，也不改变当前文章只包含 macOS 证据的结论。
+本文档用于在真实 Windows 11 设备上复现第一篇文章的三层 AI 记忆系统 POC。Win11 正式验证已于 2026-07-20 完成；本文继续作为复现手册保留。最终结果和 macOS 对照见 [`analysis/formal-macos-win11-comparison.md`](analysis/formal-macos-win11-comparison.md)。
 
 ## 1. 仓库与安全边界
 
@@ -11,7 +11,7 @@
 - POC 目录：`experiments/practical-ai-memory/01-three-layer-memory`
 - 验证主题：三层 AI 记忆系统 POC
 
-macOS 已完成 `gpt-5.6-sol medium` 的 18 次正式实验和 6 次探索性模型对照；Windows 尚未验证。本次只验证 Win11，不修改正式文章结论。
+macOS 与 Win11 已分别完成 `gpt-5.6-sol medium` 的 18 次正式实验；macOS 另有 6 次探索性模型对照。复现时仍只验证 Win11，不混入模型敏感性对照。
 
 执行前必须确认：
 
@@ -155,7 +155,7 @@ python validate_public_runs.py --require-runs
 4. Windows 特有异常、路径兼容性问题、Codex CLI 行为差异和修复方式。
 5. 脱敏检查结果，以及确认没有上传私有原始记录。
 
-在这些证据完成前，文章只能写“Windows 待验证”，不能写“已跨平台验证”。
+完成上述证据门禁后，可以写“同一协议已在 macOS 与 Win11 独立复现”，但不能扩展为所有 Windows 环境都兼容，也不能写成已经验证跨设备双向同步。
 
 ## 8. 中断与误触发处理
 

@@ -1,0 +1,19 @@
+run_name,purpose,task,condition,model,reasoning_effort,codex_version,score,max_score,workspace_command_calls,workspace_output_bytes,workspace_output_bytes_reliable,workspace_metric_coverage_complete,workspace_metric_unmeasured_tool_calls,workspace_mcp_tool_calls,workspace_mcp_output_bytes,elapsed_seconds,input_tokens,cached_input_tokens,output_tokens,reasoning_output_tokens
+formal-01-current-task-baseline,formal run,current-task,baseline,gpt-5.6-sol,medium,codex-cli 0.144.1,5,5,4,9824,True,True,0,0,0,70.157,127937,104960,1056,265
+formal-01-current-task-layered,formal run,current-task,layered,gpt-5.6-sol,medium,codex-cli 0.144.1,5,5,4,2600,True,True,0,0,0,57.109,101271,65280,877,227
+formal-01-reference-retrieval-baseline,formal run,reference-retrieval,baseline,gpt-5.6-sol,medium,codex-cli 0.144.1,8,8,2,4104,True,True,0,2,4104,80.187,143341,116224,1279,329
+formal-01-reference-retrieval-layered,formal run,reference-retrieval,layered,gpt-5.6-sol,medium,codex-cli 0.144.1,8,8,4,1287,True,True,0,0,0,66.188,101141,69376,1110,361
+formal-01-stable-rules-baseline,formal run,stable-rules,baseline,gpt-5.6-sol,medium,codex-cli 0.144.1,10,10,2,11706,True,True,0,0,0,69.0,89968,64512,1461,644
+formal-01-stable-rules-layered,formal run,stable-rules,layered,gpt-5.6-sol,medium,codex-cli 0.144.1,10,10,3,3239,True,True,0,0,0,62.468,102930,82688,1152,352
+formal-02-current-task-baseline,formal run,current-task,baseline,gpt-5.6-sol,medium,codex-cli 0.144.1,5,5,3,4728,True,True,0,1,3628,60.313,153030,110848,1169,357
+formal-02-current-task-layered,formal run,current-task,layered,gpt-5.6-sol,medium,codex-cli 0.144.1,5,5,5,2962,True,True,0,0,0,63.594,143625,137472,1092,365
+formal-02-reference-retrieval-baseline,formal run,reference-retrieval,baseline,gpt-5.6-sol,medium,codex-cli 0.144.1,8,8,6,6688,True,True,0,0,0,80.25,128358,89600,1427,455
+formal-02-reference-retrieval-layered,formal run,reference-retrieval,layered,gpt-5.6-sol,medium,codex-cli 0.144.1,8,8,4,1630,True,True,0,0,0,60.047,122263,104960,1139,292
+formal-02-stable-rules-baseline,formal run,stable-rules,baseline,gpt-5.6-sol,medium,codex-cli 0.144.1,10,10,3,2121,True,True,0,0,0,80.25,126069,103936,1481,485
+formal-02-stable-rules-layered,formal run,stable-rules,layered,gpt-5.6-sol,medium,codex-cli 0.144.1,10,10,3,3243,True,True,0,0,0,64.922,103011,65280,1162,325
+formal-03-current-task-baseline,formal run,current-task,baseline,gpt-5.6-sol,medium,codex-cli 0.144.1,5,5,4,9869,True,True,0,0,0,87.063,149732,105728,1277,409
+formal-03-current-task-layered,formal run,current-task,layered,gpt-5.6-sol,medium,codex-cli 0.144.1,5,5,5,2558,True,True,0,0,0,103.0,143786,123136,1315,410
+formal-03-reference-retrieval-baseline,formal run,reference-retrieval,baseline,gpt-5.6-sol,medium,codex-cli 0.144.1,8,8,5,6232,True,True,0,0,0,80.203,149033,139520,1343,399
+formal-03-reference-retrieval-layered,formal run,reference-retrieval,layered,gpt-5.6-sol,medium,codex-cli 0.144.1,8,8,4,1690,True,True,0,0,0,68.0,101940,97024,1252,453
+formal-03-stable-rules-baseline,formal run,stable-rules,baseline,gpt-5.6-sol,medium,codex-cli 0.144.1,10,10,3,10055,True,True,0,0,0,80.234,110447,100096,1551,559
+formal-03-stable-rules-layered,formal run,stable-rules,layered,gpt-5.6-sol,medium,codex-cli 0.144.1,10,10,3,3536,True,True,0,1,1756,62.594,111325,86784,1057,206

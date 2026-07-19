@@ -1,0 +1,276 @@
+{
+  "selection_prefix": "formal-",
+  "platform_tag": "win11",
+  "run_count": 18,
+  "model_configuration": {
+    "model": "gpt-5.6-sol",
+    "reasoning_effort": "medium",
+    "codex_version": "codex-cli 0.144.1"
+  },
+  "groups": {
+    "current-task:baseline": {
+      "n": 3,
+      "correctness": {
+        "score": 15,
+        "max_score": 15
+      },
+      "workspace_metrics_n": 3,
+      "workspace_command_calls": {
+        "min": 3.0,
+        "median": 4.0,
+        "mean": 3.667,
+        "max": 4.0
+      },
+      "workspace_output_bytes": {
+        "min": 4728.0,
+        "median": 9824.0,
+        "mean": 8140.333,
+        "max": 9869.0
+      },
+      "elapsed_seconds": {
+        "min": 60.313,
+        "median": 70.157,
+        "mean": 72.511,
+        "max": 87.063
+      },
+      "input_tokens": {
+        "min": 127937.0,
+        "median": 149732.0,
+        "mean": 143566.333,
+        "max": 153030.0
+      },
+      "output_tokens": {
+        "min": 1056.0,
+        "median": 1169.0,
+        "mean": 1167.333,
+        "max": 1277.0
+      },
+      "reasoning_output_tokens": {
+        "min": 265.0,
+        "median": 357.0,
+        "mean": 343.667,
+        "max": 409.0
+      }
+    },
+    "current-task:layered": {
+      "n": 3,
+      "correctness": {
+        "score": 15,
+        "max_score": 15
+      },
+      "workspace_metrics_n": 3,
+      "workspace_command_calls": {
+        "min": 4.0,
+        "median": 5.0,
+        "mean": 4.667,
+        "max": 5.0
+      },
+      "workspace_output_bytes": {
+        "min": 2558.0,
+        "median": 2600.0,
+        "mean": 2706.667,
+        "max": 2962.0
+      },
+      "elapsed_seconds": {
+        "min": 57.109,
+        "median": 63.594,
+        "mean": 74.568,
+        "max": 103.0
+      },
+      "input_tokens": {
+        "min": 101271.0,
+        "median": 143625.0,
+        "mean": 129560.667,
+        "max": 143786.0
+      },
+      "output_tokens": {
+        "min": 877.0,
+        "median": 1092.0,
+        "mean": 1094.667,
+        "max": 1315.0
+      },
+      "reasoning_output_tokens": {
+        "min": 227.0,
+        "median": 365.0,
+        "mean": 334.0,
+        "max": 410.0
+      }
+    },
+    "reference-retrieval:baseline": {
+      "n": 3,
+      "correctness": {
+        "score": 24,
+        "max_score": 24
+      },
+      "workspace_metrics_n": 3,
+      "workspace_command_calls": {
+        "min": 2.0,
+        "median": 5.0,
+        "mean": 4.333,
+        "max": 6.0
+      },
+      "workspace_output_bytes": {
+        "min": 4104.0,
+        "median": 6232.0,
+        "mean": 5674.667,
+        "max": 6688.0
+      },
+      "elapsed_seconds": {
+        "min": 80.187,
+        "median": 80.203,
+        "mean": 80.213,
+        "max": 80.25
+      },
+      "input_tokens": {
+        "min": 128358.0,
+        "median": 143341.0,
+        "mean": 140244.0,
+        "max": 149033.0
+      },
+      "output_tokens": {
+        "min": 1279.0,
+        "median": 1343.0,
+        "mean": 1349.667,
+        "max": 1427.0
+      },
+      "reasoning_output_tokens": {
+        "min": 329.0,
+        "median": 399.0,
+        "mean": 394.333,
+        "max": 455.0
+      }
+    },
+    "reference-retrieval:layered": {
+      "n": 3,
+      "correctness": {
+        "score": 24,
+        "max_score": 24
+      },
+      "workspace_metrics_n": 3,
+      "workspace_command_calls": {
+        "min": 4.0,
+        "median": 4.0,
+        "mean": 4.0,
+        "max": 4.0
+      },
+      "workspace_output_bytes": {
+        "min": 1287.0,
+        "median": 1630.0,
+        "mean": 1535.667,
+        "max": 1690.0
+      },
+      "elapsed_seconds": {
+        "min": 60.047,
+        "median": 66.188,
+        "mean": 64.745,
+        "max": 68.0
+      },
+      "input_tokens": {
+        "min": 101141.0,
+        "median": 101940.0,
+        "mean": 108448.0,
+        "max": 122263.0
+      },
+      "output_tokens": {
+        "min": 1110.0,
+        "median": 1139.0,
+        "mean": 1167.0,
+        "max": 1252.0
+      },
+      "reasoning_output_tokens": {
+        "min": 292.0,
+        "median": 361.0,
+        "mean": 368.667,
+        "max": 453.0
+      }
+    },
+    "stable-rules:baseline": {
+      "n": 3,
+      "correctness": {
+        "score": 30,
+        "max_score": 30
+      },
+      "workspace_metrics_n": 3,
+      "workspace_command_calls": {
+        "min": 2.0,
+        "median": 3.0,
+        "mean": 2.667,
+        "max": 3.0
+      },
+      "workspace_output_bytes": {
+        "min": 2121.0,
+        "median": 10055.0,
+        "mean": 7960.667,
+        "max": 11706.0
+      },
+      "elapsed_seconds": {
+        "min": 69.0,
+        "median": 80.234,
+        "mean": 76.495,
+        "max": 80.25
+      },
+      "input_tokens": {
+        "min": 89968.0,
+        "median": 110447.0,
+        "mean": 108828.0,
+        "max": 126069.0
+      },
+      "output_tokens": {
+        "min": 1461.0,
+        "median": 1481.0,
+        "mean": 1497.667,
+        "max": 1551.0
+      },
+      "reasoning_output_tokens": {
+        "min": 485.0,
+        "median": 559.0,
+        "mean": 562.667,
+        "max": 644.0
+      }
+    },
+    "stable-rules:layered": {
+      "n": 3,
+      "correctness": {
+        "score": 30,
+        "max_score": 30
+      },
+      "workspace_metrics_n": 3,
+      "workspace_command_calls": {
+        "min": 3.0,
+        "median": 3.0,
+        "mean": 3.0,
+        "max": 3.0
+      },
+      "workspace_output_bytes": {
+        "min": 3239.0,
+        "median": 3243.0,
+        "mean": 3339.333,
+        "max": 3536.0
+      },
+      "elapsed_seconds": {
+        "min": 62.468,
+        "median": 62.594,
+        "mean": 63.328,
+        "max": 64.922
+      },
+      "input_tokens": {
+        "min": 102930.0,
+        "median": 103011.0,
+        "mean": 105755.333,
+        "max": 111325.0
+      },
+      "output_tokens": {
+        "min": 1057.0,
+        "median": 1152.0,
+        "mean": 1123.667,
+        "max": 1162.0
+      },
+      "reasoning_output_tokens": {
+        "min": 206.0,
+        "median": 325.0,
+        "mean": 294.333,
+        "max": 352.0
+      }
+    }
+  }
+}
