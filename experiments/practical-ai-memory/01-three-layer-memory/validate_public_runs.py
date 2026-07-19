@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 
+import argparse
 import hashlib
 import json
 import re
@@ -21,14 +22,31 @@ REQUIRED_FILES = (
     "score.json",
 )
 SENSITIVE_PATTERNS = (
-    re.compile(r"/Users/"),
+    re.compile(r"/Users/|[A-Za-z]:(?:\\\\|\\|/)Users(?:\\\\|\\|/)"),
     re.compile(r"/var/folders/"),
+    re.compile(
+        r"[A-Za-z]:(?:\\\\|\\|/)(?:Windows|ProgramData)(?:\\\\|\\|/)",
+        re.IGNORECASE,
+    ),
     re.compile(r'"thread_id"'),
     re.compile(r"sk-[A-Za-z0-9_-]{12,}"),
+    re.compile("msu" + "tools", re.IGNORECASE),
+    re.compile("pro" + "vider" + "_label", re.IGNORECASE),
 )
 
 
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--require-runs",
+        action="store_true",
+        help="Fail when no local public runs exist",
+    )
+    return parser.parse_args()
+
+
 def main() -> int:
+    args = parse_args()
     public_root = ROOT / "runs" / "public"
     failures = []
     checked = 0
@@ -60,6 +78,12 @@ def main() -> int:
     if failures:
         print("\n".join(failures))
         return 1
+    if args.require_runs and checked == 0:
+        print("no local public runs found")
+        return 1
+    if checked == 0:
+        print("no local public runs; nothing to validate")
+        return 0
     print(f"validated {checked} public runs")
     return 0
 

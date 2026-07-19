@@ -13,11 +13,21 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent
 SENSITIVE_PATTERNS = (
-    re.compile(r"/Users/"),
+    re.compile(r"/Users/|[A-Za-z]:(?:\\\\|\\|/)Users(?:\\\\|\\|/)"),
     re.compile(r"/var/folders/"),
+    re.compile(
+        r"[A-Za-z]:(?:\\\\|\\|/)(?:Windows|Users|ProgramData)(?:\\\\|\\|/)",
+        re.IGNORECASE,
+    ),
     re.compile(r'"thread_id"'),
     re.compile(r"sk-[A-Za-z0-9_-]{12,}"),
+    re.compile("msu" + "tools", re.IGNORECASE),
+    re.compile("pro" + "vider" + "_label", re.IGNORECASE),
 )
+
+
+def is_runtime_command(value: object) -> bool:
+    return "/.codex/" in str(value).replace("\\", "/")
 
 
 def sanitize_text(value: str) -> str:
@@ -26,6 +36,18 @@ def sanitize_text(value: str) -> str:
         lambda match: f"](fixture-snapshot/{match.group(1)})",
         value,
     )
+    windows_path = re.compile(
+        r"[A-Za-z]:(?:\\\\|\\|/)Users(?:\\\\|\\|/)"
+        r"[^\\/\s\"']+(?:(?:\\\\|\\|/)[^\s\"']*)?",
+        re.IGNORECASE,
+    )
+    windows_system_path = re.compile(
+        r"[A-Za-z]:(?:\\\\|\\|/)(?:Windows|ProgramData)"
+        r"(?:\\\\|\\|/)[^\s\"']*",
+        re.IGNORECASE,
+    )
+    value = windows_path.sub("<redacted-user-path>", value)
+    value = windows_system_path.sub("<redacted-system-path>", value)
     value = re.sub(r"/Users/[^/\s]+/[^\s\"']*", "<redacted-user-path>", value)
     value = re.sub(r"/var/folders/[^\s\"')]+", "<redacted-temp-path>", value)
     return value
@@ -34,6 +56,7 @@ def sanitize_text(value: str) -> str:
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser()
     parser.add_argument("run_dir", type=Path)
+    parser.add_argument("--platform-tag", choices=("macos", "win11"))
     return parser.parse_args()
 
 
@@ -44,7 +67,8 @@ def main() -> int:
         raise SystemExit(f"run directory does not exist: {source}")
 
     metadata = json.loads((source / "metadata.json").read_text(encoding="utf-8"))
-    destination = ROOT / "runs" / "public" / "macos" / metadata["run_name"]
+    platform_tag = args.platform_tag or metadata.get("platform_tag", "macos")
+    destination = ROOT / "runs" / "public" / platform_tag / metadata["run_name"]
     if destination.exists():
         raise SystemExit(f"public run already exists: {destination}")
     destination.mkdir(parents=True)
@@ -65,6 +89,7 @@ def main() -> int:
         "purpose",
         "started_at_utc",
         "platform",
+        "platform_tag",
         "python_version",
         "codex_version",
         "requested_model",
@@ -103,7 +128,7 @@ def main() -> int:
         if event.get("type") != "item.completed" or item.get("type") != "command_execution":
             continue
         command = item.get("command", "")
-        if "/.codex/" in command:
+        if is_runtime_command(command):
             commands.append({"scope": "global-runtime", "command": "<omitted>"})
         else:
             commands.append({"scope": "workspace", "command": sanitize_text(command)})

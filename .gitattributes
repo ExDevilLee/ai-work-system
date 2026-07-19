@@ -1,0 +1,6 @@
+experiments/practical-ai-memory/01-three-layer-memory/**/*.csv text eol=lf
+experiments/practical-ai-memory/01-three-layer-memory/**/*.json text eol=lf
+experiments/practical-ai-memory/01-three-layer-memory/**/*.jsonl text eol=lf
+experiments/practical-ai-memory/01-three-layer-memory/**/*.md text eol=lf
+experiments/practical-ai-memory/01-three-layer-memory/**/*.py text eol=lf
+experiments/practical-ai-memory/01-three-layer-memory/.gitignore text eol=lf

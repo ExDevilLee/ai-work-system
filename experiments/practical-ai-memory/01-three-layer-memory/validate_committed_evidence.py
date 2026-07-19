@@ -16,6 +16,11 @@ EVIDENCE = ROOT / "evidence"
 SENSITIVE_PATTERNS = (
     re.compile(r"/Users/"),
     re.compile(r"(?:/private)?/var/folders/"),
+    re.compile(r"[A-Za-z]:(?:\\\\|\\|/)Users(?:\\\\|\\|/)"),
+    re.compile(
+        r"[A-Za-z]:(?:\\\\|\\|/)(?:Windows|ProgramData)(?:\\\\|\\|/)",
+        re.IGNORECASE,
+    ),
     re.compile(r'"thread_id"'),
     re.compile(r"sk-[A-Za-z0-9_-]{12,}"),
     re.compile("msu" + "tools", re.IGNORECASE),

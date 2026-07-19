@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import subprocess
 import sys
+import argparse
 from pathlib import Path
 
 
@@ -49,13 +50,22 @@ SCHEDULE = (
 )
 
 
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--platform-tag", choices=("macos", "win11"), default="macos")
+    parser.add_argument("--model", default=MODEL)
+    parser.add_argument("--reasoning-effort", default=REASONING_EFFORT)
+    return parser.parse_args()
+
+
 def main() -> int:
+    args = parse_args()
     completed = 0
     skipped = 0
     for label, runs in SCHEDULE:
         for task, condition in runs:
             run_name = f"{label}-{task}-{condition}"
-            run_dir = ROOT / "runs" / "private" / "macos" / run_name
+            run_dir = ROOT / "runs" / "private" / args.platform_tag / run_name
             metadata = run_dir / "metadata.json"
             if metadata.is_file():
                 print(f"SKIP {run_name}", flush=True)
@@ -76,9 +86,11 @@ def main() -> int:
                 "--task",
                 task,
                 "--model",
-                MODEL,
+                args.model,
                 "--reasoning-effort",
-                REASONING_EFFORT,
+                args.reasoning_effort,
+                "--platform-tag",
+                args.platform_tag,
             ]
             print(f"RUN  {run_name}", flush=True)
             result = subprocess.run(command)

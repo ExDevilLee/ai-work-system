@@ -19,7 +19,14 @@ from typing import Optional
 
 ROOT = Path(__file__).resolve().parent
 CONDITIONS = ("baseline", "layered")
-RUNTIME_PATH_PATTERN = re.compile(r"(/[^\s\"']*/\.codex/[^\s\"']+)")
+RUNTIME_PATH_PATTERN = re.compile(
+    r"((?:[A-Za-z]:[\\/]|/)[^\s\"']*[\\/]\.codex[\\/][^\s\"']+)"
+)
+
+
+def is_runtime_path(value: object) -> bool:
+    normalized = str(value).replace("\\", "/")
+    return "/.codex/" in normalized
 
 
 def tree_checksum(root: Path) -> str:
@@ -63,6 +70,12 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--task", default="recovery-task")
     parser.add_argument("--model", help="Lock the model for formal repeated runs")
     parser.add_argument("--reasoning-effort", choices=("low", "medium", "high", "xhigh"))
+    parser.add_argument(
+        "--platform-tag",
+        choices=("macos", "win11"),
+        default="macos",
+        help="Keep evidence separated by execution platform",
+    )
     return parser.parse_args()
 
 
@@ -92,7 +105,7 @@ def main() -> int:
 
     started_at = datetime.now(timezone.utc)
     run_name = f"{args.label}-{args.task}-{args.condition}"
-    run_dir = ROOT / "runs" / "private" / "macos" / run_name
+    run_dir = ROOT / "runs" / "private" / args.platform_tag / run_name
 
     if run_dir.exists():
         raise SystemExit(f"run directory already exists: {run_dir}")
@@ -148,11 +161,11 @@ def main() -> int:
     mixed_scope_commands = [
         item
         for item in completed_commands
-        if "/.codex/" in item.get("command", "")
+        if is_runtime_path(item.get("command", ""))
         and any(marker in item.get("command", "") for marker in fixture_markers)
     ]
     workspace_commands = [
-        item for item in completed_commands if "/.codex/" not in item.get("command", "")
+        item for item in completed_commands if not is_runtime_path(item.get("command", ""))
     ]
     mixed_adjustments = [
         adjusted_mixed_workspace_bytes(item) for item in mixed_scope_commands
@@ -173,6 +186,7 @@ def main() -> int:
         ),
         "started_at_utc": started_at.isoformat(),
         "platform": platform.platform(),
+        "platform_tag": args.platform_tag,
         "python_version": platform.python_version(),
         "codex_version": command_output("codex", "--version"),
         "requested_model": args.model,

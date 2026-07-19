@@ -7,7 +7,7 @@ import argparse
 import json
 from pathlib import Path
 
-from run_experiment import adjusted_mixed_workspace_bytes
+from run_experiment import adjusted_mixed_workspace_bytes, is_runtime_path
 
 
 def parse_args() -> argparse.Namespace:
@@ -42,11 +42,11 @@ def main() -> int:
         mixed = [
             item
             for item in commands
-            if "/.codex/" in item.get("command", "")
+            if is_runtime_path(item.get("command", ""))
             and any(marker in item.get("command", "") for marker in markers)
         ]
         workspace = [
-            item for item in commands if "/.codex/" not in item.get("command", "")
+            item for item in commands if not is_runtime_path(item.get("command", ""))
         ]
         adjustments = [adjusted_mixed_workspace_bytes(item) for item in mixed]
 

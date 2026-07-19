@@ -2,7 +2,7 @@
 
 本实验为“AI 长期记忆实战”系列第一篇提供证据，比较同一组信息在“混合记录”和“三层分离”两种组织方式下，对新会话恢复任务与查找资料的影响。
 
-当前阶段只验证 macOS。Windows 将在后续兼容性 checkpoint 使用同一夹具、提示和评分规则补充验证；在此之前，本实验不作跨平台结论。
+当前已完成 macOS 验证。Win11 使用同一夹具、提示和评分规则，在独立的平台目录中补充验证；Win11 完成前，本实验不作跨平台结论。验证入口见 [`WINDOWS-VALIDATION.md`](WINDOWS-VALIDATION.md)。
 
 ## 核心假设
 
@@ -27,8 +27,8 @@
 ├── expected/
 ├── evidence/          # 提交到 Git 的精简公开依据
 ├── runs/
-│   ├── private/       # 完整原始记录，仅本地保留
-│   └── public/        # 完整脱敏中间层，仅本地保留
+│   ├── private/<platform-tag>/ # 完整原始记录，仅本地保留
+│   └── public/<platform-tag>/  # 完整脱敏中间层，仅本地保留
 ├── data/
 ├── analysis/
 └── references/
@@ -67,8 +67,10 @@ python3 run_experiment.py layered --label pilot-02 \
 
 ```bash
 python3 export_public_run.py runs/private/macos/<run-name>
-python3 validate_public_runs.py
+python3 validate_public_runs.py --require-runs
 ```
+
+Win11 将 `macos` 替换为 `win11`，不要把两种平台的运行目录混合聚合。
 
 `runs/private/` 和 `runs/public/` 都由 Git 忽略。阶段实验完成后，再生成真正提交的精简证据：
 

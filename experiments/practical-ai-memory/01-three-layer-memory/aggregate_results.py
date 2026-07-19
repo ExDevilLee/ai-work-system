@@ -18,6 +18,7 @@ def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser()
     parser.add_argument("--prefix", required=True)
     parser.add_argument("--output-stem", required=True)
+    parser.add_argument("--platform-tag", choices=("macos", "win11"), default="macos")
     return parser.parse_args()
 
 
@@ -32,7 +33,7 @@ def summarize(values: list[float]) -> dict[str, float]:
 
 def main() -> int:
     args = parse_args()
-    private = ROOT / "runs" / "private" / "macos"
+    private = ROOT / "runs" / "private" / args.platform_tag
     rows = []
     model_configs = set()
 
@@ -125,6 +126,7 @@ def main() -> int:
     model, effort, cli_version = next(iter(model_configs))
     summary = {
         "selection_prefix": args.prefix,
+        "platform_tag": args.platform_tag,
         "run_count": len(rows),
         "model_configuration": {
             "model": model,
