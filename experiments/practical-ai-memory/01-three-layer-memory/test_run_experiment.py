@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import hashlib
+import json
 import sys
 import tempfile
 import unittest
@@ -110,6 +111,52 @@ class WorkspaceMetricCoverageTest(unittest.TestCase):
                 }
             ]
             self.assertEqual(mcp_workspace_metrics(events, fixture), (1, 14, 0))
+
+    def test_counts_json_wrapped_multifile_mcp_result(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            fixture = Path(temporary_directory)
+            first = "第一项：检查图片。\n第二项：检查链接。\n"
+            second = "平台策略：先验证，再发布。\n"
+            (fixture / "references").mkdir()
+            (fixture / "references" / "checklist.md").write_text(
+                first, encoding="utf-8"
+            )
+            (fixture / "references" / "policy.md").write_text(
+                second, encoding="utf-8"
+            )
+            result_text = json.dumps(
+                json.dumps(
+                    {
+                        "files": [
+                            {"name": "checklist", "content": first},
+                            {"name": "policy", "content": second},
+                        ]
+                    },
+                    ensure_ascii=False,
+                ),
+                ensure_ascii=False,
+            )
+            events = [
+                {
+                    "type": "item.completed",
+                    "item": {
+                        "type": "mcp_tool_call",
+                        "server": "node_repl",
+                        "tool": "js",
+                        "arguments": {
+                            "code": "read(root + '/references/' + fileName)"
+                        },
+                        "result": {
+                            "content": [{"type": "text", "text": result_text}]
+                        },
+                    },
+                }
+            ]
+
+            self.assertEqual(
+                mcp_workspace_metrics(events, fixture),
+                (1, len(result_text.encode("utf-8")), 0),
+            )
 
 
 if __name__ == "__main__":

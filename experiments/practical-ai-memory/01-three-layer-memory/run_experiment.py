@@ -64,6 +64,24 @@ def mcp_result_text(item: object) -> Optional[str]:
     return "".join(texts) if texts else None
 
 
+def structured_string_leaves(value: object) -> Iterable[str]:
+    """Yield strings from JSON-shaped MCP output, including encoded JSON strings."""
+    if isinstance(value, str):
+        yield value
+        try:
+            decoded = json.loads(value)
+        except (json.JSONDecodeError, TypeError):
+            return
+        if decoded != value:
+            yield from structured_string_leaves(decoded)
+    elif isinstance(value, dict):
+        for child in value.values():
+            yield from structured_string_leaves(child)
+    elif isinstance(value, list):
+        for child in value:
+            yield from structured_string_leaves(child)
+
+
 def fixture_texts(fixture: Optional[Path]) -> Iterable[str]:
     if fixture is None or not fixture.is_dir():
         return ()
@@ -102,8 +120,10 @@ def classify_mcp_tool_call(
         return "non_workspace", None
 
     result_text = mcp_result_text(item)
+    result_candidates = tuple(structured_string_leaves(result_text or ""))
     if result_text and any(
-        text and text in result_text for text in fixture_texts(fixture)
+        text and any(text in candidate for candidate in result_candidates)
+        for text in fixture_texts(fixture)
     ):
         return "workspace", len(result_text.encode("utf-8"))
 
