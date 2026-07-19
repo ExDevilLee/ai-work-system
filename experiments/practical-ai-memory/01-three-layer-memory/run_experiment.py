@@ -29,6 +29,15 @@ def is_runtime_path(value: object) -> bool:
     return "/.codex/" in normalized
 
 
+def has_unmeasured_mcp_tool_calls(events: Sequence[dict[str, object]]) -> bool:
+    return any(
+        event.get("type") == "item.completed"
+        and isinstance(event.get("item"), dict)
+        and event["item"].get("type") == "mcp_tool_call"
+        for event in events
+    )
+
+
 def tree_checksum(root: Path) -> str:
     digest = hashlib.sha256()
     files = (item for item in root.rglob("*") if item.is_file())
@@ -194,6 +203,13 @@ def main() -> int:
         adjusted_mixed_workspace_bytes(item) for item in mixed_scope_commands
     ]
     usage_events = [event["usage"] for event in events if event.get("type") == "turn.completed"]
+    unmeasured_mcp_tool_calls = sum(
+        1
+        for event in events
+        if event.get("type") == "item.completed"
+        and event.get("item", {}).get("type") == "mcp_tool_call"
+    )
+    workspace_metric_coverage_complete = not has_unmeasured_mcp_tool_calls(events)
 
     metadata = {
         "run_name": run_name,
@@ -225,9 +241,10 @@ def main() -> int:
         "completed_command_calls": len(completed_commands),
         "workspace_command_calls": len(workspace_commands) + len(mixed_scope_commands),
         "mixed_scope_command_calls": len(mixed_scope_commands),
-        "workspace_output_bytes_reliable": all(
-            value is not None for value in mixed_adjustments
-        ),
+        "workspace_metric_coverage_complete": workspace_metric_coverage_complete,
+        "workspace_metric_unmeasured_tool_calls": unmeasured_mcp_tool_calls,
+        "workspace_output_bytes_reliable": workspace_metric_coverage_complete
+        and all(value is not None for value in mixed_adjustments),
         "mixed_scope_adjusted_bytes": sum(
             value for value in mixed_adjustments if value is not None
         ),

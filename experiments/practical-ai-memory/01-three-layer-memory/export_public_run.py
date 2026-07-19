@@ -106,6 +106,8 @@ def main() -> int:
         "workspace_command_calls",
         "mixed_scope_command_calls",
         "workspace_output_bytes_reliable",
+        "workspace_metric_coverage_complete",
+        "workspace_metric_unmeasured_tool_calls",
         "mixed_scope_adjusted_bytes",
         "workspace_output_bytes",
         "command_shape",

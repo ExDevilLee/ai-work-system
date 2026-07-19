@@ -69,6 +69,13 @@ def main() -> int:
                 "workspace_output_bytes_reliable": metadata[
                     "workspace_output_bytes_reliable"
                 ],
+                "workspace_metric_coverage_complete": metadata.get(
+                    "workspace_metric_coverage_complete",
+                    metadata["workspace_output_bytes_reliable"],
+                ),
+                "workspace_metric_unmeasured_tool_calls": metadata.get(
+                    "workspace_metric_unmeasured_tool_calls", 0
+                ),
                 "elapsed_seconds": metadata["elapsed_seconds"],
                 "input_tokens": usage.get("input_tokens"),
                 "cached_input_tokens": usage.get("cached_input_tokens"),
@@ -97,17 +104,38 @@ def main() -> int:
     group_summary = {}
     for (task, condition), group in sorted(groups.items()):
         key = f"{task}:{condition}"
+        workspace_metric_group = [
+            row
+            for row in group
+            if row["workspace_metric_coverage_complete"]
+            and row["workspace_output_bytes_reliable"]
+        ]
         group_summary[key] = {
             "n": len(group),
             "correctness": {
                 "score": sum(int(row["score"]) for row in group),
                 "max_score": sum(int(row["max_score"]) for row in group),
             },
-            "workspace_command_calls": summarize(
-                [float(row["workspace_command_calls"]) for row in group]
+            "workspace_metrics_n": len(workspace_metric_group),
+            "workspace_command_calls": (
+                summarize(
+                    [
+                        float(row["workspace_command_calls"])
+                        for row in workspace_metric_group
+                    ]
+                )
+                if workspace_metric_group
+                else None
             ),
-            "workspace_output_bytes": summarize(
-                [float(row["workspace_output_bytes"]) for row in group]
+            "workspace_output_bytes": (
+                summarize(
+                    [
+                        float(row["workspace_output_bytes"])
+                        for row in workspace_metric_group
+                    ]
+                )
+                if workspace_metric_group
+                else None
             ),
             "elapsed_seconds": summarize(
                 [float(row["elapsed_seconds"]) for row in group]

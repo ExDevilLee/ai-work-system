@@ -66,6 +66,12 @@ def manifest_record(run_dir: Path) -> dict[str, object]:
         "workspace_output_bytes_reliable": metadata.get(
             "workspace_output_bytes_reliable"
         ),
+        "workspace_metric_coverage_complete": metadata.get(
+            "workspace_metric_coverage_complete"
+        ),
+        "workspace_metric_unmeasured_tool_calls": metadata.get(
+            "workspace_metric_unmeasured_tool_calls"
+        ),
         "mixed_scope_adjusted_bytes": metadata.get("mixed_scope_adjusted_bytes"),
         "workspace_output_bytes": metadata.get("workspace_output_bytes"),
         "score": score,

@@ -10,7 +10,12 @@ import unittest
 from pathlib import Path
 from unittest.mock import patch
 
-from run_experiment import resolve_codex_executable, run_utf8_command, tree_checksum
+from run_experiment import (
+    has_unmeasured_mcp_tool_calls,
+    resolve_codex_executable,
+    run_utf8_command,
+    tree_checksum,
+)
 
 
 class TreeChecksumTest(unittest.TestCase):
@@ -62,6 +67,26 @@ class Utf8CommandTest(unittest.TestCase):
             [sys.executable, "-c", script], input_text=prompt
         )
         self.assertEqual(result.stdout, prompt)
+
+
+class WorkspaceMetricCoverageTest(unittest.TestCase):
+    def test_marks_completed_mcp_calls_as_unmeasured(self) -> None:
+        events = [
+            {
+                "type": "item.completed",
+                "item": {"type": "mcp_tool_call", "status": "completed"},
+            }
+        ]
+        self.assertTrue(has_unmeasured_mcp_tool_calls(events))
+
+    def test_accepts_command_only_events(self) -> None:
+        events = [
+            {
+                "type": "item.completed",
+                "item": {"type": "command_execution", "exit_code": 0},
+            }
+        ]
+        self.assertFalse(has_unmeasured_mcp_tool_calls(events))
 
 
 if __name__ == "__main__":
