@@ -76,6 +76,10 @@ def main() -> int:
                 "workspace_metric_unmeasured_tool_calls": metadata.get(
                     "workspace_metric_unmeasured_tool_calls", 0
                 ),
+                "workspace_mcp_tool_calls": metadata.get("workspace_mcp_tool_calls", 0),
+                "workspace_mcp_output_bytes": metadata.get(
+                    "workspace_mcp_output_bytes", 0
+                ),
                 "elapsed_seconds": metadata["elapsed_seconds"],
                 "input_tokens": usage.get("input_tokens"),
                 "cached_input_tokens": usage.get("cached_input_tokens"),

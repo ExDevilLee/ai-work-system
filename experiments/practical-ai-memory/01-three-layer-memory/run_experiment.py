@@ -12,6 +12,7 @@ import shutil
 import subprocess
 import tempfile
 import time
+from collections.abc import Iterable
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Optional, Sequence
@@ -29,13 +30,118 @@ def is_runtime_path(value: object) -> bool:
     return "/.codex/" in normalized
 
 
-def has_unmeasured_mcp_tool_calls(events: Sequence[dict[str, object]]) -> bool:
+def has_unmeasured_mcp_tool_calls(
+    events: Sequence[dict[str, object]], fixture: Optional[Path] = None
+) -> bool:
+    if fixture is None:
+        return any(
+            event.get("type") == "item.completed"
+            and isinstance(event.get("item"), dict)
+            and event["item"].get("type") == "mcp_tool_call"
+            for event in events
+        )
     return any(
-        event.get("type") == "item.completed"
-        and isinstance(event.get("item"), dict)
-        and event["item"].get("type") == "mcp_tool_call"
+        classify_mcp_tool_call(event.get("item"), fixture)[0] == "unknown"
         for event in events
+        if event.get("type") == "item.completed"
     )
+
+
+def mcp_result_text(item: object) -> Optional[str]:
+    if not isinstance(item, dict):
+        return None
+    result = item.get("result")
+    if not isinstance(result, dict):
+        return None
+    content = result.get("content")
+    if not isinstance(content, list):
+        return None
+    texts = [
+        entry.get("text")
+        for entry in content
+        if isinstance(entry, dict) and isinstance(entry.get("text"), str)
+    ]
+    return "".join(texts) if texts else None
+
+
+def fixture_texts(fixture: Optional[Path]) -> Iterable[str]:
+    if fixture is None or not fixture.is_dir():
+        return ()
+    texts = []
+    for path in fixture.rglob("*"):
+        if not path.is_file():
+            continue
+        try:
+            texts.append(path.read_text(encoding="utf-8"))
+        except UnicodeDecodeError:
+            continue
+    return texts
+
+
+def mcp_arguments_text(item: object) -> str:
+    if not isinstance(item, dict):
+        return ""
+    arguments = item.get("arguments")
+    if isinstance(arguments, dict):
+        return json.dumps(arguments, ensure_ascii=False)
+    return str(arguments or "")
+
+
+def classify_mcp_tool_call(
+    item: object, fixture: Optional[Path]
+) -> tuple[str, Optional[int]]:
+    """Classify MCP output without persisting tool arguments or absolute paths."""
+    if not isinstance(item, dict):
+        return "unknown", None
+    server = item.get("server")
+    tool = item.get("tool")
+    if server == "codex" and tool in {
+        "list_mcp_resources",
+        "list_mcp_resource_templates",
+    }:
+        return "non_workspace", None
+
+    result_text = mcp_result_text(item)
+    if result_text and any(
+        text and text in result_text for text in fixture_texts(fixture)
+    ):
+        return "workspace", len(result_text.encode("utf-8"))
+
+    # A node_repl call that does not mention a fixture path is treated as
+    # external/non-workspace; a fixture reference without matching content is
+    # incomplete because the returned representation cannot be measured safely.
+    args_text = mcp_arguments_text(item).replace("\\", "/")
+    markers = set()
+    if fixture is not None and fixture.is_dir():
+        markers = {
+            path.relative_to(fixture).as_posix()
+            for path in fixture.rglob("*")
+            if path.is_file()
+        }
+    if markers and any(marker in args_text for marker in markers):
+        return "unknown", None
+    return "non_workspace", None
+
+
+def mcp_workspace_metrics(
+    events: Sequence[dict[str, object]], fixture: Path
+) -> tuple[int, int, int]:
+    workspace_calls = 0
+    workspace_output_bytes = 0
+    unmeasured_calls = 0
+    for event in events:
+        if event.get("type") != "item.completed":
+            continue
+        item = event.get("item")
+        if not isinstance(item, dict) or item.get("type") != "mcp_tool_call":
+            continue
+        classification, output_bytes = classify_mcp_tool_call(item, fixture)
+        if classification == "workspace" and output_bytes is not None:
+            workspace_calls += 1
+            workspace_output_bytes += output_bytes
+        elif classification == "unknown":
+            unmeasured_calls += 1
+    return workspace_calls, workspace_output_bytes, unmeasured_calls
 
 
 def tree_checksum(root: Path) -> str:
@@ -203,13 +309,10 @@ def main() -> int:
         adjusted_mixed_workspace_bytes(item) for item in mixed_scope_commands
     ]
     usage_events = [event["usage"] for event in events if event.get("type") == "turn.completed"]
-    unmeasured_mcp_tool_calls = sum(
-        1
-        for event in events
-        if event.get("type") == "item.completed"
-        and event.get("item", {}).get("type") == "mcp_tool_call"
+    mcp_workspace_calls, mcp_workspace_bytes, unmeasured_mcp_tool_calls = (
+        mcp_workspace_metrics(events, fixture)
     )
-    workspace_metric_coverage_complete = not has_unmeasured_mcp_tool_calls(events)
+    workspace_metric_coverage_complete = unmeasured_mcp_tool_calls == 0
 
     metadata = {
         "run_name": run_name,
@@ -239,8 +342,12 @@ def main() -> int:
         "elapsed_seconds": elapsed_seconds,
         "usage": usage_events[-1] if usage_events else None,
         "completed_command_calls": len(completed_commands),
-        "workspace_command_calls": len(workspace_commands) + len(mixed_scope_commands),
+        "workspace_command_calls": (
+            len(workspace_commands) + len(mixed_scope_commands) + mcp_workspace_calls
+        ),
         "mixed_scope_command_calls": len(mixed_scope_commands),
+        "workspace_mcp_tool_calls": mcp_workspace_calls,
+        "workspace_mcp_output_bytes": mcp_workspace_bytes,
         "workspace_metric_coverage_complete": workspace_metric_coverage_complete,
         "workspace_metric_unmeasured_tool_calls": unmeasured_mcp_tool_calls,
         "workspace_output_bytes_reliable": workspace_metric_coverage_complete
@@ -252,7 +359,8 @@ def main() -> int:
             len(item.get("aggregated_output", "").encode("utf-8"))
             for item in workspace_commands
         )
-        + sum(value for value in mixed_adjustments if value is not None),
+        + sum(value for value in mixed_adjustments if value is not None)
+        + mcp_workspace_bytes,
         "command_shape": "codex exec -C <isolated-workspace> --skip-git-repo-check --sandbox read-only --ephemeral --json --output-last-message <file> [--model <model>] [--config model_reasoning_effort=<effort>] -; prompt transport: UTF-8 stdin",
     }
     (run_dir / "metadata.json").write_text(

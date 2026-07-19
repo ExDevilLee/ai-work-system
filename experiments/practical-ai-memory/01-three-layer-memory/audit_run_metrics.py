@@ -9,8 +9,8 @@ from pathlib import Path
 
 from run_experiment import (
     adjusted_mixed_workspace_bytes,
-    has_unmeasured_mcp_tool_calls,
     is_runtime_path,
+    mcp_workspace_metrics,
 )
 
 
@@ -53,17 +53,18 @@ def main() -> int:
             item for item in commands if not is_runtime_path(item.get("command", ""))
         ]
         adjustments = [adjusted_mixed_workspace_bytes(item) for item in mixed]
-        unmeasured_mcp_tool_calls = sum(
-            1
-            for event in events
-            if event.get("type") == "item.completed"
-            and event.get("item", {}).get("type") == "mcp_tool_call"
+        mcp_workspace_calls, mcp_workspace_bytes, unmeasured_mcp_tool_calls = (
+            mcp_workspace_metrics(events, snapshot)
         )
-        coverage_complete = not has_unmeasured_mcp_tool_calls(events)
+        coverage_complete = unmeasured_mcp_tool_calls == 0
 
         metadata = json.loads(metadata_path.read_text(encoding="utf-8"))
-        metadata["workspace_command_calls"] = len(workspace) + len(mixed)
+        metadata["workspace_command_calls"] = (
+            len(workspace) + len(mixed) + mcp_workspace_calls
+        )
         metadata["mixed_scope_command_calls"] = len(mixed)
+        metadata["workspace_mcp_tool_calls"] = mcp_workspace_calls
+        metadata["workspace_mcp_output_bytes"] = mcp_workspace_bytes
         metadata["workspace_metric_coverage_complete"] = coverage_complete
         metadata["workspace_metric_unmeasured_tool_calls"] = (
             unmeasured_mcp_tool_calls
@@ -77,7 +78,7 @@ def main() -> int:
         metadata["workspace_output_bytes"] = sum(
             len(item.get("aggregated_output", "").encode("utf-8"))
             for item in workspace
-        ) + sum(value for value in adjustments if value is not None)
+        ) + sum(value for value in adjustments if value is not None) + mcp_workspace_bytes
         metadata_path.write_text(
             json.dumps(metadata, ensure_ascii=False, indent=2) + "\n",
             encoding="utf-8",

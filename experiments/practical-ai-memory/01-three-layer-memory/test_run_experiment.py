@@ -12,6 +12,7 @@ from unittest.mock import patch
 
 from run_experiment import (
     has_unmeasured_mcp_tool_calls,
+    mcp_workspace_metrics,
     resolve_codex_executable,
     run_utf8_command,
     tree_checksum,
@@ -87,6 +88,28 @@ class WorkspaceMetricCoverageTest(unittest.TestCase):
             }
         ]
         self.assertFalse(has_unmeasured_mcp_tool_calls(events))
+
+    def test_counts_fixture_mcp_result_as_workspace_output(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            fixture = Path(temporary_directory)
+            (fixture / "PROJECT_NOTES.md").write_text(
+                "fixture notes\n", encoding="utf-8"
+            )
+            events = [
+                {
+                    "type": "item.completed",
+                    "item": {
+                        "type": "mcp_tool_call",
+                        "server": "node_repl",
+                        "tool": "js",
+                        "arguments": {"code": "read PROJECT_NOTES.md"},
+                        "result": {
+                            "content": [{"type": "text", "text": "fixture notes\n"}]
+                        },
+                    },
+                }
+            ]
+            self.assertEqual(mcp_workspace_metrics(events, fixture), (1, 14, 0))
 
 
 if __name__ == "__main__":
