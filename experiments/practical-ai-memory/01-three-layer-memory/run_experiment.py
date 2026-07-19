@@ -14,7 +14,7 @@ import tempfile
 import time
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Optional
+from typing import Optional, Sequence
 
 
 ROOT = Path(__file__).resolve().parent
@@ -47,8 +47,20 @@ def resolve_codex_executable() -> str:
     return executable
 
 
+def run_utf8_command(
+    command: Sequence[str], *, check: bool = False
+) -> subprocess.CompletedProcess[str]:
+    return subprocess.run(
+        command,
+        check=check,
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+    )
+
+
 def command_output(*args: str) -> str:
-    result = subprocess.run(args, check=True, capture_output=True, text=True)
+    result = run_utf8_command(args, check=True)
     return result.stdout.strip()
 
 
@@ -148,7 +160,7 @@ def main() -> int:
         command.append(prompt_path.read_text(encoding="utf-8"))
 
         started = time.monotonic()
-        result = subprocess.run(command, capture_output=True, text=True)
+        result = run_utf8_command(command)
         elapsed_seconds = round(time.monotonic() - started, 3)
 
     (run_dir / "raw.jsonl").write_text(result.stdout, encoding="utf-8")

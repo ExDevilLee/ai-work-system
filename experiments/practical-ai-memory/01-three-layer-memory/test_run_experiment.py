@@ -4,12 +4,13 @@
 from __future__ import annotations
 
 import hashlib
+import sys
 import tempfile
 import unittest
 from pathlib import Path
 from unittest.mock import patch
 
-from run_experiment import resolve_codex_executable, tree_checksum
+from run_experiment import resolve_codex_executable, run_utf8_command, tree_checksum
 
 
 class TreeChecksumTest(unittest.TestCase):
@@ -41,6 +42,18 @@ class CodexExecutableTest(unittest.TestCase):
     def test_resolves_platform_launcher_once(self, which: object) -> None:
         self.assertEqual(resolve_codex_executable(), r"C:\npm\codex.cmd")
         which.assert_called_once_with("codex")
+
+
+class Utf8CommandTest(unittest.TestCase):
+    def test_decodes_utf8_stdout_and_stderr(self) -> None:
+        script = (
+            "import sys; "
+            "sys.stdout.buffer.write('标准输出'.encode('utf-8')); "
+            "sys.stderr.buffer.write('错误输出'.encode('utf-8'))"
+        )
+        result = run_utf8_command([sys.executable, "-c", script])
+        self.assertEqual(result.stdout, "标准输出")
+        self.assertEqual(result.stderr, "错误输出")
 
 
 if __name__ == "__main__":
