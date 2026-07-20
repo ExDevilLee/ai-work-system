@@ -47,3 +47,4 @@ Win11 复现步骤见 [`WINDOWS-VALIDATION.md`](WINDOWS-VALIDATION.md)。
 正式结果：
 
 - [`analysis/formal-macos.md`](analysis/formal-macos.md)
+- [`references/literature-ledger.md`](references/literature-ledger.md)

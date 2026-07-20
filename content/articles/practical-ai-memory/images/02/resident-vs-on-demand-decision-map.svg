@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900" viewBox="0 0 1600 900" role="img" aria-labelledby="title desc">
+  <title id="title">常驻与按需读取判断图</title>
+  <desc id="desc">根据信息变化频率和遗漏后果，将长期记忆分为常驻候选、按任务强制读取、索引后按需读取和临时记录四类。</desc>
+
+  <rect width="1600" height="900" fill="#f7f8fa"/>
+
+  <text x="80" y="82" fill="#18212b" font-family="PingFang SC, Microsoft YaHei, sans-serif" font-size="40" font-weight="700">哪些信息应该常驻？</text>
+  <text x="80" y="125" fill="#5b6573" font-family="PingFang SC, Microsoft YaHei, sans-serif" font-size="22">先看变化频率与遗漏后果，不按“重要程度”一刀切</text>
+
+  <line x1="235" y1="742" x2="1470" y2="742" stroke="#26323e" stroke-width="4"/>
+  <path d="M1470 742 L1448 730 L1448 754 Z" fill="#26323e"/>
+  <line x1="235" y1="742" x2="235" y2="180" stroke="#26323e" stroke-width="4"/>
+  <path d="M235 180 L223 202 L247 202 Z" fill="#26323e"/>
+
+  <text x="1395" y="790" fill="#26323e" font-family="PingFang SC, Microsoft YaHei, sans-serif" font-size="23" font-weight="700">变化频率</text>
+  <text x="255" y="790" fill="#697482" font-family="PingFang SC, Microsoft YaHei, sans-serif" font-size="18">稳定</text>
+  <text x="1280" y="790" fill="#697482" font-family="PingFang SC, Microsoft YaHei, sans-serif" font-size="18">频繁变化</text>
+  <text x="90" y="210" fill="#26323e" font-family="PingFang SC, Microsoft YaHei, sans-serif" font-size="23" font-weight="700">遗漏后果</text>
+  <text x="155" y="710" fill="#697482" font-family="PingFang SC, Microsoft YaHei, sans-serif" font-size="18">低</text>
+  <text x="155" y="238" fill="#697482" font-family="PingFang SC, Microsoft YaHei, sans-serif" font-size="18">高</text>
+
+  <line x1="835" y1="210" x2="835" y2="712" stroke="#c2c8d0" stroke-width="2" stroke-dasharray="10 10"/>
+  <line x1="265" y1="475" x2="1430" y2="475" stroke="#c2c8d0" stroke-width="2" stroke-dasharray="10 10"/>
+
+  <rect x="285" y="225" width="500" height="210" rx="8" fill="#ffffff" stroke="#1f8a70" stroke-width="3"/>
+  <rect x="285" y="225" width="12" height="210" rx="6" fill="#1f8a70"/>
+  <text x="330" y="282" fill="#176b58" font-family="PingFang SC, Microsoft YaHei, sans-serif" font-size="29" font-weight="700">常驻候选</text>
+  <text x="330" y="325" fill="#26323e" font-family="PingFang SC, Microsoft YaHei, sans-serif" font-size="22">稳定、跨任务、遗漏后果高</text>
+  <text x="330" y="370" fill="#66717e" font-family="PingFang SC, Microsoft YaHei, sans-serif" font-size="19">公开边界 · 权限约束 · 核心规则</text>
+  <text x="330" y="402" fill="#66717e" font-family="PingFang SC, Microsoft YaHei, sans-serif" font-size="19">保持短小，并定期复核是否仍有效</text>
+
+  <rect x="885" y="225" width="500" height="210" rx="8" fill="#ffffff" stroke="#b65f76" stroke-width="3"/>
+  <rect x="1373" y="225" width="12" height="210" rx="6" fill="#b65f76"/>
+  <text x="930" y="282" fill="#91455a" font-family="PingFang SC, Microsoft YaHei, sans-serif" font-size="29" font-weight="700">按任务强制读取</text>
+  <text x="930" y="325" fill="#26323e" font-family="PingFang SC, Microsoft YaHei, sans-serif" font-size="22">变化快、遗漏后果高</text>
+  <text x="930" y="370" fill="#66717e" font-family="PingFang SC, Microsoft YaHei, sans-serif" font-size="19">当前阻塞 · 目标环境 · 有效操作状态</text>
+  <text x="930" y="402" fill="#66717e" font-family="PingFang SC, Microsoft YaHei, sans-serif" font-size="19">保留唯一状态源，不复制后长期常驻</text>
+
+  <rect x="285" y="515" width="500" height="180" rx="8" fill="#ffffff" stroke="#3772b9" stroke-width="3"/>
+  <rect x="285" y="515" width="12" height="180" rx="6" fill="#3772b9"/>
+  <text x="330" y="570" fill="#285b96" font-family="PingFang SC, Microsoft YaHei, sans-serif" font-size="29" font-weight="700">索引后按需读取</text>
+  <text x="330" y="612" fill="#26323e" font-family="PingFang SC, Microsoft YaHei, sans-serif" font-size="22">稳定或低频，遗漏后果较低</text>
+  <text x="330" y="654" fill="#66717e" font-family="PingFang SC, Microsoft YaHei, sans-serif" font-size="19">检查清单 · 论文 · 历史分析</text>
+
+  <rect x="885" y="515" width="500" height="180" rx="8" fill="#ffffff" stroke="#d98138" stroke-width="3"/>
+  <rect x="1373" y="515" width="12" height="180" rx="6" fill="#d98138"/>
+  <text x="930" y="570" fill="#aa5c21" font-family="PingFang SC, Microsoft YaHei, sans-serif" font-size="29" font-weight="700">临时记录，定期清理</text>
+  <text x="930" y="612" fill="#26323e" font-family="PingFang SC, Microsoft YaHei, sans-serif" font-size="22">变化快、遗漏后果较低</text>
+  <text x="930" y="654" fill="#66717e" font-family="PingFang SC, Microsoft YaHei, sans-serif" font-size="19">过程笔记 · 未筛选想法 · 短期观察</text>
+
+  <text x="835" y="850" text-anchor="middle" fill="#4c5865" font-family="PingFang SC, Microsoft YaHei, sans-serif" font-size="21" font-weight="600">常驻的主要价值是降低遗漏风险，不是保证减少检索</text>
+</svg>
