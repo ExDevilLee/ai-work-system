@@ -76,11 +76,12 @@ From one-off AI chats to a long-term collaboration system with memory, workflows
 
 [MoWen series collection](https://note.mowen.cn/detail/CGAIy3ZJS0VwC6wlH3je-)
 
-### Practical AI Long-Term Memory (In Progress, 1 article)
+### Practical AI Long-Term Memory (In Progress, 2 articles)
 
 Build a layered, searchable, governable, and recoverable AI long-term memory system through locally validated POCs.
 
 - [How Can You Build a Minimum Three-Layer AI Memory System with Folders and Markdown?](https://github.com/ExDevilLee/ai-work-system/wiki/16-%E5%8F%AA%E7%94%A8%E6%96%87%E4%BB%B6%E5%A4%B9%E5%92%8C-Markdown%EF%BC%8C%E6%80%8E%E4%B9%88%E6%90%AD%E4%B8%80%E4%B8%AA%E6%9C%80%E5%B0%8F%E5%8F%AF%E7%94%A8%E7%9A%84%E4%B8%89%E5%B1%82-AI-%E8%AE%B0%E5%BF%86%E7%B3%BB%E7%BB%9F%EF%BC%9F)
+- [What Should Stay Resident in Long-Term Memory, and What Should Be Loaded on Demand?](https://github.com/ExDevilLee/ai-work-system/wiki/17-%E9%95%BF%E6%9C%9F%E8%AE%B0%E5%BF%86%E9%87%8C%EF%BC%8C%E5%93%AA%E4%BA%9B%E4%BF%A1%E6%81%AF%E5%BA%94%E8%AF%A5%E5%B8%B8%E9%A9%BB%EF%BC%8C%E5%93%AA%E4%BA%9B%E5%BA%94%E8%AF%A5%E6%8C%89%E9%9C%80%E8%AF%BB%E5%8F%96%EF%BC%9F)
 
 [MoWen series collection](https://note.mowen.cn/detail/IH2-o1ke6IjnS1LnhX2fJ)
 

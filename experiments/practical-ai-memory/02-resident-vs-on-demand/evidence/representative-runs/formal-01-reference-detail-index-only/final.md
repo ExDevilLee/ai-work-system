@@ -6,4 +6,4 @@
 1. 本机绝对路径、会话标识和疑似密钥已经移除。
 1. README 提供最小复现命令和实验限制。
 
-共享项目记录路径：[`references/public-evidence-checklist.md`](../../fixtures/index-only/references/public-evidence-checklist.md)
+包含这三项原文的共享项目记录路径：[`references/public-evidence-checklist.md`](../../fixtures/index-only/references/public-evidence-checklist.md)

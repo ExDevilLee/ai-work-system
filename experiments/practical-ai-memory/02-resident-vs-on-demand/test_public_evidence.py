@@ -3,6 +3,7 @@ from __future__ import annotations
 import unittest
 
 from build_public_evidence import sanitize_final
+from validate_public_evidence import validate_score
 
 
 class PublicEvidenceTest(unittest.TestCase):
@@ -25,6 +26,20 @@ class PublicEvidenceTest(unittest.TestCase):
             sanitize_final("line  \nnext", "index-only"),
             "# 模型最终回答\n\nline\nnext\n",
         )
+
+    def test_accepts_protocol_valid_non_full_score(self) -> None:
+        record = {
+            "run_name": "formal-01-critical-boundary-index-only",
+            "score": {
+                "correctness_score": 5,
+                "correctness_max": 6,
+                "protocol_valid": True,
+                "unsupported_claims": 0,
+                "irrelevant_project_facts": 0,
+            },
+        }
+
+        self.assertEqual(validate_score(record), [])
 
 
 if __name__ == "__main__":

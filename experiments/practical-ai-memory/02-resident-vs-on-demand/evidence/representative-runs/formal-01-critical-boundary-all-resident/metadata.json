@@ -4,7 +4,7 @@
   "fixture_set": "pilot-01",
   "task": "critical-boundary",
   "purpose": "formal run",
-  "started_at_utc": "2026-07-20T04:45:43.764339+00:00",
+  "started_at_utc": "2026-07-20T22:42:29.817853+00:00",
   "platform_tag": "macos",
   "python_version": "3.9.6",
   "codex_version": "codex-cli 0.144.1",
@@ -16,12 +16,12 @@
   "sandbox": "read-only",
   "ephemeral": true,
   "exit_code": 0,
-  "elapsed_seconds": 19.726,
+  "elapsed_seconds": 27.864,
   "usage": {
-    "input_tokens": 18109,
-    "cached_input_tokens": 0,
-    "output_tokens": 326,
-    "reasoning_output_tokens": 30
+    "input_tokens": 21345,
+    "cached_input_tokens": 3840,
+    "output_tokens": 316,
+    "reasoning_output_tokens": 19
   },
   "completed_command_calls": 0,
   "workspace_command_calls": 0,
@@ -36,5 +36,5 @@
   "resident_instruction_bytes": 2438,
   "project_context_bytes_reliable": true,
   "project_context_bytes": 2438,
-  "command_shape": "codex exec -C <isolated-workspace> --skip-git-repo-check --sandbox read-only --ephemeral --json --output-last-message <file> [--model <model>] [--config model_reasoning_effort=<effort>] -; prompt transport: UTF-8 stdin"
+  "command_shape": "codex exec -C <isolated-workspace> --skip-git-repo-check --sandbox read-only --ephemeral --json --config features.plugins=false --output-last-message <file> [--model <model>] [--config model_reasoning_effort=<effort>] -; prompt transport: UTF-8 stdin"
 }

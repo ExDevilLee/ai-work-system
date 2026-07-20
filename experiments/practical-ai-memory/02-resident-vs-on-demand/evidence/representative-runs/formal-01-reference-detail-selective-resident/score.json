@@ -7,10 +7,10 @@
   "protocol_valid": true,
   "unsupported_claims": 0,
   "irrelevant_project_facts": 0,
-  "manual_review_minutes": 0.021296296,
+  "manual_review_minutes": 0.038889,
   "review_time_status": "batch average allocation",
   "review_time_method": "batch_average",
-  "review_batch_size": 18,
+  "review_batch_size": 9,
   "manual_review_status": "reviewed",
-  "notes": "All four frozen rubric items satisfied; reviewed in a timed batch shared with critical-boundary."
+  "notes": "全部冻结评分项均命中。"
 }

@@ -38,6 +38,29 @@ def sha256(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
+def validate_score(record: dict[str, object]) -> list[str]:
+    run_name = str(record.get("run_name", "<unknown>"))
+    score = record.get("score")
+    if not isinstance(score, dict):
+        return [f"{run_name}: score is missing or invalid"]
+
+    failures = []
+    if score.get("protocol_valid") is not True:
+        failures.append(f"{run_name}: protocol invalid")
+    correctness = score.get("correctness_score")
+    maximum = score.get("correctness_max")
+    if (
+        not isinstance(correctness, int)
+        or not isinstance(maximum, int)
+        or maximum <= 0
+        or not 0 <= correctness <= maximum
+    ):
+        failures.append(f"{run_name}: correctness score is out of range")
+    if score.get("unsupported_claims") or score.get("irrelevant_project_facts"):
+        failures.append(f"{run_name}: review issue count is nonzero")
+    return failures
+
+
 def main() -> int:
     failures = []
     manifest = EVIDENCE / "manifest.jsonl"
@@ -75,13 +98,7 @@ def main() -> int:
         fixture_hashes[condition] = tree_checksum(fixture)
 
     for record in records:
-        score = record["score"]
-        if not score["protocol_valid"]:
-            failures.append(f"{record['run_name']}: protocol invalid")
-        if score["correctness_score"] != score["correctness_max"]:
-            failures.append(f"{record['run_name']}: correctness is not full score")
-        if score["unsupported_claims"] or score["irrelevant_project_facts"]:
-            failures.append(f"{record['run_name']}: review issue count is nonzero")
+        failures.extend(validate_score(record))
         if fixture_hashes.get(record["condition"]) != record["fixture_sha256"]:
             failures.append(f"{record['run_name']}: fixture checksum mismatch")
         prompt = ROOT / "prompts" / f"{record['task']}.md"

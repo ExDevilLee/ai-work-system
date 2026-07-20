@@ -7,10 +7,10 @@
   "protocol_valid": true,
   "unsupported_claims": 0,
   "irrelevant_project_facts": 0,
-  "manual_review_minutes": 0.018518519,
+  "manual_review_minutes": 0.014815,
   "review_time_status": "batch average allocation",
   "review_time_method": "batch_average",
   "review_batch_size": 9,
   "manual_review_status": "reviewed",
-  "notes": "All five frozen rubric items satisfied in the timed status-conflict review batch."
+  "notes": "全部冻结评分项均命中。"
 }

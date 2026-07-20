@@ -4,7 +4,7 @@
   "fixture_set": "pilot-01",
   "task": "status-conflict",
   "purpose": "formal run",
-  "started_at_utc": "2026-07-20T04:49:02.792980+00:00",
+  "started_at_utc": "2026-07-20T22:46:04.313890+00:00",
   "platform_tag": "macos",
   "python_version": "3.9.6",
   "codex_version": "codex-cli 0.144.1",
@@ -16,15 +16,15 @@
   "sandbox": "read-only",
   "ephemeral": true,
   "exit_code": 0,
-  "elapsed_seconds": 39.098,
+  "elapsed_seconds": 45.768,
   "usage": {
-    "input_tokens": 57986,
-    "cached_input_tokens": 52480,
-    "output_tokens": 1040,
-    "reasoning_output_tokens": 241
+    "input_tokens": 64651,
+    "cached_input_tokens": 44288,
+    "output_tokens": 1083,
+    "reasoning_output_tokens": 120
   },
-  "completed_command_calls": 2,
-  "workspace_command_calls": 1,
+  "completed_command_calls": 5,
+  "workspace_command_calls": 5,
   "mixed_scope_command_calls": 0,
   "workspace_output_bytes_reliable": true,
   "workspace_metric_coverage_complete": true,
@@ -32,9 +32,9 @@
   "workspace_mcp_tool_calls": 0,
   "workspace_mcp_output_bytes": 0,
   "mixed_scope_adjusted_bytes": 0,
-  "workspace_output_bytes": 2361,
+  "workspace_output_bytes": 3275,
   "resident_instruction_bytes": 812,
   "project_context_bytes_reliable": true,
-  "project_context_bytes": 3173,
-  "command_shape": "codex exec -C <isolated-workspace> --skip-git-repo-check --sandbox read-only --ephemeral --json --output-last-message <file> [--model <model>] [--config model_reasoning_effort=<effort>] -; prompt transport: UTF-8 stdin"
+  "project_context_bytes": 4087,
+  "command_shape": "codex exec -C <isolated-workspace> --skip-git-repo-check --sandbox read-only --ephemeral --json --config features.plugins=false --output-last-message <file> [--model <model>] [--config model_reasoning_effort=<effort>] -; prompt transport: UTF-8 stdin"
 }

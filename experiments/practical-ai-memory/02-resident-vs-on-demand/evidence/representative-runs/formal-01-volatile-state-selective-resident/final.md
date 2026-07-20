@@ -5,4 +5,4 @@
 1. 当前阻塞：尚未获得可以支持常驻信息选择标准的重复实验结果。
 1. 最近完成项：三层记忆 POC 已在 macOS 与 Win11 各完成 18 次正式运行。
 
-原始来源路径：[memory/CURRENT.md](../../fixtures/selective-resident/memory/CURRENT.md)
+原始来源路径：[`memory/CURRENT.md`](../../fixtures/selective-resident/memory/CURRENT.md)

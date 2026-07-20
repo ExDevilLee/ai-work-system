@@ -16,9 +16,9 @@
 
 ## 当前阶段
 
-三轮 Pilot 与 36 次 macOS 正式矩阵均已完成。三个条件各 12 个样本，全部命中冻结答案，工作区指标覆盖完整。结果没有支持“选择性常驻总是最优”：不同任务的读取成本不同，常驻规则也不能保证模型不再核对文件。完整结论与限制见 [`analysis/formal-macos.md`](analysis/formal-macos.md)。所有 Pilot 都不进入文章结论。
+三轮 Pilot，以及 macOS 与原生 Win11 各 36 次正式矩阵均已完成。两个平台都使用相同冻结夹具、提示、评分表和模型配置；每个平台的三个条件各有 12 个样本，工作区指标覆盖完整。结果没有支持“选择性常驻总是最优”：不同任务与平台的检索成本不同，常驻规则也不能保证模型不再核对文件。完整结论与限制见 [`analysis/formal-macos.md`](analysis/formal-macos.md) 和 [`analysis/formal-macos-win11-comparison.md`](analysis/formal-macos-win11-comparison.md)。所有 Pilot 都不进入文章结论。
 
-首次 Win11 Smoke 的 12 次命令均成功，但其中 9 次读取了本机 Codex 插件技能文件，因此整批未通过协议门禁，正式矩阵没有启动。运行器现已显式禁用插件，并把用户级 Codex 运行时访问升级为协议失败；脱敏记录见 [`analysis/win11-smoke-01.md`](analysis/win11-smoke-01.md)。
+首次 Win11 Smoke 的 12 次命令均成功，但其中 9 次读取了本机 Codex 插件技能文件，因此整批未通过协议门禁并被隔离。运行器随后显式禁用插件，并把用户级 Codex 运行时访问升级为协议失败；修复后的 Win11 Smoke 和 36 次正式矩阵均通过环境隔离门禁。脱敏记录见 [`analysis/win11-smoke-01.md`](analysis/win11-smoke-01.md)。
 
 静态验证：
 
@@ -27,9 +27,9 @@ python3 validate_fixtures.py
 python3 -m unittest discover -p 'test_*.py'
 ```
 
-运行记录默认写入被 Git 忽略的 `runs/private/<platform-tag>/`。试跑只用于发现题目歧义、夹具泄漏、评分困难和指标覆盖缺口，不进入正式结论。macOS 脱敏公开证据已生成，下一阶段准备 Win11 复现；Win11 完成前不声明跨平台实测。
+运行记录默认写入被 Git 忽略的 `runs/private/<platform-tag>/`。试跑只用于发现题目歧义、夹具泄漏、评分困难和指标覆盖缺口，不进入正式结论。macOS 脱敏公开证据已经基于关闭插件后的干净矩阵重建；Win11 只回传脱敏聚合文件，不回传私有原始事件、评分文件、临时路径或会话标识。
 
-公开证据只保留全部 36 次正式运行的 manifest、第 1 轮 12 个代表样本，以及按条件去重的 3 份夹具。原始事件、绝对路径和会话标识不进入 Git：
+公开证据只保留 macOS 全部 36 次正式运行的 manifest、第 1 轮 12 个代表样本，以及按条件去重的 3 份夹具。Win11 仅公开聚合结果。原始事件、绝对路径和会话标识不进入 Git：
 
 ```bash
 python3 build_public_evidence.py
@@ -50,4 +50,5 @@ Win11 复现步骤见 [`WINDOWS-VALIDATION.md`](WINDOWS-VALIDATION.md)。
 正式结果：
 
 - [`analysis/formal-macos.md`](analysis/formal-macos.md)
+- [`analysis/formal-macos-win11-comparison.md`](analysis/formal-macos-win11-comparison.md)
 - [`references/literature-ledger.md`](references/literature-ledger.md)
