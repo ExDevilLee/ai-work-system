@@ -55,6 +55,25 @@ class ScoreRunTest(unittest.TestCase):
                 with self.assertRaisesRegex(SystemExit, "review-minutes"):
                     main()
 
+    def test_formal_run_can_record_batch_average(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            run_dir = self.make_run(Path(temporary_directory), "formal run")
+            args = self.base_args(run_dir) + [
+                "--review-minutes",
+                "0.5",
+                "--review-time-method",
+                "batch_average",
+                "--review-batch-size",
+                "9",
+            ]
+            with patch("sys.argv", args):
+                self.assertEqual(main(), 0)
+
+            score = json.loads((run_dir / "score.json").read_text(encoding="utf-8"))
+            self.assertEqual(score["review_time_method"], "batch_average")
+            self.assertEqual(score["review_batch_size"], 9)
+            self.assertEqual(score["review_time_status"], "batch average allocation")
+
 
 if __name__ == "__main__":
     unittest.main()

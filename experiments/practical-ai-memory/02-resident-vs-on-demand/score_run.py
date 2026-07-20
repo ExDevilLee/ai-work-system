@@ -15,6 +15,12 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--max-score", type=int, required=True)
     parser.add_argument("--protocol-valid", choices=("yes", "no"), required=True)
     parser.add_argument("--review-minutes", type=float)
+    parser.add_argument(
+        "--review-time-method",
+        choices=("individual", "batch_average"),
+        default="individual",
+    )
+    parser.add_argument("--review-batch-size", type=int)
     parser.add_argument("--irrelevant-facts", type=int, default=0)
     parser.add_argument("--unsupported-claims", type=int, default=0)
     parser.add_argument("--notes", required=True)
@@ -27,6 +33,13 @@ def main() -> int:
         raise SystemExit("score must be between zero and max-score")
     if args.review_minutes is not None and args.review_minutes < 0:
         raise SystemExit("review-minutes must not be negative")
+    if args.review_time_method == "batch_average":
+        if args.review_minutes is None or not args.review_batch_size or args.review_batch_size < 2:
+            raise SystemExit(
+                "batch_average requires review-minutes and review-batch-size >= 2"
+            )
+    elif args.review_batch_size is not None:
+        raise SystemExit("review-batch-size requires batch_average")
     if args.irrelevant_facts < 0 or args.unsupported_claims < 0:
         raise SystemExit("claim counts must not be negative")
 
@@ -44,8 +57,16 @@ def main() -> int:
         "irrelevant_project_facts": args.irrelevant_facts,
         "manual_review_minutes": args.review_minutes,
         "review_time_status": (
-            "measured" if args.review_minutes is not None else "not individually timed"
+            "measured"
+            if args.review_minutes is not None and args.review_time_method == "individual"
+            else (
+                "batch average allocation"
+                if args.review_minutes is not None
+                else "not individually timed"
+            )
         ),
+        "review_time_method": args.review_time_method,
+        "review_batch_size": args.review_batch_size,
         "manual_review_status": "reviewed",
         "notes": args.notes,
     }

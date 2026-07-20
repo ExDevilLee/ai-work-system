@@ -16,19 +16,23 @@
 
 ## 当前阶段
 
-三轮 Pilot 已完成：12 次完整矩阵与两轮各 3 次高后果任务修订验证。最终三组均命中冻结答案，工作区指标覆盖完整，协议门禁已经通过。当前进入 36 次 macOS 正式矩阵；所有 Pilot 都不进入文章结论。
+三轮 Pilot 与 36 次 macOS 正式矩阵均已完成。三个条件各 12 个样本，全部命中冻结答案，工作区指标覆盖完整。结果没有支持“选择性常驻总是最优”：不同任务的读取成本不同，常驻规则也不能保证模型不再核对文件。完整结论与限制见 [`analysis/formal-macos.md`](analysis/formal-macos.md)。所有 Pilot 都不进入文章结论。
 
 静态验证：
 
 ```bash
 python3 validate_fixtures.py
-python3 -m unittest test_run_experiment.py test_validate_fixtures.py
+python3 -m unittest discover -p 'test_*.py'
 ```
 
-运行记录默认写入被 Git 忽略的 `runs/private/<platform-tag>/`。试跑只用于发现题目歧义、夹具泄漏、评分困难和指标覆盖缺口，不进入正式结论。
+运行记录默认写入被 Git 忽略的 `runs/private/<platform-tag>/`。试跑只用于发现题目歧义、夹具泄漏、评分困难和指标覆盖缺口，不进入正式结论。下一阶段先构建 macOS 脱敏公开证据，再准备 Win11 复现；Win11 完成前不声明跨平台实测。
 
 试跑复核：
 
 - [`analysis/pilot-01.md`](analysis/pilot-01.md)
 - [`analysis/pilot-02.md`](analysis/pilot-02.md)
 - [`analysis/pilot-03.md`](analysis/pilot-03.md)
+
+正式结果：
+
+- [`analysis/formal-macos.md`](analysis/formal-macos.md)
