@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 
+import argparse
 import re
 from pathlib import Path
 from typing import Any
@@ -154,7 +155,14 @@ def build_index_lines(
     return zh_lines, en_lines
 
 
-def replace_block(path: Path, start: str, end: str, lines: list[str]) -> None:
+def replace_block(
+    path: Path,
+    start: str,
+    end: str,
+    lines: list[str],
+    *,
+    check: bool = False,
+) -> None:
     text = path.read_text(encoding="utf-8")
     pattern = re.compile(
         rf"({re.escape(start)}\n)(.*?)(\n{re.escape(end)})",
@@ -164,10 +172,24 @@ def replace_block(path: Path, start: str, end: str, lines: list[str]) -> None:
     new_text, count = pattern.subn(replacement, text)
     if count != 1:
         raise SystemExit(f"Expected one generated block in {path.relative_to(REPO_ROOT)}")
+    if check:
+        if new_text != text:
+            raise SystemExit(
+                f"Generated article index is stale in {path.relative_to(REPO_ROOT)}; "
+                "run python3 scripts/update_readme_index.py"
+            )
+        return
     path.write_text(new_text, encoding="utf-8")
 
 
 def main() -> int:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "--check",
+        action="store_true",
+        help="fail if README article indexes are not up to date",
+    )
+    args = parser.parse_args()
     rows = article_rows()
     zh_lines, en_lines = build_index_lines(rows)
 
@@ -176,14 +198,17 @@ def main() -> int:
         "<!-- articles:index:start -->",
         "<!-- articles:index:end -->",
         zh_lines,
+        check=args.check,
     )
     replace_block(
         REPO_ROOT / "README-EN.md",
         "<!-- articles:index:start -->",
         "<!-- articles:index:end -->",
         en_lines,
+        check=args.check,
     )
-    print(f"Updated README article indexes: {len(rows)} published article(s).")
+    action = "Verified" if args.check else "Updated"
+    print(f"{action} README article indexes: {len(rows)} published article(s).")
     return 0
 
 

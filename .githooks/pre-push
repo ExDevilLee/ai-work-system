@@ -1,0 +1,15 @@
+#!/bin/sh
+set -eu
+
+repo_root=$(git rev-parse --show-toplevel)
+
+if command -v python3 >/dev/null 2>&1; then
+  python_command=python3
+elif command -v python >/dev/null 2>&1; then
+  python_command=python
+else
+  echo "Python is required for the pre-push publishing check." >&2
+  exit 1
+fi
+
+exec "$python_command" "$repo_root/scripts/check_before_publish.py"

@@ -4,6 +4,7 @@ import json
 import tempfile
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
 from scripts import update_readme_index
 
@@ -66,6 +67,21 @@ series: {series}
 
 
 class UpdateReadmeIndexTest(unittest.TestCase):
+    def test_check_mode_rejects_stale_generated_block(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "README.md"
+            path.write_text("start\nold\nend\n", encoding="utf-8")
+
+            with patch("scripts.update_readme_index.REPO_ROOT", Path(tmp)):
+                with self.assertRaisesRegex(SystemExit, "Generated article index is stale"):
+                    update_readme_index.replace_block(
+                        path,
+                        "start",
+                        "end",
+                        ["new"],
+                        check=True,
+                    )
+
     def test_rows_keep_global_wiki_pages_and_reset_series_sequence(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)

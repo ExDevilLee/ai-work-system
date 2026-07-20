@@ -12,3 +12,4 @@
 - `content/articles/<series-id>/*.md` 是唯一内容源头；GitHub Wiki、个人网站、公众号等都只是展示层或分发层，不反向修改源文。
 - GitHub Wiki 只同步 `status: ready` 的文章；已发布文章如果主仓库源文更新，重新运行同步脚本覆盖更新 Wiki。
 - 墨问也只同步 `status: ready` 的文章；`publishing/mowen-notes.json` 持久保存源文件与笔记 ID，并按 `content/series.json` 为受影响系列倒序重建各自目录。
+- 提交或 Push 涉及公开文章、系列目录或发布脚本时，必须先运行 `python3 scripts/check_before_publish.py`；本机首次使用按 `docs/publishing-runbook.md` 安装版本化 `pre-push` hook。

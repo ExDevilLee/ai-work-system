@@ -4,6 +4,14 @@
 
 ## 日常发布步骤
 
+本机首次参与发布前，安装仓库统一检查环境并启用版本化 `pre-push` hook：
+
+```bash
+python3 scripts/setup_local_publish_checks.py
+```
+
+脚本会把 Python 依赖安装到当前 Git 仓库的本地运行目录，执行锁定版本的 `npm ci`，并设置 `core.hooksPath=.githooks`。这些运行文件位于 `.git` 或被忽略的 `node_modules/`，不会进入提交。Windows 可将命令中的 `python3` 替换为 `python`。
+
 1. 在 `content/articles/<series-id>/*.md` 写文章。
 1. 草稿阶段保持 `status: draft`。
 1. 初稿完成后判断配图是否能明显降低理解成本；需要时先生成图片、插入正文并完成本地预览，不需要时在阶段汇总中说明理由。
@@ -15,11 +23,13 @@
 python3 scripts/update_readme_index.py
 ```
 
-1. 本地验证 Wiki 同步范围：
+1. 运行统一发布前检查：
 
 ```bash
-python3 scripts/sync_wiki.py --dry-run
+python3 scripts/check_before_publish.py
 ```
+
+该入口以只读方式检查 README 索引是否同步，运行 Wiki 发布测试，分别生成 GitHub/Gitee 发布前结果，检查 ready 文章的 frontmatter、加粗兼容性、图片、导航、Markdown 格式和明显敏感信息。安装 hook 后，`git push` 会自动重复执行同一入口；失败时 Push 会停止。
 
 1. 提交并 push 到 `main`。
 1. 等待自动链路完成：
@@ -76,6 +86,12 @@ git diff -- README.md README-EN.md
 
 如果文章没有出现在“系列文章”中，检查文章 frontmatter 是否为 `status: ready`，并确认 `series` 已登记在 `content/series.json`。
 
+只检查、不修改文件时运行：
+
+```bash
+python3 scripts/update_readme_index.py --check
+```
+
 ### GitHub Wiki 没有更新
 
 检查 GitHub Actions 中 Wiki 同步 workflow 是否运行。
@@ -89,10 +105,10 @@ git diff -- README.md README-EN.md
 本地可先运行：
 
 ```bash
-python3 scripts/sync_wiki.py --dry-run
+python3 scripts/check_before_publish.py
 ```
 
-确认脚本能看到目标文章。
+确认完整发布前门禁通过并能看到目标文章。需要单独查看生成范围时，仍可运行 `python3 scripts/sync_wiki.py --dry-run`。
 
 ### Gitee 仓库没有同步
 
