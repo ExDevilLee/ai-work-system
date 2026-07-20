@@ -1,0 +1,16 @@
+{
+  "run_name": "formal-01-volatile-state-all-resident",
+  "task": "volatile-state",
+  "condition": "all-resident",
+  "correctness_score": 5,
+  "correctness_max": 5,
+  "protocol_valid": true,
+  "unsupported_claims": 0,
+  "irrelevant_project_facts": 0,
+  "manual_review_minutes": 0.018518519,
+  "review_time_status": "batch average allocation",
+  "review_time_method": "batch_average",
+  "review_batch_size": 9,
+  "manual_review_status": "reviewed",
+  "notes": "All five frozen rubric items satisfied in the timed volatile-state review batch."
+}

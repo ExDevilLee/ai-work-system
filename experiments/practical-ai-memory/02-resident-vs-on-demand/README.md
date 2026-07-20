@@ -25,7 +25,16 @@ python3 validate_fixtures.py
 python3 -m unittest discover -p 'test_*.py'
 ```
 
-运行记录默认写入被 Git 忽略的 `runs/private/<platform-tag>/`。试跑只用于发现题目歧义、夹具泄漏、评分困难和指标覆盖缺口，不进入正式结论。下一阶段先构建 macOS 脱敏公开证据，再准备 Win11 复现；Win11 完成前不声明跨平台实测。
+运行记录默认写入被 Git 忽略的 `runs/private/<platform-tag>/`。试跑只用于发现题目歧义、夹具泄漏、评分困难和指标覆盖缺口，不进入正式结论。macOS 脱敏公开证据已生成，下一阶段准备 Win11 复现；Win11 完成前不声明跨平台实测。
+
+公开证据只保留全部 36 次正式运行的 manifest、第 1 轮 12 个代表样本，以及按条件去重的 3 份夹具。原始事件、绝对路径和会话标识不进入 Git：
+
+```bash
+python3 build_public_evidence.py
+python3 validate_public_evidence.py
+```
+
+公开入口：[`evidence/README.md`](evidence/README.md)。
 
 试跑复核：
 

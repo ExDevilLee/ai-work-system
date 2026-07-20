@@ -1,0 +1,16 @@
+{
+  "run_name": "formal-01-critical-boundary-index-only",
+  "task": "critical-boundary",
+  "condition": "index-only",
+  "correctness_score": 6,
+  "correctness_max": 6,
+  "protocol_valid": true,
+  "unsupported_claims": 0,
+  "irrelevant_project_facts": 0,
+  "manual_review_minutes": 0.021296296,
+  "review_time_status": "batch average allocation",
+  "review_time_method": "batch_average",
+  "review_batch_size": 18,
+  "manual_review_status": "reviewed",
+  "notes": "All six frozen rubric items satisfied; reviewed in a timed batch shared with reference-detail."
+}

@@ -1,0 +1,8 @@
+# 模型最终回答
+
+1. 当前唯一目标：在 macOS 验证长期记忆的常驻与按需读取边界。
+1. 下一步动作：完成三种加载策略的 Pilot 01，并检查正确性、上下文读取量和人工 Review 成本。
+1. 当前阻塞：尚未获得可以支持常驻信息选择标准的重复实验结果。
+1. 最近完成项：三层记忆 POC 已在 macOS 与 Win11 各完成 18 次正式运行。
+
+原始来源路径：[memory/CURRENT.md](../../fixtures/selective-resident/memory/CURRENT.md)

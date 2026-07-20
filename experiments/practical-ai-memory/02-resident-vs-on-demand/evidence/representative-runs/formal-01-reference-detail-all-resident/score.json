@@ -1,0 +1,16 @@
+{
+  "run_name": "formal-01-reference-detail-all-resident",
+  "task": "reference-detail",
+  "condition": "all-resident",
+  "correctness_score": 4,
+  "correctness_max": 4,
+  "protocol_valid": true,
+  "unsupported_claims": 0,
+  "irrelevant_project_facts": 0,
+  "manual_review_minutes": 0.021296296,
+  "review_time_status": "batch average allocation",
+  "review_time_method": "batch_average",
+  "review_batch_size": 18,
+  "manual_review_status": "reviewed",
+  "notes": "All four frozen rubric items satisfied; reviewed in a timed batch shared with critical-boundary."
+}

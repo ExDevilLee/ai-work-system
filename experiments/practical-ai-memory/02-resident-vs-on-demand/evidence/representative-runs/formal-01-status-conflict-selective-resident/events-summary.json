@@ -1,0 +1,16 @@
+{
+  "raw_event_count": 11,
+  "event_type_counts": {
+    "item.completed": 6,
+    "item.started": 2,
+    "thread.started": 1,
+    "turn.completed": 1,
+    "turn.started": 1
+  },
+  "completed_item_type_counts": {
+    "agent_message": 3,
+    "command_execution": 2,
+    "error": 1
+  },
+  "raw_jsonl_publication": "withheld because it contains local paths, thread identifiers, and unrelated runtime context"
+}
