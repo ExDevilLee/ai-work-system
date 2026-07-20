@@ -36,6 +36,8 @@ python3 validate_public_evidence.py
 
 公开入口：[`evidence/README.md`](evidence/README.md)。
 
+Win11 复现步骤见 [`WINDOWS-VALIDATION.md`](WINDOWS-VALIDATION.md)。
+
 试跑复核：
 
 - [`analysis/pilot-01.md`](analysis/pilot-01.md)
