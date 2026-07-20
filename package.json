@@ -1,7 +1,13 @@
 {
   "name": "ai-work-system-publishing",
   "private": true,
+  "scripts": {
+    "lint:md": "markdownlint-cli2"
+  },
   "dependencies": {
     "md-to-mowen": "1.9.1"
+  },
+  "devDependencies": {
+    "markdownlint-cli2": "0.23.0"
   }
 }

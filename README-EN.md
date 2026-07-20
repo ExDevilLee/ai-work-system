@@ -45,11 +45,11 @@ If you are new to this project, start with these articles:
 
 The fourth article turns the series toward practical project memory. The fifth explains how an observation becomes a project rule, and the sixth turns stable rules into repeatable workflows. Articles seven and eight establish review, evidence, and human-decision boundaries. Articles nine through twelve examine human responsibility, system value, cleanup, and task continuity. Articles thirteen through fifteen close the series through prompt design, task selection, and information boundaries.
 
-## What Comes Next
+## Current Direction
 
-- The next planned series is "Practical Long-Term AI Memory," beginning with why working memory, long-term memory, and indexed reference material need separate layers.
+- The "Practical Long-Term AI Memory" series is now in progress. Its first article validates a three-layer memory POC, and the next will test what should stay resident versus load on demand.
 - [ROADMAP](docs/series-roadmap.md)
-- [MORE](docs/topic-pool.md)
+- [MORE: Topic Pool](docs/topic-pool.md)
 
 ## Article Series
 
