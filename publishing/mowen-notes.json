@@ -211,6 +211,24 @@
       "note_id": "6lD9GoSg8TA8e1CjQ4kC9",
       "published": true,
       "url": "https://note.mowen.cn/detail/6lD9GoSg8TA8e1CjQ4kC9"
+    },
+    "content/articles/practical-ai-memory/2026-07-20-resident-vs-on-demand-memory.md": {
+      "assets": {
+        "images/02/resident-vs-on-demand-decision-map.png": {
+          "sha256": "fd4459e9f19ba2171ae31c94d6869f0ea4b5e152b0322461c4b2c196646a67ae",
+          "source_url": "https://gitee.com/ExDevilLee/ai-work-system/raw/main/content/articles/practical-ai-memory/images/02/resident-vs-on-demand-decision-map.png",
+          "uuid": "vdNnS6zh8w3GRoZ3v8mYe-TMP"
+        }
+      },
+      "content_sha256": "0085aae351e24519761bc753706dc9fe200db1ea98b9ac070a3c5b73c4ab6616",
+      "note_id": "8tUmwpitUN-yU0d6bulKF",
+      "publication_blocked": {
+        "content_sha256": "0085aae351e24519761bc753706dc9fe200db1ea98b9ac070a3c5b73c4ab6616",
+        "message": "MoWen MCP error: error: code = 403 reason = RISKY message = svc [NoteSvc.SetPrivacy]: note risky. metadata = map[] cause = <nil>",
+        "reason": "RISKY"
+      },
+      "published": false,
+      "url": "https://note.mowen.cn/detail/8tUmwpitUN-yU0d6bulKF"
     }
   },
   "directories": {
