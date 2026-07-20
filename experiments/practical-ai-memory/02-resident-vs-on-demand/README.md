@@ -16,7 +16,7 @@
 
 ## 当前阶段
 
-Pilot 01 已完成 12 次 macOS 运行，Pilot 02 已完成 3 次高后果任务重跑。两轮均命中冻结事实，并连续发现题目与入口规则中的来源审计混杂。当前进入修正入口规则后的 Pilot 03；所有试跑都不进入文章结论。
+三轮 Pilot 已完成：12 次完整矩阵与两轮各 3 次高后果任务修订验证。最终三组均命中冻结答案，工作区指标覆盖完整，协议门禁已经通过。当前进入 36 次 macOS 正式矩阵；所有 Pilot 都不进入文章结论。
 
 静态验证：
 
@@ -31,3 +31,4 @@ python3 -m unittest test_run_experiment.py test_validate_fixtures.py
 
 - [`analysis/pilot-01.md`](analysis/pilot-01.md)
 - [`analysis/pilot-02.md`](analysis/pilot-02.md)
+- [`analysis/pilot-03.md`](analysis/pilot-03.md)
