@@ -16,7 +16,7 @@
 
 ## 当前阶段
 
-当前只完成 Pilot 01 的协议、冻结夹具和静态门禁。尚未运行模型，因此这里没有效果结论，也不能据此判断哪种策略更好。
+Pilot 01 已完成 12 次 macOS 运行，三组答案均命中冻结事实，并发现高后果任务混入来源审计的协议问题。当前进入只重跑该任务三组条件的 Pilot 02；两轮试跑都不进入文章结论。
 
 静态验证：
 
@@ -25,4 +25,6 @@ python3 validate_fixtures.py
 python3 -m unittest test_run_experiment.py test_validate_fixtures.py
 ```
 
-首次模型试跑应在人工确认协议后进行。试跑仅用于发现题目歧义、夹具泄漏、评分困难和指标覆盖缺口，不进入正式结论。
+运行记录默认写入被 Git 忽略的 `runs/private/<platform-tag>/`。试跑只用于发现题目歧义、夹具泄漏、评分困难和指标覆盖缺口，不进入正式结论。
+
+Pilot 01 复核见 [`analysis/pilot-01.md`](analysis/pilot-01.md)。

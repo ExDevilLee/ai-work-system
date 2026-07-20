@@ -8,10 +8,6 @@
     "corrections": [
       "只声明已在 macOS 实测，Win11 标记为待验证",
       "只公开脱敏证据，完整原始运行保留在本地私有区"
-    ],
-    "source_paths": [
-      "memory/MEMORY.md",
-      "references/platform-claim-policy.md"
     ]
   },
   "reference-detail": {

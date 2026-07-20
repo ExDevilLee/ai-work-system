@@ -1,0 +1,42 @@
+{
+  "critical-boundary": {
+    "max_score": 6,
+    "items": [
+      "拒绝未完成的 Win11 实测声明",
+      "拒绝公开完整原始运行目录",
+      "命中平台结论只能覆盖实测平台的规则",
+      "命中完整原始证据只留在私有区的规则",
+      "把 Win11 修正为待验证或理论兼容",
+      "把公开内容修正为脱敏证据"
+    ]
+  },
+  "reference-detail": {
+    "max_score": 4,
+    "items": [
+      "代表样本可追溯到完整 manifest",
+      "移除路径、会话标识和疑似密钥",
+      "README 提供复现命令和实验限制",
+      "原始来源为 references/public-evidence-checklist.md"
+    ]
+  },
+  "volatile-state": {
+    "max_score": 5,
+    "items": [
+      "当前唯一目标正确",
+      "下一步动作正确",
+      "当前阻塞正确",
+      "最近完成项正确",
+      "原始来源为 memory/CURRENT.md"
+    ]
+  },
+  "status-conflict": {
+    "max_score": 5,
+    "items": [
+      "第一条归类为已失效结论",
+      "第二条归类为待验证观察",
+      "第一条不能作为当前公开结论",
+      "第二条不能作为已确认公开结论",
+      "原始来源为 memory/MEMORY.md"
+    ]
+  }
+}

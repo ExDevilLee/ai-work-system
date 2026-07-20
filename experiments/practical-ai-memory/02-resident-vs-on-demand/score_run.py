@@ -14,7 +14,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--score", type=int, required=True)
     parser.add_argument("--max-score", type=int, required=True)
     parser.add_argument("--protocol-valid", choices=("yes", "no"), required=True)
-    parser.add_argument("--review-minutes", type=float, required=True)
+    parser.add_argument("--review-minutes", type=float)
     parser.add_argument("--irrelevant-facts", type=int, default=0)
     parser.add_argument("--unsupported-claims", type=int, default=0)
     parser.add_argument("--notes", required=True)
@@ -25,12 +25,14 @@ def main() -> int:
     args = parse_args()
     if not 0 <= args.score <= args.max_score:
         raise SystemExit("score must be between zero and max-score")
-    if args.review_minutes < 0:
+    if args.review_minutes is not None and args.review_minutes < 0:
         raise SystemExit("review-minutes must not be negative")
     if args.irrelevant_facts < 0 or args.unsupported_claims < 0:
         raise SystemExit("claim counts must not be negative")
 
     metadata = json.loads((args.run_dir / "metadata.json").read_text(encoding="utf-8"))
+    if metadata.get("purpose") == "formal run" and args.review_minutes is None:
+        raise SystemExit("formal scoring must record review-minutes")
     score = {
         "run_name": metadata["run_name"],
         "task": metadata.get("task"),
@@ -41,6 +43,9 @@ def main() -> int:
         "unsupported_claims": args.unsupported_claims,
         "irrelevant_project_facts": args.irrelevant_facts,
         "manual_review_minutes": args.review_minutes,
+        "review_time_status": (
+            "measured" if args.review_minutes is not None else "not individually timed"
+        ),
         "manual_review_status": "reviewed",
         "notes": args.notes,
     }
