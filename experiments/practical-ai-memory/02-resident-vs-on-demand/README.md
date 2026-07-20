@@ -16,7 +16,7 @@
 
 ## 当前阶段
 
-Pilot 01 已完成 12 次 macOS 运行，三组答案均命中冻结事实，并发现高后果任务混入来源审计的协议问题。当前进入只重跑该任务三组条件的 Pilot 02；两轮试跑都不进入文章结论。
+Pilot 01 已完成 12 次 macOS 运行，Pilot 02 已完成 3 次高后果任务重跑。两轮均命中冻结事实，并连续发现题目与入口规则中的来源审计混杂。当前进入修正入口规则后的 Pilot 03；所有试跑都不进入文章结论。
 
 静态验证：
 
@@ -27,4 +27,7 @@ python3 -m unittest test_run_experiment.py test_validate_fixtures.py
 
 运行记录默认写入被 Git 忽略的 `runs/private/<platform-tag>/`。试跑只用于发现题目歧义、夹具泄漏、评分困难和指标覆盖缺口，不进入正式结论。
 
-Pilot 01 复核见 [`analysis/pilot-01.md`](analysis/pilot-01.md)。
+试跑复核：
+
+- [`analysis/pilot-01.md`](analysis/pilot-01.md)
+- [`analysis/pilot-02.md`](analysis/pilot-02.md)
