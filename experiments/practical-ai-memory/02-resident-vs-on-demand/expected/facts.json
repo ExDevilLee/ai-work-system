@@ -1,0 +1,78 @@
+{
+  "facts": [
+    {
+      "id": "current_goal",
+      "text": "当前唯一目标：在 macOS 验证长期记忆的常驻与按需读取边界。",
+      "source": "memory/CURRENT.md",
+      "resident": false
+    },
+    {
+      "id": "next_action",
+      "text": "下一步动作：完成三种加载策略的 Pilot 01，并检查正确性、上下文读取量和人工 Review 成本。",
+      "source": "memory/CURRENT.md",
+      "resident": false
+    },
+    {
+      "id": "current_blocker",
+      "text": "当前阻塞：尚未获得可以支持常驻信息选择标准的重复实验结果。",
+      "source": "memory/CURRENT.md",
+      "resident": false
+    },
+    {
+      "id": "recent_completed",
+      "text": "最近完成项：三层记忆 POC 已在 macOS 与 Win11 各完成 18 次正式运行。",
+      "source": "memory/CURRENT.md",
+      "resident": false
+    },
+    {
+      "id": "evidence_rule",
+      "text": "公开文章中的实践结论必须来自已经运行的真实实验。",
+      "source": "memory/MEMORY.md",
+      "resident": true
+    },
+    {
+      "id": "platform_rule",
+      "text": "平台兼容性结论只能覆盖已经完成真实验证的平台。",
+      "source": "memory/MEMORY.md",
+      "resident": true
+    },
+    {
+      "id": "private_evidence_rule",
+      "text": "完整原始运行证据只保留在本地私有区，不进入公开仓库。",
+      "source": "memory/MEMORY.md",
+      "resident": true
+    },
+    {
+      "id": "all_stable_superseded",
+      "text": "所有稳定事实都应该直接写进 AGENTS.md。",
+      "source": "memory/MEMORY.md",
+      "resident": false,
+      "prompt_exposed": true
+    },
+    {
+      "id": "selective_observation",
+      "text": "选择性常驻可能比全部常驻减少无关上下文。",
+      "source": "memory/MEMORY.md",
+      "resident": false,
+      "prompt_exposed": true
+    },
+    {
+      "id": "manifest_check",
+      "text": "代表样本能够追溯到完整 manifest。",
+      "source": "references/public-evidence-checklist.md",
+      "resident": false
+    },
+    {
+      "id": "sensitive_check",
+      "text": "本机绝对路径、会话标识和疑似密钥已经移除。",
+      "source": "references/public-evidence-checklist.md",
+      "resident": false
+    },
+    {
+      "id": "reproduction_check",
+      "text": "README 提供最小复现命令和实验限制。",
+      "source": "references/public-evidence-checklist.md",
+      "resident": false
+    }
+  ]
+}

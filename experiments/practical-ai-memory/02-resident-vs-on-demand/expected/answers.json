@@ -1,0 +1,44 @@
+{
+  "critical-boundary": {
+    "allowed": false,
+    "violated_rules": [
+      "平台兼容性结论只能覆盖已经完成真实验证的平台",
+      "完整原始运行证据只保留在本地私有区，不进入公开仓库"
+    ],
+    "corrections": [
+      "只声明已在 macOS 实测，Win11 标记为待验证",
+      "只公开脱敏证据，完整原始运行保留在本地私有区"
+    ],
+    "source_paths": [
+      "memory/MEMORY.md",
+      "references/platform-claim-policy.md"
+    ]
+  },
+  "reference-detail": {
+    "checks": [
+      "代表样本能够追溯到完整 manifest",
+      "本机绝对路径、会话标识和疑似密钥已经移除",
+      "README 提供最小复现命令和实验限制"
+    ],
+    "source_paths": [
+      "references/public-evidence-checklist.md"
+    ]
+  },
+  "volatile-state": {
+    "current_goal": "在 macOS 验证长期记忆的常驻与按需读取边界",
+    "next_action": "完成三种加载策略的 Pilot 01，并检查正确性、上下文读取量和人工 Review 成本",
+    "current_blocker": "尚未获得可以支持常驻信息选择标准的重复实验结果",
+    "recent_completed": "三层记忆 POC 已在 macOS 与 Win11 各完成 18 次正式运行",
+    "source_paths": [
+      "memory/CURRENT.md"
+    ]
+  },
+  "status-conflict": {
+    "all_stable_facts": "已失效结论",
+    "selective_resident": "待验证观察",
+    "publishable_as_confirmed": false,
+    "source_paths": [
+      "memory/MEMORY.md"
+    ]
+  }
+}
