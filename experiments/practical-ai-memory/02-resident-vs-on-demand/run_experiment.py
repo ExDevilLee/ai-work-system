@@ -32,6 +32,18 @@ def is_runtime_path(value: object) -> bool:
     return "/.codex/" in normalized
 
 
+def runtime_tool_access_count(events: Sequence[dict[str, object]]) -> int:
+    """Count completed tool events that expose user-level Codex runtime paths."""
+    return sum(
+        1
+        for event in events
+        if event.get("type") == "item.completed"
+        and isinstance(event.get("item"), dict)
+        and event["item"].get("type") in {"command_execution", "mcp_tool_call"}
+        and is_runtime_path(json.dumps(event["item"], ensure_ascii=False))
+    )
+
+
 def has_unmeasured_mcp_tool_calls(
     events: Sequence[dict[str, object]], fixture: Optional[Path] = None
 ) -> bool:
@@ -206,6 +218,39 @@ def command_output(*args: str) -> str:
     return result.stdout.strip()
 
 
+def build_codex_command(
+    codex_executable: str,
+    workspace: Path,
+    final_path: Path,
+    *,
+    model: Optional[str],
+    reasoning_effort: Optional[str],
+) -> list[str]:
+    command = [
+        codex_executable,
+        "exec",
+        "-C",
+        str(workspace),
+        "--skip-git-repo-check",
+        "--sandbox",
+        "read-only",
+        "--ephemeral",
+        "--json",
+        "--config",
+        "features.plugins=false",
+        "--output-last-message",
+        str(final_path),
+    ]
+    if model:
+        command.extend(["--model", model])
+    if reasoning_effort:
+        command.extend(
+            ["--config", f'model_reasoning_effort="{reasoning_effort}"']
+        )
+    command.append("-")
+    return command
+
+
 def adjusted_mixed_workspace_bytes(item: dict[str, object]) -> Optional[int]:
     """Remove known global file prefixes from one mixed-scope command output."""
     command = str(item.get("command", ""))
@@ -286,27 +331,14 @@ def main() -> int:
         workspace = Path(temp) / "workspace"
         shutil.copytree(fixture, workspace)
 
-        command = [
+        command = build_codex_command(
             codex_executable,
-            "exec",
-            "-C",
-            str(workspace),
-            "--skip-git-repo-check",
-            "--sandbox",
-            "read-only",
-            "--ephemeral",
-            "--json",
-            "--output-last-message",
-            str(run_dir / "final.md"),
-        ]
-        if args.model:
-            command.extend(["--model", args.model])
-        if args.reasoning_effort:
-            command.extend(
-                ["--config", f'model_reasoning_effort="{args.reasoning_effort}"']
-            )
+            workspace,
+            run_dir / "final.md",
+            model=args.model,
+            reasoning_effort=args.reasoning_effort,
+        )
         prompt_text = prompt_path.read_text(encoding="utf-8")
-        command.append("-")
 
         started = time.monotonic()
         result = run_utf8_command(command, input_text=prompt_text)
@@ -344,6 +376,7 @@ def main() -> int:
     mcp_workspace_calls, mcp_workspace_bytes, unmeasured_mcp_tool_calls = (
         mcp_workspace_metrics(events, fixture)
     )
+    runtime_access_calls = runtime_tool_access_count(events)
     workspace_metric_coverage_complete = unmeasured_mcp_tool_calls == 0
 
     metadata = {
@@ -370,6 +403,9 @@ def main() -> int:
         "prompt_sha256": hashlib.sha256(prompt_path.read_bytes()).hexdigest(),
         "sandbox": "read-only",
         "ephemeral": True,
+        "plugins_enabled": False,
+        "runtime_tool_access_calls": runtime_access_calls,
+        "protocol_environment_isolated": runtime_access_calls == 0,
         "exit_code": result.returncode,
         "elapsed_seconds": elapsed_seconds,
         "usage": usage_events[-1] if usage_events else None,
@@ -394,7 +430,7 @@ def main() -> int:
         + sum(value for value in mixed_adjustments if value is not None)
         + mcp_workspace_bytes,
         "resident_instruction_bytes": resident_instruction_bytes(fixture),
-        "command_shape": "codex exec -C <isolated-workspace> --skip-git-repo-check --sandbox read-only --ephemeral --json --output-last-message <file> [--model <model>] [--config model_reasoning_effort=<effort>] -; prompt transport: UTF-8 stdin",
+        "command_shape": "codex exec -C <isolated-workspace> --skip-git-repo-check --sandbox read-only --ephemeral --json --config features.plugins=false --output-last-message <file> [--model <model>] [--config model_reasoning_effort=<effort>] -; prompt transport: UTF-8 stdin",
     }
     metadata["project_context_bytes_reliable"] = metadata[
         "workspace_output_bytes_reliable"
@@ -410,6 +446,8 @@ def main() -> int:
     )
 
     print(json.dumps(metadata, ensure_ascii=False, indent=2))
+    if result.returncode == 0 and runtime_access_calls:
+        return 2
     return result.returncode
 
 

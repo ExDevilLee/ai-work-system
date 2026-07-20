@@ -18,6 +18,8 @@
 
 三轮 Pilot 与 36 次 macOS 正式矩阵均已完成。三个条件各 12 个样本，全部命中冻结答案，工作区指标覆盖完整。结果没有支持“选择性常驻总是最优”：不同任务的读取成本不同，常驻规则也不能保证模型不再核对文件。完整结论与限制见 [`analysis/formal-macos.md`](analysis/formal-macos.md)。所有 Pilot 都不进入文章结论。
 
+首次 Win11 Smoke 的 12 次命令均成功，但其中 9 次读取了本机 Codex 插件技能文件，因此整批未通过协议门禁，正式矩阵没有启动。运行器现已显式禁用插件，并把用户级 Codex 运行时访问升级为协议失败；脱敏记录见 [`analysis/win11-smoke-01.md`](analysis/win11-smoke-01.md)。
+
 静态验证：
 
 ```bash
@@ -43,6 +45,7 @@ Win11 复现步骤见 [`WINDOWS-VALIDATION.md`](WINDOWS-VALIDATION.md)。
 - [`analysis/pilot-01.md`](analysis/pilot-01.md)
 - [`analysis/pilot-02.md`](analysis/pilot-02.md)
 - [`analysis/pilot-03.md`](analysis/pilot-03.md)
+- [`analysis/win11-smoke-01.md`](analysis/win11-smoke-01.md)
 
 正式结果：
 

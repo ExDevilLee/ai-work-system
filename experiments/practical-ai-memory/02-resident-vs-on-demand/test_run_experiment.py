@@ -12,10 +12,12 @@ from pathlib import Path
 from unittest.mock import patch
 
 from run_experiment import (
+    build_codex_command,
     has_unmeasured_mcp_tool_calls,
     mcp_workspace_metrics,
     resident_instruction_bytes,
     resolve_codex_executable,
+    runtime_tool_access_count,
     run_utf8_command,
     tree_checksum,
 )
@@ -48,7 +50,7 @@ class TreeChecksumTest(unittest.TestCase):
         with tempfile.TemporaryDirectory() as temporary_directory:
             root = Path(temporary_directory)
             content = "# Rules\n\n- 中文规则。\n"
-            (root / "AGENTS.md").write_text(content, encoding="utf-8")
+            (root / "AGENTS.md").write_bytes(content.encode("utf-8"))
 
             self.assertEqual(
                 resident_instruction_bytes(root), len(content.encode("utf-8"))
@@ -60,6 +62,18 @@ class CodexExecutableTest(unittest.TestCase):
     def test_resolves_platform_launcher_once(self, which: object) -> None:
         self.assertEqual(resolve_codex_executable(), r"C:\npm\codex.cmd")
         which.assert_called_once_with("codex")
+
+    def test_build_command_disables_plugins(self) -> None:
+        command = build_codex_command(
+            "codex.cmd",
+            Path("workspace"),
+            Path("final.md"),
+            model="gpt-5.6-sol",
+            reasoning_effort="medium",
+        )
+
+        self.assertIn("features.plugins=false", command)
+        self.assertEqual(command[-1], "-")
 
 
 class Utf8CommandTest(unittest.TestCase):
@@ -104,9 +118,7 @@ class WorkspaceMetricCoverageTest(unittest.TestCase):
     def test_counts_fixture_mcp_result_as_workspace_output(self) -> None:
         with tempfile.TemporaryDirectory() as temporary_directory:
             fixture = Path(temporary_directory)
-            (fixture / "PROJECT_NOTES.md").write_text(
-                "fixture notes\n", encoding="utf-8"
-            )
+            (fixture / "PROJECT_NOTES.md").write_bytes(b"fixture notes\n")
             events = [
                 {
                     "type": "item.completed",
@@ -129,11 +141,11 @@ class WorkspaceMetricCoverageTest(unittest.TestCase):
             first = "第一项：检查图片。\n第二项：检查链接。\n"
             second = "平台策略：先验证，再发布。\n"
             (fixture / "references").mkdir()
-            (fixture / "references" / "checklist.md").write_text(
-                first, encoding="utf-8"
+            (fixture / "references" / "checklist.md").write_bytes(
+                first.encode("utf-8")
             )
-            (fixture / "references" / "policy.md").write_text(
-                second, encoding="utf-8"
+            (fixture / "references" / "policy.md").write_bytes(
+                second.encode("utf-8")
             )
             result_text = json.dumps(
                 json.dumps(
@@ -168,6 +180,35 @@ class WorkspaceMetricCoverageTest(unittest.TestCase):
                 mcp_workspace_metrics(events, fixture),
                 (1, len(result_text.encode("utf-8")), 0),
             )
+
+    def test_detects_runtime_access_in_command_and_mcp_events(self) -> None:
+        events = [
+            {
+                "type": "item.completed",
+                "item": {
+                    "type": "command_execution",
+                    "command": r'type "C:\\Users\\example\\.codex\\plugins\\skill.md"',
+                },
+            },
+            {
+                "type": "item.completed",
+                "item": {
+                    "type": "mcp_tool_call",
+                    "arguments": {
+                        "path": "/Users/example/.codex/plugins/example/SKILL.md"
+                    },
+                },
+            },
+            {
+                "type": "item.completed",
+                "item": {
+                    "type": "command_execution",
+                    "command": "type memory\\MEMORY.md",
+                },
+            },
+        ]
+
+        self.assertEqual(runtime_tool_access_count(events), 2)
 
 
 if __name__ == "__main__":

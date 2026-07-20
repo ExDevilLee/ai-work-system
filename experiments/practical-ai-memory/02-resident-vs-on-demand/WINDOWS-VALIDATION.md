@@ -67,12 +67,22 @@ foreach ($task in $tasks) {
 
 每个成功运行都应包含 `metadata.json`、`final.md`、`raw.jsonl`、`stderr.log`、`fixture-snapshot/` 和 `prompt.md`，并满足：平台标签为 `win11`、模型为 `gpt-5.6-sol`、推理强度为 `medium`、多行中文 prompt 完整传入、fixture/prompt 哈希稳定。若任一运行失败、语义答案不完整、出现 prompt 截断、读取真实记忆或指标覆盖不完整，立即停止，不进入正式矩阵。
 
+每次运行的 `metadata.json` 还必须满足：
+
+- `plugins_enabled=false`
+- `runtime_tool_access_calls=0`
+- `protocol_environment_isolated=true`
+
+如果工具事件读取本机 `.codex` 下的插件、技能或其他运行时文件，即使答案正确、指标完整，也属于协议失败。隔离整批 Smoke 后从头重跑，不能继续使用其中未越界的部分。
+
 运行器已经针对 Windows 做了以下处理，不要在本机手工绕过：
 
 - 通过 PATH 解析 `codex.cmd`，不把裸 `codex` 直接交给 `CreateProcess`。
 - 使用 UTF-8 解码 stdout/stderr。
 - 使用 stdin 传递多行 prompt，避免 npm `.cmd` 的 `%*` 截断。
 - 使用 POSIX 相对路径排序计算 fixture 哈希。
+- 每次调用显式设置 `features.plugins=false`，避免本机插件安装状态进入实验变量。
+- 检查工具事件中的用户级 Codex 运行时路径；发现越界访问时以非零状态停止。
 
 ## 4. 正式矩阵
 
