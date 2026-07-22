@@ -8,6 +8,8 @@ import subprocess
 import sys
 from pathlib import Path
 
+from matrix_support import is_complete_successful_run
+
 
 ROOT = Path(__file__).resolve().parent
 MODEL = "gpt-5.6-sol"
@@ -53,7 +55,7 @@ def main() -> int:
         for task, condition in runs:
             run_name = f"{label}-{task}-{condition}"
             run_dir = ROOT / "runs" / "private" / args.platform_tag / run_name
-            if (run_dir / "metadata.json").is_file():
+            if is_complete_successful_run(run_dir):
                 print(f"SKIP {run_name}", flush=True)
                 skipped += 1
                 continue
