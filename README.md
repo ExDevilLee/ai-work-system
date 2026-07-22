@@ -88,7 +88,7 @@ English version: [README-EN.md](README-EN.md)
 
 ## 当前写作中
 
-暂无正在公开推进的草稿。
+- 《一条临时经验，什么时候值得成为长期记忆？》已进入 `review`，当前基于 45 次 macOS 正式运行；Win11 对照、计时评分和聚合数据将在进入 `ready` 前补充。
 
 ## 发布原则
 

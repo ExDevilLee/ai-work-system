@@ -1,0 +1,23 @@
+{
+  "direct-promotion": {
+    "human_receipt_required": false,
+    "checks": [
+      "记录每次直接写入稳定记忆的决定",
+      "单独统计误晋升和遗漏，不用读取量替代质量"
+    ]
+  },
+  "rule-gated": {
+    "human_receipt_required": false,
+    "checks": [
+      "说明满足或未满足的证据门槛",
+      "不能把人工回执当成该条件的必需正确性项"
+    ]
+  },
+  "staged-human-gate": {
+    "human_receipt_required": true,
+    "checks": [
+      "每次晋升前核对人工决定",
+      "没有批准回执时不得写入稳定记忆"
+    ]
+  }
+}

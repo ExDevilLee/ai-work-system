@@ -92,7 +92,7 @@ Article bodies are currently written in Chinese first. English titles are provid
 
 ## Work In Progress
 
-No public draft is currently in progress.
+- *When Does a Temporary Experience Deserve to Become Long-Term Memory?* is in `review`, currently based on 45 formal macOS runs. Win11 comparison, timed scoring, and aggregated data will be added before `ready`.
 
 ## Publishing Principle
 
