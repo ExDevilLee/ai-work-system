@@ -181,6 +181,65 @@ class WorkspaceMetricCoverageTest(unittest.TestCase):
                 (1, len(result_text.encode("utf-8")), 0),
             )
 
+    def test_counts_partial_fixture_mcp_result(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            fixture = Path(temporary_directory)
+            fixture_text = (
+                "# 观察记录\n\n"
+                "第一次发布检查发现导航链接失效。\n"
+                "第二次独立检查再次发现同类问题。\n"
+                "第三次检查确认修复前问题仍可复现。\n"
+            )
+            (fixture / "observation.md").write_text(
+                fixture_text, encoding="utf-8"
+            )
+            fragment = "第二次独立检查再次发现同类问题。\n第三次检查确认修复前问题仍可复现。"
+            result_text = json.dumps(
+                {"content": fragment}, ensure_ascii=False
+            )
+            events = [
+                {
+                    "type": "item.completed",
+                    "item": {
+                        "type": "mcp_tool_call",
+                        "server": "node_repl",
+                        "tool": "js",
+                        "arguments": {"code": "read selected lines"},
+                        "result": {
+                            "content": [{"type": "text", "text": result_text}]
+                        },
+                    },
+                }
+            ]
+
+            self.assertEqual(
+                mcp_workspace_metrics(events, fixture),
+                (1, len(result_text.encode("utf-8")), 0),
+            )
+
+    def test_does_not_count_short_fixture_overlap(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            fixture = Path(temporary_directory)
+            (fixture / "observation.md").write_text(
+                "状态：待验证观察。\n", encoding="utf-8"
+            )
+            events = [
+                {
+                    "type": "item.completed",
+                    "item": {
+                        "type": "mcp_tool_call",
+                        "server": "node_repl",
+                        "tool": "js",
+                        "arguments": {"code": "format status"},
+                        "result": {
+                            "content": [{"type": "text", "text": "待验证观察"}]
+                        },
+                    },
+                }
+            ]
+
+            self.assertEqual(mcp_workspace_metrics(events, fixture), (0, 0, 0))
+
     def test_detects_runtime_access_in_command_and_mcp_events(self) -> None:
         events = [
             {

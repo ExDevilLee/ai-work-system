@@ -22,6 +22,7 @@ from validate_fixtures import validate
 
 ROOT = Path(__file__).resolve().parent
 CONDITIONS = ("direct-promotion", "rule-gated", "staged-human-gate")
+MIN_FIXTURE_FRAGMENT_BYTES = 32
 RUNTIME_PATH_PATTERN = re.compile(
     r"((?:[A-Za-z]:[\\/]|/)[^\s\"']*[\\/]\.codex[\\/][^\s\"']+)"
 )
@@ -110,6 +111,24 @@ def fixture_texts(fixture: Optional[Path]) -> Iterable[str]:
     return texts
 
 
+def result_contains_fixture_content(
+    result_candidates: Sequence[str], fixture_contents: Iterable[str]
+) -> bool:
+    for fixture_text in fixture_contents:
+        if not fixture_text:
+            continue
+        for candidate in result_candidates:
+            if fixture_text in candidate:
+                return True
+            fragment = candidate.strip()
+            if (
+                len(fragment.encode("utf-8")) >= MIN_FIXTURE_FRAGMENT_BYTES
+                and fragment in fixture_text
+            ):
+                return True
+    return False
+
+
 def mcp_arguments_text(item: object) -> str:
     if not isinstance(item, dict):
         return ""
@@ -135,9 +154,8 @@ def classify_mcp_tool_call(
 
     result_text = mcp_result_text(item)
     result_candidates = tuple(structured_string_leaves(result_text or ""))
-    if result_text and any(
-        text and any(text in candidate for candidate in result_candidates)
-        for text in fixture_texts(fixture)
+    if result_text and result_contains_fixture_content(
+        result_candidates, fixture_texts(fixture)
     ):
         return "workspace", len(result_text.encode("utf-8"))
 
