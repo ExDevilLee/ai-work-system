@@ -1,3 +1,6 @@
 runs/private/
 data/
+!data/
+!data/formal-win11-gpt-5.6-sol-medium.csv
+!data/formal-win11-gpt-5.6-sol-medium.json
 __pycache__/

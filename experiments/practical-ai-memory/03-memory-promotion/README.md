@@ -15,9 +15,9 @@
 
 ## 当前阶段
 
-macOS Pilot 01 和 45 次正式重复矩阵已经完成，协议、环境隔离和指标覆盖门禁通过。正式结果的只读评分建议已经形成，但本轮 Review 没有预先计时，因此尚未写入 `score.json` 或生成聚合数据。详见 [`analysis/pilot-01.md`](analysis/pilot-01.md) 和 [`analysis/formal-macos-review.md`](analysis/formal-macos-review.md)。
+macOS Pilot 01 和 45 次正式重复矩阵已经完成，协议、环境隔离和指标覆盖门禁通过。macOS 的真实 Review 结果已形成，但 Review 开始前没有预先计时，因此未写入正式 `score.json` 或生成聚合数据，详见 [`analysis/formal-macos-review.md`](analysis/formal-macos-review.md)。
 
-前四批 Win11 Smoke 依次暴露了 MCP 片段漏记、临时路径门禁过严和目录操作无法归类问题，修正后的完整 Smoke 已通过。Win11 正式矩阵完成 32 次后在第 33 次遇到 HTTP 429 并停止；失败运行没有进入有效样本，剩余 12 次尚未启动。调度器已增加成功状态与文件完整性恢复门禁，限流冷却后可以重跑失败槽位并继续剩余矩阵。脱敏记录见 [`analysis/win11-smoke-01.md`](analysis/win11-smoke-01.md)、[`analysis/win11-smoke-03.md`](analysis/win11-smoke-03.md)、[`analysis/win11-smoke-04.md`](analysis/win11-smoke-04.md) 和 [`analysis/win11-formal-01.md`](analysis/win11-formal-01.md)。
+Win11 已按相同冻结协议完成 45 次正式运行并完成评分与聚合：15 个分组均为 `n=3`、`workspace_metrics_n=3`，总分 `210/225`，三个条件分别为 `60/75`、`75/75`、`75/75`。脱敏聚合文件位于 `data/`，完整原始运行记录仍不公开。Win11 的 Smoke 与限流恢复过程见 [`analysis/win11-smoke-01.md`](analysis/win11-smoke-01.md)、[`analysis/win11-smoke-03.md`](analysis/win11-smoke-03.md)、[`analysis/win11-smoke-04.md`](analysis/win11-smoke-04.md) 和 [`analysis/win11-formal-01.md`](analysis/win11-formal-01.md)。
 
 静态验证：
 
