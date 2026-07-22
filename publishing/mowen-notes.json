@@ -224,6 +224,24 @@
       "note_id": "8tUmwpitUN-yU0d6bulKF",
       "published": true,
       "url": "https://note.mowen.cn/detail/8tUmwpitUN-yU0d6bulKF"
+    },
+    "content/articles/practical-ai-memory/2026-07-21-when-should-experience-become-long-term-memory.md": {
+      "assets": {
+        "images/03/memory-promotion-gates.png": {
+          "sha256": "aafa013d81bfab020621c2f1c5ee8670a4a90041bdc60c93b31662d67d973f76",
+          "source_url": "https://gitee.com/ExDevilLee/ai-work-system/raw/main/content/articles/practical-ai-memory/images/03/memory-promotion-gates.png",
+          "uuid": "vOnpBwbDLDZURJvyKst4z-TMP"
+        }
+      },
+      "content_sha256": "82accc3c5264ad18aeff6ece79d96c14645caa3ef8d26b23740b8555c904ec63",
+      "note_id": "QreHPYlmbLex_lBfp9mhG",
+      "publication_blocked": {
+        "content_sha256": "82accc3c5264ad18aeff6ece79d96c14645caa3ef8d26b23740b8555c904ec63",
+        "message": "MoWen MCP error: error: code = 403 reason = RISKY message = svc [NoteSvc.SetPrivacy]: note risky. metadata = map[] cause = <nil>",
+        "reason": "RISKY"
+      },
+      "published": false,
+      "url": "https://note.mowen.cn/detail/QreHPYlmbLex_lBfp9mhG"
     }
   },
   "directories": {
