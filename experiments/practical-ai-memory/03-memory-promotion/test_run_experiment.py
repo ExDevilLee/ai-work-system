@@ -255,6 +255,75 @@ class WorkspaceMetricCoverageTest(unittest.TestCase):
                 (1, len(result_text.encode("utf-8")), 0),
             )
 
+    def test_counts_complete_fixture_directory_listing(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            fixture = Path(temporary_directory)
+            observations = fixture / "observations"
+            observations.mkdir()
+            for index, name in enumerate(
+                ("INDEX.md", "one-off-success.md", "repeated-evidence.md")
+            ):
+                (observations / name).write_text(
+                    f"synthetic body {index}", encoding="utf-8"
+                )
+            result_text = (
+                "directory entries: INDEX.md, one-off-success.md, "
+                "repeated-evidence.md"
+            )
+            events = [
+                {
+                    "type": "item.completed",
+                    "item": {
+                        "type": "mcp_tool_call",
+                        "server": "node_repl",
+                        "tool": "js",
+                        "arguments": {"code": "fs.readdir(target)"},
+                        "result": {
+                            "content": [{"type": "text", "text": result_text}]
+                        },
+                    },
+                }
+            ]
+
+            self.assertEqual(
+                mcp_workspace_metrics(events, fixture),
+                (1, len(result_text.encode("utf-8")), 0),
+            )
+
+    def test_counts_scoped_fixture_subdirectory_operation(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            fixture = Path(temporary_directory)
+            observations = fixture / "observations"
+            observations.mkdir()
+            (observations / "one-off-success.md").write_text(
+                "synthetic observation", encoding="utf-8"
+            )
+            result_text = '["one-off-success.md"]'
+            events = [
+                {
+                    "type": "item.completed",
+                    "item": {
+                        "type": "mcp_tool_call",
+                        "server": "node_repl",
+                        "tool": "js",
+                        "arguments": {
+                            "code": (
+                                "fs.readdir('observations').filter(name => "
+                                "fs.readFile('observations/' + name))"
+                            )
+                        },
+                        "result": {
+                            "content": [{"type": "text", "text": result_text}]
+                        },
+                    },
+                }
+            ]
+
+            self.assertEqual(
+                mcp_workspace_metrics(events, fixture),
+                (1, len(result_text.encode("utf-8")), 0),
+            )
+
     def test_does_not_count_short_fixture_overlap(self) -> None:
         with tempfile.TemporaryDirectory() as temporary_directory:
             fixture = Path(temporary_directory)

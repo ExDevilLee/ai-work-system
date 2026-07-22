@@ -162,6 +162,40 @@ def mcp_arguments_text(item: object) -> str:
     return str(arguments or "")
 
 
+def fixture_path_markers(fixture: Optional[Path]) -> set[str]:
+    if fixture is None or not fixture.is_dir():
+        return set()
+    return {
+        path.relative_to(fixture).as_posix()
+        for path in fixture.rglob("*")
+    }
+
+
+def result_matches_fixture_paths(
+    result_candidates: Sequence[str], fixture: Optional[Path]
+) -> bool:
+    markers = fixture_path_markers(fixture)
+    file_paths = {marker for marker in markers if "/" in marker}
+    if any(
+        marker in candidate.replace("\\", "/")
+        for marker in file_paths
+        for candidate in result_candidates
+    ):
+        return True
+
+    if fixture is None or not fixture.is_dir():
+        return False
+    directories = [fixture]
+    directories.extend(path for path in fixture.rglob("*") if path.is_dir())
+    for directory in directories:
+        entries = [child.name for child in directory.iterdir()]
+        if len(entries) < 2:
+            continue
+        if any(all(entry in candidate for entry in entries) for candidate in result_candidates):
+            return True
+    return False
+
+
 def classify_mcp_tool_call(
     item: object, fixture: Optional[Path]
 ) -> tuple[str, Optional[int]]:
@@ -182,23 +216,27 @@ def classify_mcp_tool_call(
         result_candidates, fixture_texts(fixture)
     ):
         return "workspace", len(result_text.encode("utf-8"))
+    if result_text and result_matches_fixture_paths(result_candidates, fixture):
+        return "workspace", len(result_text.encode("utf-8"))
 
     # A node_repl call that does not mention a fixture path is treated as
     # external/non-workspace; a fixture reference without matching content is
     # incomplete because the returned representation cannot be measured safely.
     args_text = mcp_arguments_text(item).replace("\\", "/")
-    markers = set()
-    if fixture is not None and fixture.is_dir():
-        markers = {
-            path.relative_to(fixture).as_posix()
-            for path in fixture.rglob("*")
-            if path.is_file()
-        }
+    markers = fixture_path_markers(fixture)
+    has_file_operation = server == "node_repl" and any(
+        marker in args_text.lower() for marker in NODE_REPL_FILE_MARKERS
+    )
+    if (
+        result_text
+        and has_file_operation
+        and markers
+        and any(marker in args_text for marker in markers)
+    ):
+        return "workspace", len(result_text.encode("utf-8"))
     if markers and any(marker in args_text for marker in markers):
         return "unknown", None
-    if server == "node_repl" and any(
-        marker in args_text.lower() for marker in NODE_REPL_FILE_MARKERS
-    ):
+    if has_file_operation:
         return "unknown", None
     return "non_workspace", None
 
