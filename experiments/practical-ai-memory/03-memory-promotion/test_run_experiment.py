@@ -217,6 +217,44 @@ class WorkspaceMetricCoverageTest(unittest.TestCase):
                 (1, len(result_text.encode("utf-8")), 0),
             )
 
+    def test_counts_wrapped_fixture_fragment(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            fixture = Path(temporary_directory)
+            fixture_text = (
+                "# 决策记录\n\n"
+                "候选经验已经通过三次独立发布检查。\n"
+                "批准范围仅限当前 Wiki 发布脚本。\n"
+            )
+            (fixture / "decision.md").write_text(
+                fixture_text, encoding="utf-8"
+            )
+            result_text = (
+                "Tool result:\n"
+                "selected evidence follows\n"
+                "候选经验已经通过三次独立发布检查。\n"
+                "批准范围仅限当前 Wiki 发布脚本。\n"
+                "end of result"
+            )
+            events = [
+                {
+                    "type": "item.completed",
+                    "item": {
+                        "type": "mcp_tool_call",
+                        "server": "node_repl",
+                        "tool": "js",
+                        "arguments": {"code": "fs.readFile(target)"},
+                        "result": {
+                            "content": [{"type": "text", "text": result_text}]
+                        },
+                    },
+                }
+            ]
+
+            self.assertEqual(
+                mcp_workspace_metrics(events, fixture),
+                (1, len(result_text.encode("utf-8")), 0),
+            )
+
     def test_does_not_count_short_fixture_overlap(self) -> None:
         with tempfile.TemporaryDirectory() as temporary_directory:
             fixture = Path(temporary_directory)
@@ -239,6 +277,29 @@ class WorkspaceMetricCoverageTest(unittest.TestCase):
             ]
 
             self.assertEqual(mcp_workspace_metrics(events, fixture), (0, 0, 0))
+
+    def test_marks_unmatched_node_repl_file_read_unknown(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            fixture = Path(temporary_directory)
+            (fixture / "observation.md").write_text(
+                "稳定且可追溯的夹具内容。\n", encoding="utf-8"
+            )
+            events = [
+                {
+                    "type": "item.completed",
+                    "item": {
+                        "type": "mcp_tool_call",
+                        "server": "node_repl",
+                        "tool": "js",
+                        "arguments": {"code": "fs.readFile(unknownPath)"},
+                        "result": {
+                            "content": [{"type": "text", "text": "unmatched"}]
+                        },
+                    },
+                }
+            ]
+
+            self.assertEqual(mcp_workspace_metrics(events, fixture), (0, 0, 1))
 
     def test_detects_runtime_access_in_command_and_mcp_events(self) -> None:
         events = [

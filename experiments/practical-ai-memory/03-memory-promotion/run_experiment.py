@@ -23,6 +23,16 @@ from validate_fixtures import validate
 ROOT = Path(__file__).resolve().parent
 CONDITIONS = ("direct-promotion", "rule-gated", "staged-human-gate")
 MIN_FIXTURE_FRAGMENT_BYTES = 32
+NODE_REPL_FILE_MARKERS = (
+    "fs.",
+    "glob",
+    "path.join",
+    "process.cwd",
+    "readdir",
+    "readfile",
+    "readtextfile",
+    "stat(",
+)
 RUNTIME_PATH_PATTERN = re.compile(
     r"((?:[A-Za-z]:[\\/]|/)[^\s\"']*[\\/]\.codex[\\/][^\s\"']+)"
 )
@@ -126,6 +136,20 @@ def result_contains_fixture_content(
                 and fragment in fixture_text
             ):
                 return True
+            for start in range(len(fixture_text)):
+                end = start
+                fragment_bytes = 0
+                while (
+                    end < len(fixture_text)
+                    and fragment_bytes < MIN_FIXTURE_FRAGMENT_BYTES
+                ):
+                    fragment_bytes += len(fixture_text[end].encode("utf-8"))
+                    end += 1
+                if (
+                    fragment_bytes >= MIN_FIXTURE_FRAGMENT_BYTES
+                    and fixture_text[start:end] in candidate
+                ):
+                    return True
     return False
 
 
@@ -171,6 +195,10 @@ def classify_mcp_tool_call(
             if path.is_file()
         }
     if markers and any(marker in args_text for marker in markers):
+        return "unknown", None
+    if server == "node_repl" and any(
+        marker in args_text.lower() for marker in NODE_REPL_FILE_MARKERS
+    ):
         return "unknown", None
     return "non_workspace", None
 

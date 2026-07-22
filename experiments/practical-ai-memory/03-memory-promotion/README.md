@@ -17,7 +17,7 @@
 
 macOS Pilot 01 和 45 次正式重复矩阵已经完成，协议、环境隔离和指标覆盖门禁通过。正式结果的只读评分建议已经形成，但本轮 Review 没有预先计时，因此尚未写入 `score.json` 或生成聚合数据。详见 [`analysis/pilot-01.md`](analysis/pilot-01.md) 和 [`analysis/formal-macos-review.md`](analysis/formal-macos-review.md)。
 
-首次 Win11 Smoke 在第 1 次运行发现 MCP 片段读取漏记后按门禁停止。该运行已隔离，分类器和回归测试已修正；Win11 需要从头执行全部 15 次 Smoke。脱敏记录见 [`analysis/win11-smoke-01.md`](analysis/win11-smoke-01.md)。
+前两批 Win11 Smoke 发现 MCP 片段读取漏记后均按门禁停止并隔离。分类器现已覆盖带工具包装文本的夹具连续片段，并对无法归属的文件读取保守标记覆盖不完整；Win11 需要从头执行全部 15 次 Smoke。脱敏记录见 [`analysis/win11-smoke-01.md`](analysis/win11-smoke-01.md)。
 
 静态验证：
 
