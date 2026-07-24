@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900" viewBox="0 0 1600 900" role="img" aria-labelledby="title desc">
+  <title id="title">长期记忆生命周期状态图</title>
+  <desc id="desc">长期记忆从当前有效状态，根据新证据进入冲突、被替代、过期或撤销状态。历史记录始终保留，但只有当前有效状态继续指导行动。</desc>
+
+  <rect width="1600" height="900" fill="#f7f8fa"/>
+  <text x="80" y="82" fill="#18212b" font-family="PingFang SC, Microsoft YaHei, sans-serif" font-size="40" font-weight="700">长期记忆怎样退出当前行动？</text>
+  <text x="80" y="126" fill="#5b6573" font-family="PingFang SC, Microsoft YaHei, sans-serif" font-size="22">历史始终保留，但只有 active 继续指导行动</text>
+
+  <rect x="580" y="190" width="440" height="170" rx="8" fill="#ffffff" stroke="#27835f" stroke-width="4"/>
+  <rect x="580" y="190" width="440" height="12" rx="6" fill="#27835f"/>
+  <text x="800" y="263" text-anchor="middle" fill="#176b58" font-family="PingFang SC, Microsoft YaHei, sans-serif" font-size="34" font-weight="700">active · 当前有效</text>
+  <text x="800" y="310" text-anchor="middle" fill="#5f6b78" font-family="PingFang SC, Microsoft YaHei, sans-serif" font-size="22">进入当前上下文，可以指导行动</text>
+
+  <path d="M800 360 V430" stroke="#566371" stroke-width="4" fill="none"/>
+  <path d="M800 430 L788 410 H812 Z" fill="#566371"/>
+  <text x="825" y="408" fill="#53606d" font-family="PingFang SC, Microsoft YaHei, sans-serif" font-size="18">新证据或治理决定</text>
+
+  <rect x="75" y="470" width="330" height="190" rx="8" fill="#ffffff" stroke="#b65f76" stroke-width="3"/>
+  <rect x="75" y="470" width="330" height="12" rx="6" fill="#b65f76"/>
+  <text x="240" y="535" text-anchor="middle" fill="#91455a" font-family="PingFang SC, Microsoft YaHei, sans-serif" font-size="29" font-weight="700">contested</text>
+  <text x="240" y="578" text-anchor="middle" fill="#4f5b67" font-family="PingFang SC, Microsoft YaHei, sans-serif" font-size="22" font-weight="700">证据冲突</text>
+  <text x="240" y="616" text-anchor="middle" fill="#697482" font-family="PingFang SC, Microsoft YaHei, sans-serif" font-size="19">暂停选边 · 控制变量复验</text>
+
+  <rect x="450" y="470" width="330" height="190" rx="8" fill="#ffffff" stroke="#3772b9" stroke-width="3"/>
+  <rect x="450" y="470" width="330" height="12" rx="6" fill="#3772b9"/>
+  <text x="615" y="535" text-anchor="middle" fill="#285b96" font-family="PingFang SC, Microsoft YaHei, sans-serif" font-size="29" font-weight="700">superseded</text>
+  <text x="615" y="578" text-anchor="middle" fill="#4f5b67" font-family="PingFang SC, Microsoft YaHei, sans-serif" font-size="22" font-weight="700">已被替代</text>
+  <text x="615" y="616" text-anchor="middle" fill="#697482" font-family="PingFang SC, Microsoft YaHei, sans-serif" font-size="19">新规则接管 · 旧规则退场</text>
+
+  <rect x="825" y="470" width="330" height="190" rx="8" fill="#ffffff" stroke="#9a7a32" stroke-width="3"/>
+  <rect x="825" y="470" width="330" height="12" rx="6" fill="#9a7a32"/>
+  <text x="990" y="535" text-anchor="middle" fill="#7b6024" font-family="PingFang SC, Microsoft YaHei, sans-serif" font-size="29" font-weight="700">expired</text>
+  <text x="990" y="578" text-anchor="middle" fill="#4f5b67" font-family="PingFang SC, Microsoft YaHei, sans-serif" font-size="22" font-weight="700">已经到期</text>
+  <text x="990" y="616" text-anchor="middle" fill="#697482" font-family="PingFang SC, Microsoft YaHei, sans-serif" font-size="19">有效期结束 · 恢复默认流程</text>
+
+  <rect x="1200" y="470" width="325" height="190" rx="8" fill="#ffffff" stroke="#bd4c4c" stroke-width="3"/>
+  <rect x="1200" y="470" width="325" height="12" rx="6" fill="#bd4c4c"/>
+  <text x="1362" y="535" text-anchor="middle" fill="#963a3a" font-family="PingFang SC, Microsoft YaHei, sans-serif" font-size="29" font-weight="700">revoked</text>
+  <text x="1362" y="578" text-anchor="middle" fill="#4f5b67" font-family="PingFang SC, Microsoft YaHei, sans-serif" font-size="22" font-weight="700">紧急撤销</text>
+  <text x="1362" y="616" text-anchor="middle" fill="#697482" font-family="PingFang SC, Microsoft YaHei, sans-serif" font-size="19">立即停止 · 重新取证与批准</text>
+
+  <path d="M800 430 H240 V470" stroke="#788492" stroke-width="3" fill="none"/>
+  <path d="M800 430 H615 V470" stroke="#788492" stroke-width="3" fill="none"/>
+  <path d="M800 430 H990 V470" stroke="#788492" stroke-width="3" fill="none"/>
+  <path d="M800 430 H1362 V470" stroke="#788492" stroke-width="3" fill="none"/>
+
+  <rect x="190" y="750" width="1220" height="82" rx="8" fill="#e9eef2"/>
+  <text x="800" y="783" text-anchor="middle" fill="#35414d" font-family="PingFang SC, Microsoft YaHei, sans-serif" font-size="21" font-weight="700">共同边界：保留原始记录、来源、适用范围和状态变化依据</text>
+  <text x="800" y="817" text-anchor="middle" fill="#5b6573" font-family="PingFang SC, Microsoft YaHei, sans-serif" font-size="20">退出 active ≠ 删除历史　　保留历史 ≠ 继续执行</text>
+</svg>

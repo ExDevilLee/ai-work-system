@@ -1,0 +1,37 @@
+{
+  "explicit-supersession": {
+    "current_action": "新增或修改文章后全量重建 Wiki 导航并执行远端检查",
+    "old_status": "superseded",
+    "new_status": "active",
+    "history": "保留旧规则用于审计，但不再指导当前行动",
+    "sources": ["records/explicit-supersession.md", "decisions/DECISIONS.md"]
+  },
+  "unresolved-conflict": {
+    "global_wait": null,
+    "status": "contested",
+    "next": "控制网络出口、服务配额和请求频率变量后复验并形成决定",
+    "sources": ["records/unresolved-conflict.md", "decisions/DECISIONS.md"]
+  },
+  "time-expiry": {
+    "stop_remote_sync": false,
+    "status": "expired",
+    "current_action": "恢复允许远端同步的默认流程",
+    "history": "保留临时规则及原有效期用于审计",
+    "sources": ["records/time-expiry.md", "records/INDEX.md"]
+  },
+  "scope-narrowing": {
+    "png_required": ["Wiki-A"],
+    "old_status": "superseded",
+    "new_status": "active within Wiki-A",
+    "other_platforms": "Blog-B 和 Note-C 不继承旧的全局强制转换要求",
+    "sources": ["records/scope-narrowing.md", "decisions/DECISIONS.md"]
+  },
+  "emergency-revocation": {
+    "auto_public": false,
+    "old_status": "revoked",
+    "current_action": "保持私有，等待人工完成内容与敏感性 Review",
+    "restore": "形成新的风险检查证据并获得明确批准",
+    "history": "保留旧规则和撤销原因用于审计",
+    "sources": ["records/emergency-revocation.md", "decisions/DECISIONS.md"]
+  }
+}

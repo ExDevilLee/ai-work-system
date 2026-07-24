@@ -1,0 +1,2 @@
+fixtures/** whitespace=-blank-at-eof
+prompts/** whitespace=-blank-at-eof

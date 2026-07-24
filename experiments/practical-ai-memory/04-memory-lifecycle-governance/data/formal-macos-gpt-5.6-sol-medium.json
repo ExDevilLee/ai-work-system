@@ -1,0 +1,1095 @@
+{
+  "selection_prefix": "formal-",
+  "platform_tag": "macos",
+  "run_count": 45,
+  "review_time_note": "manual_review_minutes is a per-run allocation from a timed batch average; it is not an individually timed observation",
+  "model_configuration": {
+    "model": "gpt-5.6-sol",
+    "reasoning_effort": "medium",
+    "codex_version": "codex-cli 0.145.0"
+  },
+  "conditions": {
+    "append-only": {
+      "n": 15,
+      "correctness": {
+        "score": 51,
+        "max_score": 84
+      },
+      "unsupported_claims": 0,
+      "irrelevant_project_facts": 0,
+      "workspace_metrics_n": 15,
+      "resident_instruction_bytes": {
+        "min": 748.0,
+        "median": 748.0,
+        "mean": 748.0,
+        "max": 748.0
+      },
+      "project_context_bytes": {
+        "min": 3000.0,
+        "median": 3672.0,
+        "mean": 3567.733,
+        "max": 4477.0
+      },
+      "workspace_command_calls": {
+        "min": 2.0,
+        "median": 4.0,
+        "mean": 3.133,
+        "max": 5.0
+      },
+      "workspace_output_bytes": {
+        "min": 2252.0,
+        "median": 2924.0,
+        "mean": 2819.733,
+        "max": 3729.0
+      },
+      "elapsed_seconds": {
+        "min": 28.254,
+        "median": 34.649,
+        "mean": 35.84,
+        "max": 48.296
+      }
+    },
+    "latest-wins": {
+      "n": 15,
+      "correctness": {
+        "score": 72,
+        "max_score": 84
+      },
+      "unsupported_claims": 0,
+      "irrelevant_project_facts": 0,
+      "workspace_metrics_n": 15,
+      "resident_instruction_bytes": {
+        "min": 688.0,
+        "median": 688.0,
+        "mean": 688.0,
+        "max": 688.0
+      },
+      "project_context_bytes": {
+        "min": 2902.0,
+        "median": 3762.0,
+        "mean": 3904.067,
+        "max": 6977.0
+      },
+      "workspace_command_calls": {
+        "min": 2.0,
+        "median": 4.0,
+        "mean": 3.733,
+        "max": 4.0
+      },
+      "workspace_output_bytes": {
+        "min": 2214.0,
+        "median": 3074.0,
+        "mean": 3216.067,
+        "max": 6289.0
+      },
+      "elapsed_seconds": {
+        "min": 26.782,
+        "median": 36.29,
+        "mean": 41.043,
+        "max": 64.635
+      }
+    },
+    "lifecycle-governed": {
+      "n": 15,
+      "correctness": {
+        "score": 84,
+        "max_score": 84
+      },
+      "unsupported_claims": 0,
+      "irrelevant_project_facts": 0,
+      "workspace_metrics_n": 15,
+      "resident_instruction_bytes": {
+        "min": 863.0,
+        "median": 863.0,
+        "mean": 863.0,
+        "max": 863.0
+      },
+      "project_context_bytes": {
+        "min": 3077.0,
+        "median": 3781.0,
+        "mean": 3745.333,
+        "max": 4374.0
+      },
+      "workspace_command_calls": {
+        "min": 2.0,
+        "median": 4.0,
+        "mean": 3.667,
+        "max": 5.0
+      },
+      "workspace_output_bytes": {
+        "min": 2214.0,
+        "median": 2918.0,
+        "mean": 2882.333,
+        "max": 3511.0
+      },
+      "elapsed_seconds": {
+        "min": 26.697,
+        "median": 30.936,
+        "mean": 34.266,
+        "max": 51.164
+      }
+    }
+  },
+  "groups": {
+    "emergency-revocation:append-only": {
+      "n": 3,
+      "correctness": {
+        "score": 9,
+        "max_score": 18
+      },
+      "unsupported_claims": 0,
+      "irrelevant_project_facts": 0,
+      "workspace_metrics_n": 3,
+      "resident_instruction_bytes": {
+        "min": 748.0,
+        "median": 748.0,
+        "mean": 748.0,
+        "max": 748.0
+      },
+      "project_context_bytes": {
+        "min": 3088.0,
+        "median": 3673.0,
+        "mean": 3501.0,
+        "max": 3742.0
+      },
+      "workspace_command_calls": {
+        "min": 2.0,
+        "median": 4.0,
+        "mean": 3.667,
+        "max": 5.0
+      },
+      "workspace_output_bytes": {
+        "min": 2340.0,
+        "median": 2925.0,
+        "mean": 2753.0,
+        "max": 2994.0
+      },
+      "elapsed_seconds": {
+        "min": 34.649,
+        "median": 35.515,
+        "mean": 36.622,
+        "max": 39.701
+      },
+      "input_tokens": {
+        "min": 63051.0,
+        "median": 84336.0,
+        "mean": 77250.0,
+        "max": 84363.0
+      },
+      "output_tokens": {
+        "min": 3758.0,
+        "median": 3858.0,
+        "mean": 3946.333,
+        "max": 4223.0
+      },
+      "reasoning_output_tokens": {
+        "min": 0.0,
+        "median": 0.0,
+        "mean": 0.0,
+        "max": 0.0
+      },
+      "manual_review_minutes_per_run": {
+        "min": 0.020081944,
+        "median": 0.020081944,
+        "mean": 0.02,
+        "max": 0.020081944
+      }
+    },
+    "emergency-revocation:latest-wins": {
+      "n": 3,
+      "correctness": {
+        "score": 18,
+        "max_score": 18
+      },
+      "unsupported_claims": 0,
+      "irrelevant_project_facts": 0,
+      "workspace_metrics_n": 3,
+      "resident_instruction_bytes": {
+        "min": 688.0,
+        "median": 688.0,
+        "mean": 688.0,
+        "max": 688.0
+      },
+      "project_context_bytes": {
+        "min": 3411.0,
+        "median": 3613.0,
+        "mean": 3545.667,
+        "max": 3613.0
+      },
+      "workspace_command_calls": {
+        "min": 3.0,
+        "median": 4.0,
+        "mean": 3.667,
+        "max": 4.0
+      },
+      "workspace_output_bytes": {
+        "min": 2723.0,
+        "median": 2925.0,
+        "mean": 2857.667,
+        "max": 2925.0
+      },
+      "elapsed_seconds": {
+        "min": 32.038,
+        "median": 47.969,
+        "mean": 44.55,
+        "max": 53.642
+      },
+      "input_tokens": {
+        "min": 84143.0,
+        "median": 84283.0,
+        "mean": 84245.333,
+        "max": 84310.0
+      },
+      "output_tokens": {
+        "min": 3378.0,
+        "median": 3515.0,
+        "mean": 3483.0,
+        "max": 3556.0
+      },
+      "reasoning_output_tokens": {
+        "min": 0.0,
+        "median": 0.0,
+        "mean": 0.0,
+        "max": 0.0
+      },
+      "manual_review_minutes_per_run": {
+        "min": 0.020081944,
+        "median": 0.020081944,
+        "mean": 0.02,
+        "max": 0.020081944
+      }
+    },
+    "emergency-revocation:lifecycle-governed": {
+      "n": 3,
+      "correctness": {
+        "score": 18,
+        "max_score": 18
+      },
+      "unsupported_claims": 0,
+      "irrelevant_project_facts": 0,
+      "workspace_metrics_n": 3,
+      "resident_instruction_bytes": {
+        "min": 863.0,
+        "median": 863.0,
+        "mean": 863.0,
+        "max": 863.0
+      },
+      "project_context_bytes": {
+        "min": 3235.0,
+        "median": 3473.0,
+        "mean": 3402.0,
+        "max": 3498.0
+      },
+      "workspace_command_calls": {
+        "min": 4.0,
+        "median": 4.0,
+        "mean": 4.333,
+        "max": 5.0
+      },
+      "workspace_output_bytes": {
+        "min": 2372.0,
+        "median": 2610.0,
+        "mean": 2539.0,
+        "max": 2635.0
+      },
+      "elapsed_seconds": {
+        "min": 28.885,
+        "median": 30.936,
+        "mean": 35.837,
+        "max": 47.69
+      },
+      "input_tokens": {
+        "min": 62594.0,
+        "median": 63098.0,
+        "mean": 69977.333,
+        "max": 84240.0
+      },
+      "output_tokens": {
+        "min": 2386.0,
+        "median": 2759.0,
+        "mean": 2853.333,
+        "max": 3415.0
+      },
+      "reasoning_output_tokens": {
+        "min": 0.0,
+        "median": 0.0,
+        "mean": 0.0,
+        "max": 0.0
+      },
+      "manual_review_minutes_per_run": {
+        "min": 0.020081944,
+        "median": 0.020081944,
+        "mean": 0.02,
+        "max": 0.020081944
+      }
+    },
+    "explicit-supersession:append-only": {
+      "n": 3,
+      "correctness": {
+        "score": 6,
+        "max_score": 18
+      },
+      "unsupported_claims": 0,
+      "irrelevant_project_facts": 0,
+      "workspace_metrics_n": 3,
+      "resident_instruction_bytes": {
+        "min": 748.0,
+        "median": 748.0,
+        "mean": 748.0,
+        "max": 748.0
+      },
+      "project_context_bytes": {
+        "min": 3000.0,
+        "median": 3000.0,
+        "mean": 3419.667,
+        "max": 4259.0
+      },
+      "workspace_command_calls": {
+        "min": 2.0,
+        "median": 2.0,
+        "mean": 2.667,
+        "max": 4.0
+      },
+      "workspace_output_bytes": {
+        "min": 2252.0,
+        "median": 2252.0,
+        "mean": 2671.667,
+        "max": 3511.0
+      },
+      "elapsed_seconds": {
+        "min": 33.061,
+        "median": 34.388,
+        "mean": 36.233,
+        "max": 41.249
+      },
+      "input_tokens": {
+        "min": 62982.0,
+        "median": 62986.0,
+        "mean": 63056.333,
+        "max": 63201.0
+      },
+      "output_tokens": {
+        "min": 2985.0,
+        "median": 3265.0,
+        "mean": 3340.0,
+        "max": 3770.0
+      },
+      "reasoning_output_tokens": {
+        "min": 0.0,
+        "median": 0.0,
+        "mean": 0.0,
+        "max": 0.0
+      },
+      "manual_review_minutes_per_run": {
+        "min": 0.020081944,
+        "median": 0.020081944,
+        "mean": 0.02,
+        "max": 0.020081944
+      }
+    },
+    "explicit-supersession:latest-wins": {
+      "n": 3,
+      "correctness": {
+        "score": 18,
+        "max_score": 18
+      },
+      "unsupported_claims": 0,
+      "irrelevant_project_facts": 0,
+      "workspace_metrics_n": 3,
+      "resident_instruction_bytes": {
+        "min": 688.0,
+        "median": 688.0,
+        "mean": 688.0,
+        "max": 688.0
+      },
+      "project_context_bytes": {
+        "min": 3343.0,
+        "median": 3456.0,
+        "mean": 4592.0,
+        "max": 6977.0
+      },
+      "workspace_command_calls": {
+        "min": 3.0,
+        "median": 4.0,
+        "mean": 3.667,
+        "max": 4.0
+      },
+      "workspace_output_bytes": {
+        "min": 2655.0,
+        "median": 2768.0,
+        "mean": 3904.0,
+        "max": 6289.0
+      },
+      "elapsed_seconds": {
+        "min": 33.497,
+        "median": 36.29,
+        "mean": 42.173,
+        "max": 56.733
+      },
+      "input_tokens": {
+        "min": 65040.0,
+        "median": 84170.0,
+        "mean": 77852.0,
+        "max": 84346.0
+      },
+      "output_tokens": {
+        "min": 2541.0,
+        "median": 3338.0,
+        "mean": 3460.333,
+        "max": 4502.0
+      },
+      "reasoning_output_tokens": {
+        "min": 0.0,
+        "median": 0.0,
+        "mean": 0.0,
+        "max": 0.0
+      },
+      "manual_review_minutes_per_run": {
+        "min": 0.020081944,
+        "median": 0.020081944,
+        "mean": 0.02,
+        "max": 0.020081944
+      }
+    },
+    "explicit-supersession:lifecycle-governed": {
+      "n": 3,
+      "correctness": {
+        "score": 18,
+        "max_score": 18
+      },
+      "unsupported_claims": 0,
+      "irrelevant_project_facts": 0,
+      "workspace_metrics_n": 3,
+      "resident_instruction_bytes": {
+        "min": 863.0,
+        "median": 863.0,
+        "mean": 863.0,
+        "max": 863.0
+      },
+      "project_context_bytes": {
+        "min": 3786.0,
+        "median": 3975.0,
+        "mean": 4045.0,
+        "max": 4374.0
+      },
+      "workspace_command_calls": {
+        "min": 2.0,
+        "median": 4.0,
+        "mean": 3.333,
+        "max": 4.0
+      },
+      "workspace_output_bytes": {
+        "min": 2923.0,
+        "median": 3112.0,
+        "mean": 3182.0,
+        "max": 3511.0
+      },
+      "elapsed_seconds": {
+        "min": 26.697,
+        "median": 30.586,
+        "mean": 31.371,
+        "max": 36.829
+      },
+      "input_tokens": {
+        "min": 63009.0,
+        "median": 63066.0,
+        "mean": 63113.667,
+        "max": 63266.0
+      },
+      "output_tokens": {
+        "min": 2302.0,
+        "median": 2377.0,
+        "mean": 2433.333,
+        "max": 2621.0
+      },
+      "reasoning_output_tokens": {
+        "min": 0.0,
+        "median": 0.0,
+        "mean": 0.0,
+        "max": 0.0
+      },
+      "manual_review_minutes_per_run": {
+        "min": 0.020081944,
+        "median": 0.020081944,
+        "mean": 0.02,
+        "max": 0.020081944
+      }
+    },
+    "scope-narrowing:append-only": {
+      "n": 3,
+      "correctness": {
+        "score": 6,
+        "max_score": 18
+      },
+      "unsupported_claims": 0,
+      "irrelevant_project_facts": 0,
+      "workspace_metrics_n": 3,
+      "resident_instruction_bytes": {
+        "min": 748.0,
+        "median": 748.0,
+        "mean": 748.0,
+        "max": 748.0
+      },
+      "project_context_bytes": {
+        "min": 3020.0,
+        "median": 3690.0,
+        "mean": 3581.667,
+        "max": 4035.0
+      },
+      "workspace_command_calls": {
+        "min": 2.0,
+        "median": 4.0,
+        "mean": 3.333,
+        "max": 4.0
+      },
+      "workspace_output_bytes": {
+        "min": 2272.0,
+        "median": 2942.0,
+        "mean": 2833.667,
+        "max": 3287.0
+      },
+      "elapsed_seconds": {
+        "min": 28.254,
+        "median": 33.382,
+        "mean": 36.644,
+        "max": 48.296
+      },
+      "input_tokens": {
+        "min": 62850.0,
+        "median": 63019.0,
+        "mean": 77153.0,
+        "max": 105590.0
+      },
+      "output_tokens": {
+        "min": 2724.0,
+        "median": 3126.0,
+        "mean": 3589.0,
+        "max": 4917.0
+      },
+      "reasoning_output_tokens": {
+        "min": 0.0,
+        "median": 0.0,
+        "mean": 0.0,
+        "max": 0.0
+      },
+      "manual_review_minutes_per_run": {
+        "min": 0.020081944,
+        "median": 0.020081944,
+        "mean": 0.02,
+        "max": 0.020081944
+      }
+    },
+    "scope-narrowing:latest-wins": {
+      "n": 3,
+      "correctness": {
+        "score": 18,
+        "max_score": 18
+      },
+      "unsupported_claims": 0,
+      "irrelevant_project_facts": 0,
+      "workspace_metrics_n": 3,
+      "resident_instruction_bytes": {
+        "min": 688.0,
+        "median": 688.0,
+        "mean": 688.0,
+        "max": 688.0
+      },
+      "project_context_bytes": {
+        "min": 3762.0,
+        "median": 4134.0,
+        "mean": 4016.333,
+        "max": 4153.0
+      },
+      "workspace_command_calls": {
+        "min": 4.0,
+        "median": 4.0,
+        "mean": 4.0,
+        "max": 4.0
+      },
+      "workspace_output_bytes": {
+        "min": 3074.0,
+        "median": 3446.0,
+        "mean": 3328.333,
+        "max": 3465.0
+      },
+      "elapsed_seconds": {
+        "min": 26.782,
+        "median": 32.26,
+        "mean": 41.226,
+        "max": 64.635
+      },
+      "input_tokens": {
+        "min": 62929.0,
+        "median": 63137.0,
+        "mean": 70218.333,
+        "max": 84589.0
+      },
+      "output_tokens": {
+        "min": 2427.0,
+        "median": 2539.0,
+        "mean": 2751.0,
+        "max": 3287.0
+      },
+      "reasoning_output_tokens": {
+        "min": 0.0,
+        "median": 0.0,
+        "mean": 0.0,
+        "max": 0.0
+      },
+      "manual_review_minutes_per_run": {
+        "min": 0.020081944,
+        "median": 0.020081944,
+        "mean": 0.02,
+        "max": 0.020081944
+      }
+    },
+    "scope-narrowing:lifecycle-governed": {
+      "n": 3,
+      "correctness": {
+        "score": 18,
+        "max_score": 18
+      },
+      "unsupported_claims": 0,
+      "irrelevant_project_facts": 0,
+      "workspace_metrics_n": 3,
+      "resident_instruction_bytes": {
+        "min": 863.0,
+        "median": 863.0,
+        "mean": 863.0,
+        "max": 863.0
+      },
+      "project_context_bytes": {
+        "min": 3406.0,
+        "median": 3675.0,
+        "mean": 3718.333,
+        "max": 4074.0
+      },
+      "workspace_command_calls": {
+        "min": 4.0,
+        "median": 4.0,
+        "mean": 4.0,
+        "max": 4.0
+      },
+      "workspace_output_bytes": {
+        "min": 2543.0,
+        "median": 2812.0,
+        "mean": 2855.333,
+        "max": 3211.0
+      },
+      "elapsed_seconds": {
+        "min": 30.679,
+        "median": 32.358,
+        "mean": 38.067,
+        "max": 51.164
+      },
+      "input_tokens": {
+        "min": 62740.0,
+        "median": 62876.0,
+        "mean": 62903.333,
+        "max": 63094.0
+      },
+      "output_tokens": {
+        "min": 2395.0,
+        "median": 2504.0,
+        "mean": 2505.0,
+        "max": 2616.0
+      },
+      "reasoning_output_tokens": {
+        "min": 0.0,
+        "median": 0.0,
+        "mean": 0.0,
+        "max": 0.0
+      },
+      "manual_review_minutes_per_run": {
+        "min": 0.020081944,
+        "median": 0.020081944,
+        "mean": 0.02,
+        "max": 0.020081944
+      }
+    },
+    "time-expiry:append-only": {
+      "n": 3,
+      "correctness": {
+        "score": 15,
+        "max_score": 15
+      },
+      "unsupported_claims": 0,
+      "irrelevant_project_facts": 0,
+      "workspace_metrics_n": 3,
+      "resident_instruction_bytes": {
+        "min": 748.0,
+        "median": 748.0,
+        "mean": 748.0,
+        "max": 748.0
+      },
+      "project_context_bytes": {
+        "min": 3666.0,
+        "median": 3672.0,
+        "mean": 3670.0,
+        "max": 3672.0
+      },
+      "workspace_command_calls": {
+        "min": 2.0,
+        "median": 4.0,
+        "mean": 3.333,
+        "max": 4.0
+      },
+      "workspace_output_bytes": {
+        "min": 2918.0,
+        "median": 2924.0,
+        "mean": 2922.0,
+        "max": 2924.0
+      },
+      "elapsed_seconds": {
+        "min": 30.898,
+        "median": 35.215,
+        "mean": 35.768,
+        "max": 41.19
+      },
+      "input_tokens": {
+        "min": 62820.0,
+        "median": 62824.0,
+        "mean": 62824.667,
+        "max": 62830.0
+      },
+      "output_tokens": {
+        "min": 2655.0,
+        "median": 2688.0,
+        "mean": 2785.0,
+        "max": 3012.0
+      },
+      "reasoning_output_tokens": {
+        "min": 0.0,
+        "median": 0.0,
+        "mean": 0.0,
+        "max": 0.0
+      },
+      "manual_review_minutes_per_run": {
+        "min": 0.020081944,
+        "median": 0.020081944,
+        "mean": 0.02,
+        "max": 0.020081944
+      }
+    },
+    "time-expiry:latest-wins": {
+      "n": 3,
+      "correctness": {
+        "score": 15,
+        "max_score": 15
+      },
+      "unsupported_claims": 0,
+      "irrelevant_project_facts": 0,
+      "workspace_metrics_n": 3,
+      "resident_instruction_bytes": {
+        "min": 688.0,
+        "median": 688.0,
+        "mean": 688.0,
+        "max": 688.0
+      },
+      "project_context_bytes": {
+        "min": 2902.0,
+        "median": 3790.0,
+        "mean": 3556.0,
+        "max": 3976.0
+      },
+      "workspace_command_calls": {
+        "min": 2.0,
+        "median": 4.0,
+        "mean": 3.333,
+        "max": 4.0
+      },
+      "workspace_output_bytes": {
+        "min": 2214.0,
+        "median": 3102.0,
+        "mean": 2868.0,
+        "max": 3288.0
+      },
+      "elapsed_seconds": {
+        "min": 30.03,
+        "median": 35.452,
+        "mean": 34.754,
+        "max": 38.781
+      },
+      "input_tokens": {
+        "min": 62948.0,
+        "median": 63031.0,
+        "mean": 70170.333,
+        "max": 84532.0
+      },
+      "output_tokens": {
+        "min": 3034.0,
+        "median": 3138.0,
+        "mean": 3422.0,
+        "max": 4094.0
+      },
+      "reasoning_output_tokens": {
+        "min": 0.0,
+        "median": 0.0,
+        "mean": 0.0,
+        "max": 0.0
+      },
+      "manual_review_minutes_per_run": {
+        "min": 0.020081944,
+        "median": 0.020081944,
+        "mean": 0.02,
+        "max": 0.020081944
+      }
+    },
+    "time-expiry:lifecycle-governed": {
+      "n": 3,
+      "correctness": {
+        "score": 15,
+        "max_score": 15
+      },
+      "unsupported_claims": 0,
+      "irrelevant_project_facts": 0,
+      "workspace_metrics_n": 3,
+      "resident_instruction_bytes": {
+        "min": 863.0,
+        "median": 863.0,
+        "mean": 863.0,
+        "max": 863.0
+      },
+      "project_context_bytes": {
+        "min": 3077.0,
+        "median": 3655.0,
+        "mean": 3504.333,
+        "max": 3781.0
+      },
+      "workspace_command_calls": {
+        "min": 2.0,
+        "median": 4.0,
+        "mean": 3.333,
+        "max": 4.0
+      },
+      "workspace_output_bytes": {
+        "min": 2214.0,
+        "median": 2792.0,
+        "mean": 2641.333,
+        "max": 2918.0
+      },
+      "elapsed_seconds": {
+        "min": 27.567,
+        "median": 30.22,
+        "mean": 34.185,
+        "max": 44.767
+      },
+      "input_tokens": {
+        "min": 62902.0,
+        "median": 62975.0,
+        "mean": 62992.667,
+        "max": 63101.0
+      },
+      "output_tokens": {
+        "min": 2511.0,
+        "median": 2563.0,
+        "mean": 2893.667,
+        "max": 3607.0
+      },
+      "reasoning_output_tokens": {
+        "min": 0.0,
+        "median": 0.0,
+        "mean": 0.0,
+        "max": 0.0
+      },
+      "manual_review_minutes_per_run": {
+        "min": 0.020081944,
+        "median": 0.020081944,
+        "mean": 0.02,
+        "max": 0.020081944
+      }
+    },
+    "unresolved-conflict:append-only": {
+      "n": 3,
+      "correctness": {
+        "score": 15,
+        "max_score": 15
+      },
+      "unsupported_claims": 0,
+      "irrelevant_project_facts": 0,
+      "workspace_metrics_n": 3,
+      "resident_instruction_bytes": {
+        "min": 748.0,
+        "median": 748.0,
+        "mean": 748.0,
+        "max": 748.0
+      },
+      "project_context_bytes": {
+        "min": 3025.0,
+        "median": 3497.0,
+        "mean": 3666.333,
+        "max": 4477.0
+      },
+      "workspace_command_calls": {
+        "min": 2.0,
+        "median": 2.0,
+        "mean": 2.667,
+        "max": 4.0
+      },
+      "workspace_output_bytes": {
+        "min": 2277.0,
+        "median": 2749.0,
+        "mean": 2918.333,
+        "max": 3729.0
+      },
+      "elapsed_seconds": {
+        "min": 32.012,
+        "median": 34.403,
+        "mean": 33.935,
+        "max": 35.389
+      },
+      "input_tokens": {
+        "min": 62701.0,
+        "median": 62979.0,
+        "mean": 62976.333,
+        "max": 63249.0
+      },
+      "output_tokens": {
+        "min": 3158.0,
+        "median": 3641.0,
+        "mean": 3517.667,
+        "max": 3754.0
+      },
+      "reasoning_output_tokens": {
+        "min": 0.0,
+        "median": 0.0,
+        "mean": 0.0,
+        "max": 0.0
+      },
+      "manual_review_minutes_per_run": {
+        "min": 0.020081944,
+        "median": 0.020081944,
+        "mean": 0.02,
+        "max": 0.020081944
+      }
+    },
+    "unresolved-conflict:latest-wins": {
+      "n": 3,
+      "correctness": {
+        "score": 3,
+        "max_score": 15
+      },
+      "unsupported_claims": 0,
+      "irrelevant_project_facts": 0,
+      "workspace_metrics_n": 3,
+      "resident_instruction_bytes": {
+        "min": 688.0,
+        "median": 688.0,
+        "mean": 688.0,
+        "max": 688.0
+      },
+      "project_context_bytes": {
+        "min": 3566.0,
+        "median": 3812.0,
+        "mean": 3810.333,
+        "max": 4053.0
+      },
+      "workspace_command_calls": {
+        "min": 4.0,
+        "median": 4.0,
+        "mean": 4.0,
+        "max": 4.0
+      },
+      "workspace_output_bytes": {
+        "min": 2878.0,
+        "median": 3124.0,
+        "mean": 3122.333,
+        "max": 3365.0
+      },
+      "elapsed_seconds": {
+        "min": 35.499,
+        "median": 39.14,
+        "mean": 42.51,
+        "max": 52.89
+      },
+      "input_tokens": {
+        "min": 63010.0,
+        "median": 84256.0,
+        "mean": 77212.333,
+        "max": 84371.0
+      },
+      "output_tokens": {
+        "min": 3363.0,
+        "median": 3976.0,
+        "mean": 3858.333,
+        "max": 4236.0
+      },
+      "reasoning_output_tokens": {
+        "min": 0.0,
+        "median": 0.0,
+        "mean": 0.0,
+        "max": 0.0
+      },
+      "manual_review_minutes_per_run": {
+        "min": 0.020081944,
+        "median": 0.020081944,
+        "mean": 0.02,
+        "max": 0.020081944
+      }
+    },
+    "unresolved-conflict:lifecycle-governed": {
+      "n": 3,
+      "correctness": {
+        "score": 15,
+        "max_score": 15
+      },
+      "unsupported_claims": 0,
+      "irrelevant_project_facts": 0,
+      "workspace_metrics_n": 3,
+      "resident_instruction_bytes": {
+        "min": 863.0,
+        "median": 863.0,
+        "mean": 863.0,
+        "max": 863.0
+      },
+      "project_context_bytes": {
+        "min": 3931.0,
+        "median": 3931.0,
+        "mean": 4057.0,
+        "max": 4309.0
+      },
+      "workspace_command_calls": {
+        "min": 2.0,
+        "median": 4.0,
+        "mean": 3.333,
+        "max": 4.0
+      },
+      "workspace_output_bytes": {
+        "min": 3068.0,
+        "median": 3068.0,
+        "mean": 3194.0,
+        "max": 3446.0
+      },
+      "elapsed_seconds": {
+        "min": 29.975,
+        "median": 32.505,
+        "mean": 31.871,
+        "max": 33.134
+      },
+      "input_tokens": {
+        "min": 62969.0,
+        "median": 62992.0,
+        "mean": 63050.0,
+        "max": 63189.0
+      },
+      "output_tokens": {
+        "min": 2490.0,
+        "median": 2551.0,
+        "mean": 2569.333,
+        "max": 2667.0
+      },
+      "reasoning_output_tokens": {
+        "min": 0.0,
+        "median": 0.0,
+        "mean": 0.0,
+        "max": 0.0
+      },
+      "manual_review_minutes_per_run": {
+        "min": 0.020081944,
+        "median": 0.020081944,
+        "mean": 0.02,
+        "max": 0.020081944
+      }
+    }
+  }
+}
