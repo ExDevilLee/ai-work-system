@@ -41,7 +41,9 @@
 - `lifecycle-governed`：84/84。
 - 45/45 工作区指标覆盖完整且输出可靠。
 
-详细结果见 [`analysis/formal-macos.md`](analysis/formal-macos.md)。当前尚未执行 Win11 复现，也未开始第四篇文章创作。
+详细结果见 [`analysis/formal-macos.md`](analysis/formal-macos.md)。第四篇文章已进入 `review`，当前尚未执行 Win11 复现。
+
+Win11 使用相同冻结协议的完整复现步骤见 [`WINDOWS-VALIDATION.md`](WINDOWS-VALIDATION.md)。
 
 静态验证：
 
