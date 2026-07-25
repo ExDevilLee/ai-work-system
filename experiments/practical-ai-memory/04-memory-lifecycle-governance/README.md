@@ -41,9 +41,20 @@
 - `lifecycle-governed`：84/84。
 - 45/45 工作区指标覆盖完整且输出可靠。
 
-详细结果见 [`analysis/formal-macos.md`](analysis/formal-macos.md)。第四篇文章已进入 `review`，当前尚未执行 Win11 复现。
+详细结果见 [`analysis/formal-macos.md`](analysis/formal-macos.md)。
 
-Win11 使用相同冻结协议的完整复现步骤见 [`WINDOWS-VALIDATION.md`](WINDOWS-VALIDATION.md)。
+Win11 随后按相同冻结协议完成 15 次 Smoke、45 次正式运行、真实计时 Review、评分和聚合：
+
+- 45/45 运行通过协议门禁，15 个任务/条件组合均为 `n=3`。
+- `append-only`：51/84。
+- `latest-wins`：72/84。
+- `lifecycle-governed`：84/84。
+- 45/45 工作区指标覆盖完整且输出可靠。
+- 正确性条件总分和 15 个分组结果与 macOS 逐项一致。
+
+跨平台结果见 [`analysis/formal-macos-win11-comparison.md`](analysis/formal-macos-win11-comparison.md)。第四篇文章已补充 Win11 结果并进入 `ready`。
+
+Win11 使用相同冻结协议的完整复现步骤见 [`WINDOWS-VALIDATION.md`](WINDOWS-VALIDATION.md)。脱敏聚合文件位于 [`data/`](data/)，完整原始运行记录仍不公开。
 
 静态验证：
 
