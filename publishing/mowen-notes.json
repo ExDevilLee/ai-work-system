@@ -237,6 +237,24 @@
       "note_id": "vn0YyzvJ-eylIy_S8KTRB",
       "published": true,
       "url": "https://note.mowen.cn/detail/vn0YyzvJ-eylIy_S8KTRB"
+    },
+    "content/articles/practical-ai-memory/2026-07-24-how-should-long-term-memory-handle-conflicts-and-expiry.md": {
+      "assets": {
+        "images/04/memory-lifecycle-states.png": {
+          "sha256": "06ef882f1a1f4c4e09bb6bfc015c682d03246bb1b2c77e4c168f2806d27e958c",
+          "source_url": "https://gitee.com/ExDevilLee/ai-work-system/raw/main/content/articles/practical-ai-memory/images/04/memory-lifecycle-states.png",
+          "uuid": "h8LkYh7hHpp4qTlMbKdzq-TMP"
+        }
+      },
+      "content_sha256": "9de730171e5d24e98c55395ea5bb0b551b1bd2a099c78de812c53b2534f700b9",
+      "note_id": "xTc6rcjMwtLKnuhL6CmRL",
+      "publication_blocked": {
+        "content_sha256": "9de730171e5d24e98c55395ea5bb0b551b1bd2a099c78de812c53b2534f700b9",
+        "message": "MoWen MCP error: error: code = 403 reason = RISKY message = svc [NoteSvc.SetPrivacy]: note risky. metadata = map[] cause = <nil>",
+        "reason": "RISKY"
+      },
+      "published": false,
+      "url": "https://note.mowen.cn/detail/xTc6rcjMwtLKnuhL6CmRL"
     }
   },
   "directories": {
