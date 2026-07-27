@@ -255,6 +255,24 @@
       },
       "published": false,
       "url": "https://note.mowen.cn/detail/xTc6rcjMwtLKnuhL6CmRL"
+    },
+    "content/articles/practical-ai-memory/2026-07-27-why-rag-is-not-long-term-memory.md": {
+      "assets": {
+        "images/05/rag-vs-memory-action-layer.png": {
+          "sha256": "6acc4a74667a893c42d0fe6d0e2bfac0575f3337051a1952908b40d02411f3ca",
+          "source_url": "https://gitee.com/ExDevilLee/ai-work-system/raw/main/content/articles/practical-ai-memory/images/05/rag-vs-memory-action-layer.png",
+          "uuid": "7-gU0IdgKL8IvJSXrQeOJ-TMP"
+        }
+      },
+      "content_sha256": "261a637c30f8f0b937670a73080f34f74eba7bc7cf874bcbd829dafba1044b2a",
+      "note_id": "Pf0au855jIC-dzcssDCcI",
+      "publication_blocked": {
+        "content_sha256": "261a637c30f8f0b937670a73080f34f74eba7bc7cf874bcbd829dafba1044b2a",
+        "message": "MoWen MCP error: error: code = 403 reason = RISKY message = svc [NoteSvc.SetPrivacy]: note risky. metadata = map[] cause = <nil>",
+        "reason": "RISKY"
+      },
+      "published": false,
+      "url": "https://note.mowen.cn/detail/Pf0au855jIC-dzcssDCcI"
     }
   },
   "directories": {
