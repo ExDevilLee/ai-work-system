@@ -91,6 +91,8 @@
 
 第五篇《RAG 能把资料找回来，为什么还不等于系统形成了长期记忆？》已进入 `ready`。对应 POC 已完成三轮 macOS Pilot，并在 macOS 与原生 Win11 各完成 45 次正式运行，共 90 次；两个平台的三个条件总分均为 `75/84`、`69/84` 和 `84/84`。15 个分组中有两个时间优先分组各相差 3 分但净值相抵，其余 13 个分组一致。实验固定相同 Top-K 证据，只验证检索后的行动治理，不评价 embedding、rerank 或召回算法。
 
+后续 POC 不再默认要求 macOS 与 Win11 都执行完整正式矩阵。统一采用 [`第二系列跨平台 POC 验证策略`](../experiments/practical-ai-memory/CROSS-PLATFORM-VALIDATION-STRATEGY.md)：macOS 作为主体实验平台，Win11 默认执行覆盖全部任务与条件的兼容性 Smoke；只有操作系统属于实验变量、Smoke 出现差异、结论依赖工具链，或文章需要声明跨平台独立复现时，才升级为完整 Win11 正式矩阵。
+
 ### 内容目录规则
 
 - 第二系列文章统一放在 `content/articles/practical-ai-memory/`，frontmatter 的 `series` 使用 `practical-ai-memory`，目录与字段必须一致。
