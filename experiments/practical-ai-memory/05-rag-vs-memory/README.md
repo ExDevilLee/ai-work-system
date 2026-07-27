@@ -4,9 +4,18 @@
 
 ## 当前阶段
 
-实验夹具、验证器、隔离运行器、矩阵调度、评分和聚合工具已经完成实现。Pilot 01 暴露条件不可区分问题，Pilot 02 验证了主要条件差异但发现历史任务缺少技术原因证据，修订后的 Pilot 03 已通过全部门禁。
+实验夹具、验证器、隔离运行器、矩阵调度、评分和聚合工具已经完成实现。Pilot 01 暴露条件不可区分问题，Pilot 02 验证了主要条件差异但发现历史任务缺少技术原因证据，修订后的 Pilot 03 通过全部门禁后，已按冻结协议完成 45 次 macOS 正式运行、真实计时 Review、评分和聚合。
 
-因此当前状态是：**协议已经形成正式矩阵冻结候选，等待确认后执行 macOS 45 次正式矩阵**。三批 Pilot 都不进入文章数据，也没有生成 `score.json`。
+正式结果：
+
+- 45/45 运行通过协议门禁，15 个任务/条件组合均为 `n=3`。
+- `rag-only`：75/84。
+- `rag-with-recency`：69/84。
+- `memory-governed`：84/84。
+- 45/45 工作区指标覆盖完整且输出可靠。
+- 正式矩阵只验证相同 Top-K 证据下的行动治理，不评价召回算法。
+
+详细结果见 [`analysis/formal-macos.md`](analysis/formal-macos.md)。第五篇文章已根据 macOS 结果进入 `review`，Win11 尚未复现。
 
 已确认的实验边界：
 
@@ -21,6 +30,7 @@ Pilot Review 记录：
 - [`analysis/pilot-01.md`](analysis/pilot-01.md)：条件不可区分。
 - [`analysis/pilot-02.md`](analysis/pilot-02.md)：形成差异，但历史原因证据缺失。
 - [`analysis/pilot-03.md`](analysis/pilot-03.md)：通过，建议冻结正式矩阵。
+- [`analysis/formal-macos.md`](analysis/formal-macos.md)：45 次正式运行、评分与结果边界。
 
 完整研究问题、条件定义、评分结构和停止门禁见 [`EXPERIMENT.md`](EXPERIMENT.md)。
 
@@ -33,4 +43,4 @@ Pilot Review 记录：
 - 向量数据库不能承载记忆状态。
 - 一份当前状态索引足以解决真实项目中的全部记忆问题。
 
-只有 Pilot 通过条件可区分性和证据等价性 Review，且正式矩阵完成评分后，才能形成阶段性实验结论。
+当前阶段性结论仅适用于冻结协议、当前模型配置和 macOS 工具链。Win11 复现完成前，不形成跨平台结论。

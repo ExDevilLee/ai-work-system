@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900" viewBox="0 0 1600 900" role="img" aria-labelledby="title desc">
+  <title id="title">RAG 检索层与长期记忆行动治理层</title>
+  <desc id="desc">相同的检索证据进入三种机制。仅检索可能无法确定当前动作，时间优先可能采用未批准的新记录，记忆治理通过状态、范围和来源投影得到当前动作。</desc>
+
+  <rect width="1600" height="900" fill="#f7f8fa"/>
+  <text x="80" y="82" fill="#17212b" font-family="PingFang SC, Microsoft YaHei, sans-serif" font-size="40" font-weight="700">资料找回来了，系统还缺什么？</text>
+  <text x="80" y="126" fill="#5b6573" font-family="PingFang SC, Microsoft YaHei, sans-serif" font-size="22">同一批 Top-K 证据，不同的行动治理会得到不同的当前结论</text>
+
+  <rect x="310" y="170" width="980" height="120" rx="8" fill="#ffffff" stroke="#3974b8" stroke-width="3"/>
+  <rect x="310" y="170" width="12" height="120" rx="6" fill="#3974b8"/>
+  <text x="800" y="218" text-anchor="middle" fill="#285b96" font-family="PingFang SC, Microsoft YaHei, sans-serif" font-size="28" font-weight="700">RAG 检索层</text>
+  <text x="800" y="258" text-anchor="middle" fill="#55616e" font-family="PingFang SC, Microsoft YaHei, sans-serif" font-size="21">找回相关记录：正式决定、讨论建议、旧范围规则、较新观察与历史原因</text>
+
+  <path d="M800 290 V350" stroke="#667482" stroke-width="4" fill="none"/>
+  <path d="M800 350 L788 330 H812 Z" fill="#667482"/>
+
+  <rect x="70" y="380" width="450" height="300" rx="8" fill="#ffffff" stroke="#b26a72" stroke-width="3"/>
+  <rect x="70" y="380" width="450" height="12" rx="6" fill="#b26a72"/>
+  <text x="295" y="445" text-anchor="middle" fill="#8f4852" font-family="PingFang SC, Microsoft YaHei, sans-serif" font-size="28" font-weight="700">仅检索结果</text>
+  <text x="295" y="493" text-anchor="middle" fill="#4e5965" font-family="PingFang SC, Microsoft YaHei, sans-serif" font-size="21">知道哪些内容相关</text>
+  <text x="295" y="536" text-anchor="middle" fill="#697582" font-family="PingFang SC, Microsoft YaHei, sans-serif" font-size="19">但未必知道哪条已经批准</text>
+  <text x="295" y="570" text-anchor="middle" fill="#697582" font-family="PingFang SC, Microsoft YaHei, sans-serif" font-size="19">也未必知道旧范围是否退出</text>
+  <rect x="135" y="610" width="320" height="46" rx="6" fill="#f7e9eb"/>
+  <text x="295" y="640" text-anchor="middle" fill="#853f4a" font-family="PingFang SC, Microsoft YaHei, sans-serif" font-size="19" font-weight="700">结果：可能没有唯一动作</text>
+
+  <rect x="575" y="380" width="450" height="300" rx="8" fill="#ffffff" stroke="#a37b2f" stroke-width="3"/>
+  <rect x="575" y="380" width="450" height="12" rx="6" fill="#a37b2f"/>
+  <text x="800" y="445" text-anchor="middle" fill="#7e5f24" font-family="PingFang SC, Microsoft YaHei, sans-serif" font-size="28" font-weight="700">检索 + 时间优先</text>
+  <text x="800" y="493" text-anchor="middle" fill="#4e5965" font-family="PingFang SC, Microsoft YaHei, sans-serif" font-size="21">用日期选择最新记录</text>
+  <text x="800" y="536" text-anchor="middle" fill="#697582" font-family="PingFang SC, Microsoft YaHei, sans-serif" font-size="19">排序简单，也容易得到单一答案</text>
+  <text x="800" y="570" text-anchor="middle" fill="#697582" font-family="PingFang SC, Microsoft YaHei, sans-serif" font-size="19">但“更新”不等于“已批准”</text>
+  <rect x="640" y="610" width="320" height="46" rx="6" fill="#f4eddd"/>
+  <text x="800" y="640" text-anchor="middle" fill="#75561d" font-family="PingFang SC, Microsoft YaHei, sans-serif" font-size="19" font-weight="700">结果：可能采用错误的新记录</text>
+
+  <rect x="1080" y="380" width="450" height="300" rx="8" fill="#ffffff" stroke="#27835f" stroke-width="3"/>
+  <rect x="1080" y="380" width="450" height="12" rx="6" fill="#27835f"/>
+  <text x="1305" y="445" text-anchor="middle" fill="#176b58" font-family="PingFang SC, Microsoft YaHei, sans-serif" font-size="28" font-weight="700">检索 + 当前记忆治理</text>
+  <text x="1305" y="493" text-anchor="middle" fill="#4e5965" font-family="PingFang SC, Microsoft YaHei, sans-serif" font-size="21">叠加轻量状态投影</text>
+  <text x="1305" y="536" text-anchor="middle" fill="#697582" font-family="PingFang SC, Microsoft YaHei, sans-serif" font-size="19">状态 · 范围 · 当前动作</text>
+  <text x="1305" y="570" text-anchor="middle" fill="#697582" font-family="PingFang SC, Microsoft YaHei, sans-serif" font-size="19">来源 · 替代与冲突关系</text>
+  <rect x="1145" y="610" width="320" height="46" rx="6" fill="#e4f2ec"/>
+  <text x="1305" y="640" text-anchor="middle" fill="#176b58" font-family="PingFang SC, Microsoft YaHei, sans-serif" font-size="19" font-weight="700">结果：恢复当前可执行动作</text>
+
+  <path d="M800 350 H295 V380" stroke="#84909c" stroke-width="3" fill="none"/>
+  <path d="M800 350 V380" stroke="#84909c" stroke-width="3" fill="none"/>
+  <path d="M800 350 H1305 V380" stroke="#84909c" stroke-width="3" fill="none"/>
+
+  <rect x="170" y="758" width="1260" height="84" rx="8" fill="#e9eef2"/>
+  <text x="800" y="793" text-anchor="middle" fill="#35414d" font-family="PingFang SC, Microsoft YaHei, sans-serif" font-size="22" font-weight="700">RAG 回答“哪些资料相关”　　记忆治理回答“哪些资料现在可以指导行动”</text>
+  <text x="800" y="825" text-anchor="middle" fill="#5b6573" font-family="PingFang SC, Microsoft YaHei, sans-serif" font-size="19">二者是分工关系，不是互斥替代关系</text>
+</svg>
