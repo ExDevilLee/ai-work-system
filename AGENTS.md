@@ -13,3 +13,4 @@
 - GitHub Wiki 只同步 `status: ready` 的文章；已发布文章如果主仓库源文更新，重新运行同步脚本覆盖更新 Wiki。
 - 墨问也只同步 `status: ready` 的文章；`publishing/mowen-notes.json` 持久保存源文件与笔记 ID，并按 `content/series.json` 为受影响系列倒序重建各自目录。
 - 提交或 Push 涉及公开文章、系列目录或发布脚本时，必须先运行 `python3 scripts/check_before_publish.py`；本机首次使用按 `docs/publishing-runbook.md` 安装版本化 `pre-push` hook。
+- 设计“AI 长期记忆实战”系列 POC 或生成 Win11 验证方案前，必须先读取 `experiments/practical-ai-memory/CROSS-PLATFORM-VALIDATION-STRATEGY.md`，按其中的分级策略确定验证规模；默认采用 Level 2，只有命中升级条件时才执行 Level 3。不得记录或公开模型 provider。
