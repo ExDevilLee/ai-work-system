@@ -1,0 +1,34 @@
+{
+  "static-reference": {
+    "checks": [
+      "检查 Markdown 强调语法不存在跨平台歧义",
+      "检查正文图片路径能够在目标展示层解析",
+      "检查上一篇、目录和下一篇导航链接完整"
+    ],
+    "classification": "稳定参考资料",
+    "sources": ["retrieval-packets/static-reference.md"]
+  },
+  "approved-decision": {
+    "current_action": "新增或修改文章后全量重建 Wiki 导航，并在发布后执行远端检查",
+    "discussion_status": "未批准的增量更新建议不能指导当前行动",
+    "sources": ["retrieval-packets/approved-decision.md"]
+  },
+  "unresolved-conflict": {
+    "global_wait": null,
+    "status": "contested",
+    "next": "控制网络出口、服务配额和请求频率后复验，再形成正式决定",
+    "sources": ["retrieval-packets/unresolved-conflict.md"]
+  },
+  "scope-bound-rule": {
+    "png_required": ["Wiki-A"],
+    "not_required": ["Blog-B", "Note-C"],
+    "scope_source": "正式范围决定",
+    "sources": ["retrieval-packets/scope-bound-rule.md"]
+  },
+  "historical-trace": {
+    "current_action": "只同步 Markdown 源文件和相对路径 manifest，在目标平台重建派生索引",
+    "old_action": "直接复制二进制索引目录已经退出当前行动",
+    "history": "旧做法继续保留用于解释变化",
+    "sources": ["retrieval-packets/historical-trace.md"]
+  }
+}

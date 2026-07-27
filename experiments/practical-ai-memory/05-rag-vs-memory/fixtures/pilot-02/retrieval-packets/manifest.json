@@ -1,0 +1,104 @@
+{
+  "tasks": {
+    "static-reference": {
+      "query": "static OR publishing OR checklist",
+      "top_k": 1,
+      "required_sources": ["references/publishing-checklist.md"],
+      "packet": "static-reference.md",
+      "packet_bytes": 400,
+      "packet_sha256": "03f5a410f09a17ea1af0322c534776b0e635ad7aedcaefcc483622edf119f50c",
+      "sources": [
+        {
+          "path": "references/publishing-checklist.md",
+          "bytes": 400,
+          "sha256": "03f5a410f09a17ea1af0322c534776b0e635ad7aedcaefcc483622edf119f50c"
+        }
+      ]
+    },
+    "approved-decision": {
+      "query": "navigation OR plan OR wiki",
+      "top_k": 2,
+      "required_sources": ["records/navigation-plan-a.md", "records/navigation-plan-b.md"],
+      "packet": "approved-decision.md",
+      "packet_bytes": 473,
+      "packet_sha256": "87bd22096205ff7539964616388570b26869e8e9798b0fff1fd590256c8db578",
+      "sources": [
+        {
+          "path": "records/navigation-plan-a.md",
+          "bytes": 225,
+          "sha256": "2c89743aee09cf6856e5d1790a059d753209650c7e9eff8bebae9be511701f46"
+        },
+        {
+          "path": "records/navigation-plan-b.md",
+          "bytes": 241,
+          "sha256": "0b66ccc98bde8a0524d189a8e7c1a130224fcc8912c97a8c489ab0203713877a"
+        }
+      ]
+    },
+    "unresolved-conflict": {
+      "query": "retry OR wait OR observation",
+      "top_k": 2,
+      "required_sources": ["records/retry-observation-a.md", "records/retry-observation-b.md"],
+      "packet": "unresolved-conflict.md",
+      "packet_bytes": 530,
+      "packet_sha256": "405d08b124fc43e38bad37f2d1aae09101448354fd5a9b001529b2ca4cda0813",
+      "sources": [
+        {
+          "path": "records/retry-observation-a.md",
+          "bytes": 261,
+          "sha256": "3d313ed2ffe3a6044497181c06f194c87ce15672d43b05db338147fad2d97e86"
+        },
+        {
+          "path": "records/retry-observation-b.md",
+          "bytes": 262,
+          "sha256": "06ad64f429d7e975e329a3fffcdfe1efeb8a41ca80441408acc39b4e1eb86114"
+        }
+      ]
+    },
+    "scope-bound-rule": {
+      "query": "image OR format OR wiki",
+      "top_k": 2,
+      "required_sources": ["records/image-rule-a.md", "records/image-rule-b.md"],
+      "packet": "scope-bound-rule.md",
+      "packet_bytes": 407,
+      "packet_sha256": "b45c0f9a52530c0791eef9d839d8c1540d360c002a16e9c3fd735e11955fa332",
+      "sources": [
+        {
+          "path": "records/image-rule-a.md",
+          "bytes": 183,
+          "sha256": "50603731f3387845330e24c160ab318a44110598140a4aca86d009ed67259892"
+        },
+        {
+          "path": "records/image-rule-b.md",
+          "bytes": 217,
+          "sha256": "fa2740cc274a3a29c531e78952c368b02da14cd762bd0dab06d17b3930105220"
+        }
+      ]
+    },
+    "historical-trace": {
+      "query": "historical OR index OR platform",
+      "top_k": 3,
+      "required_sources": ["records/index-plan-a.md", "records/index-copy-observation.md", "records/index-plan-b.md"],
+      "packet": "historical-trace.md",
+      "packet_bytes": 814,
+      "packet_sha256": "35f8cea19f914bfc7cd2d885df9e49fc033560992033e95ba379412bfa030ebc",
+      "sources": [
+        {
+          "path": "records/index-plan-a.md",
+          "bytes": 224,
+          "sha256": "222975e75f3c570ec9fbf3a1665ff86b65059a84584a55427ecd1e2efe7b7002"
+        },
+        {
+          "path": "records/index-copy-observation.md",
+          "bytes": 317,
+          "sha256": "2e0e9cf3da02441f3855bb5065539f949a85695f61ded15b5b9b58098a2f3373"
+        },
+        {
+          "path": "records/index-plan-b.md",
+          "bytes": 259,
+          "sha256": "024137dcdfd4cd953bda5876eb5ffe83b16894dd42ab3e8e89283796e5969354"
+        }
+      ]
+    }
+  }
+}

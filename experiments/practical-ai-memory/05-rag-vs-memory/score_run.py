@@ -1,0 +1,83 @@
+#!/usr/bin/env python3
+"""Attach a human-reviewed score to one preserved experiment run."""
+
+from __future__ import annotations
+
+import argparse
+import json
+from pathlib import Path
+
+
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("run_dir", type=Path)
+    parser.add_argument("--score", type=int, required=True)
+    parser.add_argument("--max-score", type=int, required=True)
+    parser.add_argument("--protocol-valid", choices=("yes", "no"), required=True)
+    parser.add_argument("--review-minutes", type=float)
+    parser.add_argument(
+        "--review-time-method",
+        choices=("individual", "batch_average"),
+        default="individual",
+    )
+    parser.add_argument("--review-batch-size", type=int)
+    parser.add_argument("--irrelevant-facts", type=int, default=0)
+    parser.add_argument("--unsupported-claims", type=int, default=0)
+    parser.add_argument("--notes", required=True)
+    return parser.parse_args()
+
+
+def main() -> int:
+    args = parse_args()
+    if not 0 <= args.score <= args.max_score:
+        raise SystemExit("score must be between zero and max-score")
+    if args.review_minutes is not None and args.review_minutes < 0:
+        raise SystemExit("review-minutes must not be negative")
+    if args.review_time_method == "batch_average":
+        if args.review_minutes is None or not args.review_batch_size or args.review_batch_size < 2:
+            raise SystemExit(
+                "batch_average requires review-minutes and review-batch-size >= 2"
+            )
+    elif args.review_batch_size is not None:
+        raise SystemExit("review-batch-size requires batch_average")
+    if args.irrelevant_facts < 0 or args.unsupported_claims < 0:
+        raise SystemExit("claim counts must not be negative")
+
+    metadata = json.loads((args.run_dir / "metadata.json").read_text(encoding="utf-8"))
+    if metadata.get("purpose") == "formal run" and args.review_minutes is None:
+        raise SystemExit("formal scoring must record review-minutes")
+    score = {
+        "run_name": metadata["run_name"],
+        "task": metadata.get("task"),
+        "condition": metadata["condition"],
+        "correctness_score": args.score,
+        "correctness_max": args.max_score,
+        "protocol_valid": args.protocol_valid == "yes",
+        "unsupported_claims": args.unsupported_claims,
+        "irrelevant_project_facts": args.irrelevant_facts,
+        "manual_review_minutes": args.review_minutes,
+        "review_time_status": (
+            "measured"
+            if args.review_minutes is not None and args.review_time_method == "individual"
+            else (
+                "batch average allocation"
+                if args.review_minutes is not None
+                else "not individually timed"
+            )
+        ),
+        "review_time_method": args.review_time_method,
+        "review_batch_size": args.review_batch_size,
+        "manual_review_status": "reviewed",
+        "notes": args.notes,
+    }
+    output = args.run_dir / "score.json"
+    output.write_text(
+        json.dumps(score, ensure_ascii=False, indent=2) + "\n",
+        encoding="utf-8",
+    )
+    print(output)
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

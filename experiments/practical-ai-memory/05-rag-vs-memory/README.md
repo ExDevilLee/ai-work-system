@@ -4,7 +4,9 @@
 
 ## 当前阶段
 
-主题与实验协议已经完成设计 Review，当前尚未实现夹具、运行器或评分脚本，也没有启动 Pilot 或正式矩阵。
+实验夹具、验证器、隔离运行器、矩阵调度、评分和聚合工具已经完成实现。Pilot 01 暴露条件不可区分问题，Pilot 02 验证了主要条件差异但发现历史任务缺少技术原因证据，修订后的 Pilot 03 已通过全部门禁。
+
+因此当前状态是：**协议已经形成正式矩阵冻结候选，等待确认后执行 macOS 45 次正式矩阵**。三批 Pilot 都不进入文章数据，也没有生成 `score.json`。
 
 已确认的实验边界：
 
@@ -13,6 +15,12 @@
 - 对比 `rag-only`、`rag-with-recency` 和 `memory-governed` 三种行动治理条件。
 - 使用 5 类任务，同时覆盖 RAG 擅长的静态事实检索和需要当前状态判断的行动问题。
 - macOS 是首轮主体平台，冻结协议后再由 Win11 复现。
+
+Pilot Review 记录：
+
+- [`analysis/pilot-01.md`](analysis/pilot-01.md)：条件不可区分。
+- [`analysis/pilot-02.md`](analysis/pilot-02.md)：形成差异，但历史原因证据缺失。
+- [`analysis/pilot-03.md`](analysis/pilot-03.md)：通过，建议冻结正式矩阵。
 
 完整研究问题、条件定义、评分结构和停止门禁见 [`EXPERIMENT.md`](EXPERIMENT.md)。
 

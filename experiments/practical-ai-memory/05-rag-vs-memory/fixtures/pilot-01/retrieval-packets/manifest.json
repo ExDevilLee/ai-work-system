@@ -1,0 +1,119 @@
+{
+  "tasks": {
+    "static-reference": {
+      "query": "static reference publishing checklist markdown",
+      "top_k": 1,
+      "required_sources": [
+        "references/publishing-checklist.md"
+      ],
+      "packet": "static-reference.md",
+      "packet_bytes": 400,
+      "packet_sha256": "03f5a410f09a17ea1af0322c534776b0e635ad7aedcaefcc483622edf119f50c",
+      "sources": [
+        {
+          "path": "references/publishing-checklist.md",
+          "bytes": 400,
+          "sha256": "03f5a410f09a17ea1af0322c534776b0e635ad7aedcaefcc483622edf119f50c"
+        }
+      ]
+    },
+    "approved-decision": {
+      "query": "approved OR navigation OR incremental",
+      "top_k": 2,
+      "required_sources": [
+        "decisions/navigation-decision.md",
+        "observations/navigation-discussion.md"
+      ],
+      "packet": "approved-decision.md",
+      "packet_bytes": 589,
+      "packet_sha256": "d84be0c6a90406ddf54187d07d547fcbcc0aeadf0a015437ee003fd950d95c08",
+      "sources": [
+        {
+          "path": "observations/navigation-discussion.md",
+          "bytes": 277,
+          "sha256": "88c64be17403411943cd9e08fa1277f6d7e5a57d61af1d12293e93ec03bffaca"
+        },
+        {
+          "path": "decisions/navigation-decision.md",
+          "bytes": 305,
+          "sha256": "2caecce548ead962fbe019bd19e59a415faa2a2a5ff3d3098276b8b063506be0"
+        }
+      ]
+    },
+    "unresolved-conflict": {
+      "query": "unresolved OR retry OR quota",
+      "top_k": 3,
+      "required_sources": [
+        "observations/retry-60.md",
+        "observations/retry-180.md",
+        "decisions/retry-status.md"
+      ],
+      "packet": "unresolved-conflict.md",
+      "packet_bytes": 835,
+      "packet_sha256": "1f5be4507ba0311483c46c60c32173025cb07c26c7008a0c9d8a7b17d8c079f5",
+      "sources": [
+        {
+          "path": "observations/retry-60.md",
+          "bytes": 263,
+          "sha256": "2876917be7f359b8eb5bcb2ddb8e173bd40fb5156f050fd3c3b9f4992036f490"
+        },
+        {
+          "path": "observations/retry-180.md",
+          "bytes": 264,
+          "sha256": "79a47eb6f23d5e640af0bbed98b2acd87ccad5dc490c653e9e2af8c87d77a4fe"
+        },
+        {
+          "path": "decisions/retry-status.md",
+          "bytes": 294,
+          "sha256": "72d97405ead8bcb53ac7011f2e0a0ed92c1f3ac02c5d635440de4b26b8b35ad5"
+        }
+      ]
+    },
+    "scope-bound-rule": {
+      "query": "scope OR image OR platform",
+      "top_k": 2,
+      "required_sources": [
+        "observations/image-global-old.md",
+        "decisions/image-scope-decision.md"
+      ],
+      "packet": "scope-bound-rule.md",
+      "packet_bytes": 502,
+      "packet_sha256": "bb0458078e9835f981c13fc637e6377d45ccb80991fe0b1d1ad3bd28de08dc66",
+      "sources": [
+        {
+          "path": "observations/image-global-old.md",
+          "bytes": 243,
+          "sha256": "611c7444437676ebe23e1ec13f93ce7796af1cb8859edf7ecdb2eae257189282"
+        },
+        {
+          "path": "decisions/image-scope-decision.md",
+          "bytes": 252,
+          "sha256": "b2c30bf4bfb9ab80978a0669271ff393f221f17899d110597f6e03a5cef173d1"
+        }
+      ]
+    },
+    "historical-trace": {
+      "query": "historical OR index OR rebuild",
+      "top_k": 2,
+      "required_sources": [
+        "observations/index-copy-history.md",
+        "decisions/index-rebuild-decision.md"
+      ],
+      "packet": "historical-trace.md",
+      "packet_bytes": 703,
+      "packet_sha256": "d2facf20ad1a25dfe09bd377bad10d7d18eaa33b8f63edadb62a7623944edc3b",
+      "sources": [
+        {
+          "path": "observations/index-copy-history.md",
+          "bytes": 323,
+          "sha256": "b06745948aac8a881f7cb666dceaeafce2e1dea4285a422fde03568f5ef011b4"
+        },
+        {
+          "path": "decisions/index-rebuild-decision.md",
+          "bytes": 373,
+          "sha256": "4abe238ad0e23e0c645cb23a98db400b5d64b2e55b00151f7b45319d36da3d09"
+        }
+      ]
+    }
+  }
+}
