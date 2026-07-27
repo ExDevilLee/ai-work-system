@@ -72,7 +72,7 @@
 - 使用合成夹具，尚未覆盖真实项目中的大规模语料、增量索引和多人修改。
 - Review 未盲化条件名称，45 次采用一次真实计时后的批量均摊方式。
 - 正式矩阵冻结了相同 Top-K 检索包，只验证检索后的行动治理，不评价 embedding、rerank 或召回质量。
-- 本报告只覆盖当前模型、推理强度、CLI 和 macOS 工具链；Win11 尚未复现。
+- 本报告只记录当前模型、推理强度、CLI 和 macOS 工具链；后续 Win11 复现见 [`formal-macos-win11-comparison.md`](formal-macos-win11-comparison.md)。
 
 ## 评分与产物
 

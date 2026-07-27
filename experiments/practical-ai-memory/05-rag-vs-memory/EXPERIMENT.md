@@ -207,9 +207,9 @@ Pilot 03 的只读建议总分为：
 
 ## 正式矩阵候选
 
-Pilot 通过后，macOS 正式矩阵为 `5 个任务 x 3 个条件 x 3 次`，共 45 次。运行期间不修改模型、推理强度、CLI、夹具、Prompt、检索包、预期答案和 rubric。
+Pilot 通过后，macOS 与 Win11 分别完成 `5 个任务 x 3 个条件 x 3 次`，每个平台 45 次，共 90 次正式运行。运行期间未修改模型、推理强度、CLI、夹具、Prompt、检索包、预期答案和 rubric。
 
-macOS 完成有效正式矩阵、真实计时评分和聚合后，才能开始文章初稿。Win11 使用相同冻结协议后续复现；Win11 结果未完成前，文章不得声称结论已经跨平台验证。
+两个平台的条件总分一致：`rag-only` 为 `75/84`，`rag-with-recency` 为 `69/84`，`memory-governed` 为 `84/84`。15 个分组中有两个 `rag-with-recency` 分组存在平台差异：Win11 在已批准决定上比 macOS 低 3 分，在范围限定规则上高 3 分；其余 13 个分组一致。完整对照见 [`analysis/formal-macos-win11-comparison.md`](analysis/formal-macos-win11-comparison.md)。
 
 矩阵中断恢复只允许跳过满足全部门禁的成功运行。失败或不完整运行必须整体隔离，保留原因和哈希后使用相同槽位重跑，不得以手工修改运行产物绕过失败。
 
