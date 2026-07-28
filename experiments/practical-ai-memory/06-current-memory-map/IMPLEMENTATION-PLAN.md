@@ -344,6 +344,10 @@ codex exec -C "$WORKSPACE" --sandbox read-only --ephemeral --json
 
 metadata 必须记录模型、推理强度、Codex CLI、平台、Prompt/fixture 哈希、插件状态、运行时访问、MCP 分类、指标覆盖和输出可靠性，不得记录 provider。
 
+macOS Pilot 还必须通过 `sandbox-exec` 将子进程执行面限制为 Codex 启动链、受控
+shell 和 `cat`、`sed`、`nl`、`rg`。这个限制是运行器边界，不依赖 `AGENTS.md`
+中的自然语言约定；拒绝事件按失败运行隔离，不能被恢复调度跳过。
+
 - [ ] **Step 4: 实现矩阵调度和恢复门禁**
 
 Pilot 覆盖 15 个唯一槽位；正式矩阵覆盖 45 个唯一槽位。条件顺序按任务与重复轮换。只有四个运行文件完整、答案非空、退出码为 0、隔离有效、指标覆盖完整且输出可靠的运行才能被恢复调度跳过。
