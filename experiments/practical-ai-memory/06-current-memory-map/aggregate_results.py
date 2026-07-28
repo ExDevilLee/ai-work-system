@@ -5,20 +5,26 @@ from __future__ import annotations
 
 import argparse
 import csv
+import io
 import json
 import math
+import os
 import re
 import stat
 import statistics
+import tempfile
 from collections import defaultdict
 from pathlib import Path
-from typing import Any, Iterable
+from typing import Any, Iterable, Optional
+
+from matrix_support import expected_run_contract, is_complete_successful_run
 
 
 ROOT = Path(__file__).resolve().parent
 RUBRIC_PATH = ROOT / "expected" / "rubric.json"
 CONDITIONS = ("source-only", "flat-index", "state-projection")
 REPEATS = range(1, 4)
+FIXTURE_SET = "pilot-01"
 SAFE_IDENTIFIER = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]*$")
 SAFE_CODEX_VERSION = re.compile(r"^codex-cli [A-Za-z0-9][A-Za-z0-9._-]*$")
 CSV_FIELDS = (
@@ -55,6 +61,10 @@ def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser()
     parser.add_argument("--prefix", default="formal-")
     parser.add_argument("--platform-tag", choices=("macos", "win11"), default="macos")
+    parser.add_argument("--model", required=True)
+    parser.add_argument(
+        "--reasoning-effort", choices=("low", "medium", "high", "xhigh"), required=True
+    )
     parser.add_argument("--output-stem", required=True)
     return parser.parse_args()
 
@@ -212,12 +222,27 @@ def expected_run_names(prefix: str, tasks: Iterable[str]) -> set[str]:
     }
 
 
+def expected_run_slots(
+    prefix: str, tasks: Iterable[str]
+) -> dict[str, tuple[str, str]]:
+    if prefix != "formal-":
+        raise SystemExit("current-map formal aggregation requires prefix formal-")
+    return {
+        f"formal-{repeat:02d}-{task}-{condition}": (task, condition)
+        for repeat in REPEATS
+        for task in tasks
+        for condition in CONDITIONS
+    }
+
+
 def _validated_row(
     metadata: dict[str, Any],
     score: dict[str, Any],
     *,
     expected_name: str,
     platform_tag: str,
+    expected_model: str,
+    expected_effort: str,
     task_rubrics: dict[str, list[tuple[str, int]]],
 ) -> dict[str, object]:
     run_name = require_identifier("run_name", metadata.get("run_name"))
@@ -232,11 +257,24 @@ def _validated_row(
         raise SystemExit("platform metadata does not match the selected platform")
     model = require_identifier("requested_model", metadata.get("requested_model"))
     effort = require_identifier("reasoning_effort", metadata.get("reasoning_effort"))
+    if model != expected_model or effort != expected_effort:
+        raise SystemExit("metadata model or effort does not match the requested batch")
     cli = metadata.get("codex_version")
     if not isinstance(cli, str) or not SAFE_CODEX_VERSION.fullmatch(cli):
         raise SystemExit("private or invalid codex version rejected from public aggregate")
 
-    for key, expected in (("run_name", run_name), ("task", task), ("condition", condition)):
+    identity_fields = (
+        ("run_name", run_name),
+        ("task", task),
+        ("condition", condition),
+        ("fixture_set", metadata.get("fixture_set")),
+        ("platform_tag", platform),
+        ("requested_model", model),
+        ("reasoning_effort", effort),
+        ("fixture_sha256", metadata.get("fixture_sha256")),
+        ("prompt_sha256", metadata.get("prompt_sha256")),
+    )
+    for key, expected in identity_fields:
         if score.get(key) != expected:
             raise SystemExit("score identity does not match metadata")
     correctness = score.get("correctness_score")
@@ -298,7 +336,7 @@ def _validated_row(
         "manual_review_minutes": review_minutes,
         "review_time_method": review_method,
         "review_batch_size": review_batch_size,
-        "resident_instruction_bytes": require_number(
+        "resident_instruction_bytes": require_nonnegative_integer(
             "resident_instruction_bytes", metadata.get("resident_instruction_bytes")
         ),
         "project_context_bytes": None,
@@ -307,23 +345,27 @@ def _validated_row(
         "workspace_metric_coverage_complete": coverage,
         "workspace_output_bytes_reliable": reliable,
         "elapsed_seconds": require_number("elapsed_seconds", metadata.get("elapsed_seconds")),
-        "input_tokens": require_number("input_tokens", usage.get("input_tokens")),
-        "cached_input_tokens": require_number(
+        "input_tokens": require_nonnegative_integer(
+            "input_tokens", usage.get("input_tokens")
+        ),
+        "cached_input_tokens": require_nonnegative_integer(
             "cached_input_tokens", usage.get("cached_input_tokens")
         ),
-        "output_tokens": require_number("output_tokens", usage.get("output_tokens")),
-        "reasoning_output_tokens": require_number(
+        "output_tokens": require_nonnegative_integer(
+            "output_tokens", usage.get("output_tokens")
+        ),
+        "reasoning_output_tokens": require_nonnegative_integer(
             "reasoning_output_tokens", usage.get("reasoning_output_tokens")
         ),
     }
     if coverage and reliable:
-        row["project_context_bytes"] = require_number(
+        row["project_context_bytes"] = require_nonnegative_integer(
             "project_context_bytes", metadata.get("project_context_bytes")
         )
-        row["workspace_command_calls"] = require_number(
+        row["workspace_command_calls"] = require_nonnegative_integer(
             "workspace_command_calls", metadata.get("workspace_command_calls")
         )
-        row["workspace_output_bytes"] = require_number(
+        row["workspace_output_bytes"] = require_nonnegative_integer(
             "workspace_output_bytes", metadata.get("workspace_output_bytes")
         )
     return row
@@ -369,14 +411,165 @@ def _group_summary(group: list[dict[str, object]]) -> dict[str, object]:
     }
 
 
+def _fsync_directory(path: Path) -> None:
+    flags = os.O_RDONLY | getattr(os, "O_DIRECTORY", 0)
+    descriptor = os.open(path, flags)
+    try:
+        os.fsync(descriptor)
+    finally:
+        os.close(descriptor)
+
+
+def _write_fsynced_staging(directory: Path, prefix: str, payload: bytes) -> Path:
+    descriptor = -1
+    staging: Optional[Path] = None
+    try:
+        descriptor, raw_staging = tempfile.mkstemp(
+            prefix=prefix, suffix=".tmp", dir=directory
+        )
+        staging = Path(raw_staging)
+        os.fchmod(descriptor, 0o644)
+        with os.fdopen(descriptor, "wb", closefd=False) as handle:
+            handle.write(payload)
+            handle.flush()
+            os.fsync(handle.fileno())
+        os.close(descriptor)
+        descriptor = -1
+        return staging
+    except OSError:
+        if descriptor >= 0:
+            os.close(descriptor)
+        if staging is not None:
+            try:
+                staging.unlink()
+            except FileNotFoundError:
+                pass
+        raise
+
+
+def _reserve_backup_path(directory: Path, prefix: str) -> Path:
+    descriptor, raw_path = tempfile.mkstemp(
+        prefix=prefix, suffix=".backup", dir=directory
+    )
+    os.close(descriptor)
+    path = Path(raw_path)
+    path.unlink()
+    return path
+
+
+def _validate_public_target(path: Path) -> bool:
+    try:
+        mode = path.lstat().st_mode
+    except FileNotFoundError:
+        return False
+    if not stat.S_ISREG(mode):
+        raise ValueError("unsafe public aggregate target")
+    return True
+
+
+def replace_aggregate_pair(
+    csv_path: Path, csv_payload: bytes, json_path: Path, json_payload: bytes
+) -> None:
+    directory = csv_path.parent
+    if json_path.parent != directory:
+        raise ValueError("aggregate outputs must share one directory")
+    csv_staging: Optional[Path] = None
+    json_staging: Optional[Path] = None
+    backups: dict[Path, Optional[Path]] = {csv_path: None, json_path: None}
+    original_exists: dict[Path, bool] = {}
+    committed = False
+    rollback_failed = False
+    try:
+        for destination in (csv_path, json_path):
+            original_exists[destination] = _validate_public_target(destination)
+        csv_staging = _write_fsynced_staging(
+            directory, ".aggregate-csv-", csv_payload
+        )
+        json_staging = _write_fsynced_staging(
+            directory, ".aggregate-json-", json_payload
+        )
+        for destination in (csv_path, json_path):
+            if _validate_public_target(destination) != original_exists[destination]:
+                raise ValueError("public aggregate target changed during transaction")
+            if original_exists[destination]:
+                backup = _reserve_backup_path(directory, ".aggregate-old-")
+                os.replace(destination, backup)
+                backups[destination] = backup
+        os.replace(csv_staging, csv_path)
+        csv_staging = None
+        os.replace(json_staging, json_path)
+        json_staging = None
+        _fsync_directory(directory)
+        committed = True
+    except (OSError, ValueError) as error:
+        rollback_errors: list[str] = []
+        for destination in (csv_path, json_path):
+            backup = backups[destination]
+            try:
+                if backup is not None and backup.exists():
+                    os.replace(backup, destination)
+                    backups[destination] = None
+                elif not original_exists.get(destination, False):
+                    try:
+                        destination.unlink()
+                    except FileNotFoundError:
+                        pass
+            except OSError as rollback_error:
+                rollback_errors.append(type(rollback_error).__name__)
+        try:
+            _fsync_directory(directory)
+        except OSError as rollback_error:
+            rollback_errors.append(type(rollback_error).__name__)
+        if rollback_errors:
+            rollback_failed = True
+            raise RuntimeError("aggregate transaction rollback failed") from error
+        raise RuntimeError(
+            f"aggregate transaction failed: {type(error).__name__}"
+        ) from error
+    finally:
+        cleanup_paths = [csv_staging, json_staging]
+        if not rollback_failed:
+            cleanup_paths.extend((backups[csv_path], backups[json_path]))
+        for temporary_path in cleanup_paths:
+            if temporary_path is not None:
+                try:
+                    temporary_path.unlink()
+                except OSError:
+                    pass
+        if committed:
+            try:
+                _fsync_directory(directory)
+            except OSError:
+                pass
+
+
+def render_csv(rows: list[dict[str, object]]) -> bytes:
+    buffer = io.StringIO(newline="")
+    writer = csv.DictWriter(
+        buffer, fieldnames=CSV_FIELDS, lineterminator="\n", extrasaction="raise"
+    )
+    writer.writeheader()
+    writer.writerows(rows)
+    return buffer.getvalue().encode("utf-8")
+
+
 def aggregate_runs(
-    *, root: Path, prefix: str, platform_tag: str, output_stem: str
+    *,
+    root: Path,
+    prefix: str,
+    platform_tag: str,
+    model: str,
+    reasoning_effort: str,
+    output_stem: str,
 ) -> tuple[Path, Path]:
     require_identifier("output_stem", output_stem)
+    require_identifier("model", model)
+    require_identifier("reasoning_effort", reasoning_effort)
     if platform_tag not in ("macos", "win11"):
         raise SystemExit("unsupported platform")
     tasks = frozen_tasks()
-    expected = expected_run_names(prefix, tasks)
+    slots = expected_run_slots(prefix, tasks)
+    expected = set(slots)
     private = root / "runs" / "private" / platform_tag
     if private.is_symlink():
         raise SystemExit("private evidence root must not be a symlink")
@@ -392,6 +585,24 @@ def aggregate_runs(
     rows: list[dict[str, object]] = []
     for run_name in sorted(expected):
         run_dir = private / run_name
+        task, condition = slots[run_name]
+        try:
+            expected_run = expected_run_contract(
+                root,
+                run_name=run_name,
+                fixture_set=FIXTURE_SET,
+                task=task,
+                condition=condition,
+                platform=platform_tag,
+                model=model,
+                reasoning_effort=reasoning_effort,
+            )
+        except (OSError, ValueError) as error:
+            raise SystemExit(
+                f"expected run validation failed: {type(error).__name__}"
+            ) from error
+        if not is_complete_successful_run(run_dir, expected_run):
+            raise SystemExit("formal run evidence is not complete and successful")
         metadata_path = run_dir / "metadata.json"
         score_path = run_dir / "score.json"
         require_regular_file(metadata_path)
@@ -404,6 +615,8 @@ def aggregate_runs(
                 score,
                 expected_name=run_name,
                 platform_tag=platform_tag,
+                expected_model=model,
+                expected_effort=reasoning_effort,
                 task_rubrics=tasks,
             )
         )
@@ -453,24 +666,17 @@ def aggregate_runs(
     data_dir.mkdir(exist_ok=True)
     csv_path = data_dir / f"{output_stem}.csv"
     json_path = data_dir / f"{output_stem}.json"
-    csv_staging = csv_path.with_suffix(".csv.tmp")
-    json_staging = json_path.with_suffix(".json.tmp")
     try:
-        with csv_staging.open("w", encoding="utf-8", newline="") as handle:
-            writer = csv.DictWriter(
-                handle, fieldnames=CSV_FIELDS, lineterminator="\n", extrasaction="raise"
-            )
-            writer.writeheader()
-            writer.writerows(rows)
-        json_staging.write_text(
-            json.dumps(summary, ensure_ascii=False, indent=2) + "\n",
-            encoding="utf-8",
+        replace_aggregate_pair(
+            csv_path,
+            render_csv(rows),
+            json_path,
+            (json.dumps(summary, ensure_ascii=False, indent=2) + "\n").encode(
+                "utf-8"
+            ),
         )
-        csv_staging.replace(csv_path)
-        json_staging.replace(json_path)
-    finally:
-        csv_staging.unlink(missing_ok=True)
-        json_staging.unlink(missing_ok=True)
+    except (OSError, RuntimeError, ValueError) as error:
+        raise SystemExit(str(error)) from error
     return csv_path, json_path
 
 
@@ -480,6 +686,8 @@ def main() -> int:
         root=ROOT,
         prefix=args.prefix,
         platform_tag=args.platform_tag,
+        model=args.model,
+        reasoning_effort=args.reasoning_effort,
         output_stem=args.output_stem,
     )
     print(csv_path)

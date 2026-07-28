@@ -4,14 +4,25 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import math
+import os
+import re
+import stat
+import tempfile
 from pathlib import Path
-from typing import Any
+from typing import Any, Optional
+
+from matrix_support import expected_run_contract, is_complete_successful_run
 
 
 ROOT = Path(__file__).resolve().parent
 RUBRIC_PATH = ROOT / "expected" / "rubric.json"
+FIXTURE_SET = "pilot-01"
+CONDITIONS = ("source-only", "flat-index", "state-projection")
+PLATFORMS = ("macos", "win11")
+SAFE_IDENTIFIER = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]*$")
 
 
 def parse_args() -> argparse.Namespace:
@@ -38,14 +49,139 @@ def parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
-def load_object(path: Path) -> dict[str, Any]:
+def load_object(path: Path, label: str = "JSON") -> dict[str, Any]:
     try:
         value = json.loads(path.read_text(encoding="utf-8"))
     except (OSError, UnicodeDecodeError, json.JSONDecodeError) as error:
-        raise SystemExit(f"cannot read valid JSON: {path.name}") from error
+        raise SystemExit(f"{label} read failed: {type(error).__name__}") from error
     if not isinstance(value, dict):
-        raise SystemExit(f"JSON root must be an object: {path.name}")
+        raise SystemExit(f"{label} root must be an object")
     return value
+
+
+def _regular_file_bytes(path: Path, label: str) -> bytes:
+    flags = os.O_RDONLY | getattr(os, "O_NOFOLLOW", 0)
+    try:
+        before = os.lstat(path)
+        if not stat.S_ISREG(before.st_mode):
+            raise ValueError("not a regular file")
+        descriptor = os.open(path, flags)
+        try:
+            opened = os.fstat(descriptor)
+            if (
+                not stat.S_ISREG(opened.st_mode)
+                or (opened.st_dev, opened.st_ino) != (before.st_dev, before.st_ino)
+            ):
+                raise ValueError("file identity changed")
+            with os.fdopen(descriptor, "rb", closefd=False) as handle:
+                data = handle.read()
+            after = os.lstat(path)
+            if (after.st_dev, after.st_ino) != (opened.st_dev, opened.st_ino):
+                raise ValueError("file identity changed")
+        finally:
+            os.close(descriptor)
+        return data
+    except (OSError, ValueError) as error:
+        raise SystemExit(f"{label} read failed: {type(error).__name__}") from error
+
+
+def _regular_json_object(path: Path, label: str) -> tuple[dict[str, Any], str]:
+    data = _regular_file_bytes(path, label)
+    try:
+        value = json.loads(data.decode("utf-8"))
+    except (UnicodeDecodeError, json.JSONDecodeError) as error:
+        raise SystemExit(f"{label} read failed: {type(error).__name__}") from error
+    if not isinstance(value, dict):
+        raise SystemExit(f"{label} root must be an object")
+    return value, hashlib.sha256(data).hexdigest()
+
+
+def _safe_run_directory(path: Path) -> tuple[Path, str]:
+    candidate = Path(os.path.abspath(path))
+    private = ROOT / "runs" / "private"
+    try:
+        relative = candidate.relative_to(private)
+    except ValueError as error:
+        raise SystemExit("run directory is outside the private evidence root") from error
+    if (
+        len(relative.parts) != 2
+        or relative.parts[0] not in PLATFORMS
+        or not SAFE_IDENTIFIER.fullmatch(relative.parts[1])
+    ):
+        raise SystemExit("run directory does not match the private evidence layout")
+    for directory in (ROOT, ROOT / "runs", private, candidate.parent, candidate):
+        try:
+            mode = directory.lstat().st_mode
+        except OSError as error:
+            raise SystemExit(
+                f"run directory validation failed: {type(error).__name__}"
+            ) from error
+        if not stat.S_ISDIR(mode):
+            raise SystemExit("run directory validation failed: unsafe ancestor")
+    return candidate, relative.parts[0]
+
+
+def _formal_slot_matches(run_name: str, task: str, condition: str) -> bool:
+    return any(
+        run_name == f"formal-{repeat:02d}-{task}-{condition}"
+        for repeat in range(1, 4)
+    )
+
+
+def _validate_score_target(path: Path) -> None:
+    try:
+        mode = path.lstat().st_mode
+    except FileNotFoundError:
+        return
+    except OSError as error:
+        raise SystemExit(
+            f"score target validation failed: {type(error).__name__}"
+        ) from error
+    if not stat.S_ISREG(mode):
+        raise SystemExit("score target validation failed: unsafe target")
+
+
+def _fsync_directory(path: Path) -> None:
+    flags = os.O_RDONLY | getattr(os, "O_DIRECTORY", 0)
+    descriptor = os.open(path, flags)
+    try:
+        os.fsync(descriptor)
+    finally:
+        os.close(descriptor)
+
+
+def atomic_write_score(run_dir: Path, payload: bytes) -> None:
+    output = run_dir / "score.json"
+    _validate_score_target(output)
+    descriptor = -1
+    staging: Optional[Path] = None
+    try:
+        descriptor, raw_staging = tempfile.mkstemp(
+            prefix=".score-", suffix=".json.tmp", dir=run_dir
+        )
+        staging = Path(raw_staging)
+        os.fchmod(descriptor, 0o600)
+        with os.fdopen(descriptor, "wb", closefd=False) as handle:
+            handle.write(payload)
+            handle.flush()
+            os.fsync(handle.fileno())
+        os.close(descriptor)
+        descriptor = -1
+        _safe_run_directory(run_dir)
+        _validate_score_target(output)
+        os.replace(staging, output)
+        staging = None
+        _fsync_directory(run_dir)
+    except (OSError, ValueError) as error:
+        raise SystemExit(f"score write failed: {type(error).__name__}") from error
+    finally:
+        if descriptor >= 0:
+            os.close(descriptor)
+        if staging is not None:
+            try:
+                staging.unlink()
+            except FileNotFoundError:
+                pass
 
 
 def task_criteria(task: object) -> list[tuple[str, int]]:
@@ -148,7 +284,9 @@ def main() -> int:
     if args.irrelevant_facts < 0 or args.unsupported_claims < 0:
         raise SystemExit("claim counts must not be negative")
 
-    metadata = load_object(args.run_dir / "metadata.json")
+    run_dir, platform_tag = _safe_run_directory(args.run_dir)
+    metadata_path = run_dir / "metadata.json"
+    metadata, metadata_digest = _regular_json_object(metadata_path, "metadata")
     criteria = task_criteria(metadata.get("task"))
     maximum = sum(points for _, points in criteria)
     if not 0 <= args.score <= maximum:
@@ -156,6 +294,43 @@ def main() -> int:
     for key in ("run_name", "task", "condition"):
         if not isinstance(metadata.get(key), str) or not metadata[key]:
             raise SystemExit(f"metadata field is missing or invalid: {key}")
+    run_name = metadata["run_name"]
+    task = metadata["task"]
+    condition = metadata["condition"]
+    model = metadata.get("requested_model")
+    effort = metadata.get("reasoning_effort")
+    if (
+        run_name != run_dir.name
+        or metadata.get("platform_tag") != platform_tag
+        or condition not in CONDITIONS
+        or not _formal_slot_matches(run_name, task, condition)
+        or not isinstance(model, str)
+        or not SAFE_IDENTIFIER.fullmatch(model)
+        or not isinstance(effort, str)
+        or not SAFE_IDENTIFIER.fullmatch(effort)
+    ):
+        raise SystemExit("metadata identity does not match the frozen run slot")
+    try:
+        expected = expected_run_contract(
+            ROOT,
+            run_name=run_name,
+            fixture_set=FIXTURE_SET,
+            task=task,
+            condition=condition,
+            platform=platform_tag,
+            model=model,
+            reasoning_effort=effort,
+        )
+    except (OSError, ValueError) as error:
+        raise SystemExit(
+            f"expected run validation failed: {type(error).__name__}"
+        ) from error
+    if not is_complete_successful_run(run_dir, expected):
+        raise SystemExit("run evidence is not complete and successful")
+    _safe_run_directory(run_dir)
+    _, verified_digest = _regular_json_object(metadata_path, "metadata")
+    if verified_digest != metadata_digest:
+        raise SystemExit("metadata changed during validation")
     rubric_items = validated_rubric_items(
         args.criterion_scores, criteria, args.score
     )
@@ -164,6 +339,12 @@ def main() -> int:
         "run_name": metadata["run_name"],
         "task": metadata["task"],
         "condition": metadata["condition"],
+        "fixture_set": FIXTURE_SET,
+        "platform_tag": platform_tag,
+        "requested_model": model,
+        "reasoning_effort": effort,
+        "fixture_sha256": metadata["fixture_sha256"],
+        "prompt_sha256": metadata["prompt_sha256"],
         "correctness_score": args.score,
         "correctness_max": maximum,
         "rubric_items": rubric_items,
@@ -181,11 +362,11 @@ def main() -> int:
         "manual_review_status": "reviewed",
         "notes": args.notes,
     }
-    output = args.run_dir / "score.json"
-    output.write_text(
-        json.dumps(score, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
+    atomic_write_score(
+        run_dir,
+        (json.dumps(score, ensure_ascii=False, indent=2) + "\n").encode("utf-8"),
     )
-    print(output)
+    print("score.json")
     return 0
 
 

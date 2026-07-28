@@ -4,11 +4,15 @@ import csv
 import io
 import json
 import os
+import shutil
 import tempfile
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
 from aggregate_results import aggregate_runs, summarize
+from matrix_support import expected_run_contract
+from run_experiment import assemble_fixture
 
 
 TASKS = (
@@ -24,6 +28,7 @@ RUBRIC = json.loads(
         encoding="utf-8"
     )
 )
+SOURCE_ROOT = Path(__file__).resolve().parent
 
 
 class AggregateResultsTest(unittest.TestCase):
@@ -39,6 +44,11 @@ class AggregateResultsTest(unittest.TestCase):
         ]
 
     def make_matrix(self, root: Path) -> Path:
+        shutil.copytree(
+            SOURCE_ROOT / "fixtures" / "pilot-01",
+            root / "fixtures" / "pilot-01",
+        )
+        shutil.copytree(SOURCE_ROOT / "prompts", root / "prompts")
         private = root / "runs" / "private" / "macos"
         for repeat in range(1, 4):
             for task in TASKS:
@@ -46,15 +56,41 @@ class AggregateResultsTest(unittest.TestCase):
                     run_name = f"formal-{repeat:02d}-{task}-{condition}"
                     run_dir = private / run_name
                     run_dir.mkdir(parents=True)
+                    expected = expected_run_contract(
+                        root,
+                        run_name=run_name,
+                        fixture_set="pilot-01",
+                        task=task,
+                        condition=condition,
+                        platform="macos",
+                        model="gpt-test",
+                        reasoning_effort="medium",
+                    )
+                    assemble_fixture(
+                        root / "fixtures" / "pilot-01",
+                        condition,
+                        run_dir / "fixture-snapshot",
+                    )
+                    shutil.copy2(
+                        root / "prompts" / f"{task}.md", run_dir / "prompt.md"
+                    )
+                    (run_dir / "final.md").write_text("complete answer\n", encoding="utf-8")
+                    (run_dir / "raw.jsonl").write_text("{}\n", encoding="utf-8")
+                    (run_dir / "stderr.log").write_text("", encoding="utf-8")
                     metadata = {
                         "run_name": run_name,
                         "purpose": "formal run",
                         "task": task,
                         "condition": condition,
+                        "fixture_set": "pilot-01",
                         "platform_tag": "macos",
                         "requested_model": "gpt-test",
                         "reasoning_effort": "medium",
                         "codex_version": "codex-cli 1.2.3",
+                        "fixture_sha256": expected.fixture_sha256,
+                        "prompt_sha256": expected.prompt_sha256,
+                        "exit_code": 0,
+                        "protocol_environment_isolated": True,
                         "resident_instruction_bytes": 100,
                         "project_context_bytes": 600,
                         "workspace_command_calls": 2,
@@ -73,6 +109,12 @@ class AggregateResultsTest(unittest.TestCase):
                         "run_name": run_name,
                         "task": task,
                         "condition": condition,
+                        "fixture_set": "pilot-01",
+                        "platform_tag": "macos",
+                        "requested_model": "gpt-test",
+                        "reasoning_effort": "medium",
+                        "fixture_sha256": expected.fixture_sha256,
+                        "prompt_sha256": expected.prompt_sha256,
                         "correctness_score": 5,
                         "correctness_max": 5,
                         "rubric_items": self.rubric_items(task),
@@ -96,6 +138,8 @@ class AggregateResultsTest(unittest.TestCase):
             root=root,
             prefix="formal-",
             platform_tag="macos",
+            model="gpt-test",
+            reasoning_effort="medium",
             output_stem="formal-macos-gpt-test-medium",
         )
 
@@ -128,7 +172,7 @@ class AggregateResultsTest(unittest.TestCase):
             rows = list(csv.DictReader(io.StringIO(csv_path.read_text(encoding="utf-8"))))
             self.assertEqual(len(rows), 45)
 
-    def test_requires_workspace_metrics_n(self) -> None:
+    def test_rejects_incomplete_workspace_metric_evidence(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary)
             private = self.make_matrix(root)
@@ -138,11 +182,8 @@ class AggregateResultsTest(unittest.TestCase):
             metadata["workspace_output_bytes_reliable"] = False
             (run_dir / "metadata.json").write_text(json.dumps(metadata) + "\n", encoding="utf-8")
 
-            _, json_path = self.aggregate(root)
-            summary = json.loads(json_path.read_text(encoding="utf-8"))
-            group = summary["groups"]["active-decision:source-only"]
-            self.assertEqual(group["n"], 3)
-            self.assertEqual(group["workspace_metrics_n"], 2)
+            with self.assertRaisesRegex(SystemExit, "complete and successful"):
+                self.aggregate(root)
 
     def test_does_not_mix_model_effort_platform_or_cli(self) -> None:
         fields = (
@@ -159,7 +200,9 @@ class AggregateResultsTest(unittest.TestCase):
                 metadata = json.loads((run_dir / "metadata.json").read_text(encoding="utf-8"))
                 metadata[field] = value
                 (run_dir / "metadata.json").write_text(json.dumps(metadata) + "\n", encoding="utf-8")
-                with self.assertRaisesRegex(SystemExit, "mixed batch|platform"):
+                with self.assertRaisesRegex(
+                    SystemExit, "complete and successful|requested batch|mixed batch"
+                ):
                     self.aggregate(root)
 
     def test_private_fields_cannot_enter_public_aggregate(self) -> None:
@@ -209,8 +252,55 @@ class AggregateResultsTest(unittest.TestCase):
             target.write_bytes(metadata.read_bytes())
             metadata.unlink()
             metadata.symlink_to(target)
-            with self.assertRaisesRegex(SystemExit, "regular file"):
+            with self.assertRaisesRegex(SystemExit, "complete and successful"):
                 self.aggregate(root)
+
+    def test_rejects_metadata_score_shell_and_hash_drift(self) -> None:
+        mutations = ("remove-evidence", "change-prompt")
+        for mutation in mutations:
+            with self.subTest(mutation=mutation), tempfile.TemporaryDirectory() as temporary:
+                root = Path(temporary)
+                private = self.make_matrix(root)
+                run_dir = private / "formal-01-active-decision-source-only"
+                if mutation == "remove-evidence":
+                    for name in (
+                        "final.md",
+                        "raw.jsonl",
+                        "prompt.md",
+                        "stderr.log",
+                    ):
+                        (run_dir / name).unlink()
+                    shutil.rmtree(run_dir / "fixture-snapshot")
+                else:
+                    (run_dir / "prompt.md").write_text("drift\n", encoding="utf-8")
+                with self.assertRaisesRegex(SystemExit, "complete and successful"):
+                    self.aggregate(root)
+
+    def test_score_identity_must_match_the_same_run(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            private = self.make_matrix(root)
+            run_dir = private / "formal-01-active-decision-source-only"
+            score_path = run_dir / "score.json"
+            original = json.loads(score_path.read_text(encoding="utf-8"))
+            for field, value in (
+                ("run_name", "formal-02-active-decision-source-only"),
+                ("task", "pending-observation"),
+                ("condition", "flat-index"),
+                ("fixture_set", "pilot-02"),
+                ("platform_tag", "win11"),
+                ("requested_model", "gpt-other"),
+                ("reasoning_effort", "high"),
+                ("fixture_sha256", "0" * 64),
+                ("prompt_sha256", "1" * 64),
+            ):
+                with self.subTest(field=field):
+                    score = dict(original)
+                    score[field] = value
+                    score_path.write_text(json.dumps(score) + "\n", encoding="utf-8")
+                    with self.assertRaisesRegex(SystemExit, "score identity"):
+                        self.aggregate(root)
+            score_path.write_text(json.dumps(original) + "\n", encoding="utf-8")
 
     def test_independently_rejects_tampered_saved_rubric_items(self) -> None:
         def missing(score: dict[str, object]) -> None:
@@ -261,6 +351,80 @@ class AggregateResultsTest(unittest.TestCase):
                 score_path.write_text(json.dumps(score) + "\n", encoding="utf-8")
                 with self.assertRaisesRegex(SystemExit, "rubric"):
                     self.aggregate(root)
+
+    def test_discrete_metrics_require_nonnegative_integers(self) -> None:
+        mutations = (
+            ("metadata", "workspace_command_calls", 2.0),
+            ("metadata", "workspace_output_bytes", True),
+            ("metadata", "resident_instruction_bytes", 100.5),
+            ("score", "unsupported_claims", 0.5),
+            ("score", "irrelevant_facts", True),
+        )
+        for target, field, value in mutations:
+            with self.subTest(field=field), tempfile.TemporaryDirectory() as temporary:
+                root = Path(temporary)
+                private = self.make_matrix(root)
+                run_dir = private / "formal-01-active-decision-source-only"
+                path = run_dir / f"{target}.json"
+                payload = json.loads(path.read_text(encoding="utf-8"))
+                payload[field] = value
+                path.write_text(json.dumps(payload) + "\n", encoding="utf-8")
+                with self.assertRaisesRegex(SystemExit, "integer"):
+                    self.aggregate(root)
+
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            private = self.make_matrix(root)
+            run_dir = private / "formal-01-active-decision-source-only"
+            metadata_path = run_dir / "metadata.json"
+            metadata = json.loads(metadata_path.read_text(encoding="utf-8"))
+            metadata["usage"]["input_tokens"] = 1000.0
+            metadata_path.write_text(json.dumps(metadata) + "\n", encoding="utf-8")
+            with self.assertRaisesRegex(SystemExit, "integer"):
+                self.aggregate(root)
+
+    def test_aggregate_pair_rolls_back_old_and_absent_outputs(self) -> None:
+        for existing in (True, False):
+            with self.subTest(existing=existing), tempfile.TemporaryDirectory() as temporary:
+                root = Path(temporary)
+                self.make_matrix(root)
+                data = root / "data"
+                data.mkdir()
+                csv_path = data / "formal-macos-gpt-test-medium.csv"
+                json_path = data / "formal-macos-gpt-test-medium.json"
+                if existing:
+                    csv_path.write_bytes(b"old-csv\n")
+                    json_path.write_bytes(b"old-json\n")
+                real_replace = os.replace
+                failed = False
+
+                def fail_second_install(source: object, destination: object) -> None:
+                    nonlocal failed
+                    source_path = Path(source)
+                    if (
+                        not failed
+                        and Path(destination) == json_path
+                        and source_path.name.startswith(".aggregate-json-")
+                    ):
+                        failed = True
+                        raise OSError("injected replace failure")
+                    real_replace(source, destination)
+
+                with patch("aggregate_results.os.replace", side_effect=fail_second_install):
+                    with self.assertRaisesRegex(SystemExit, "transaction failed"):
+                        self.aggregate(root)
+                if existing:
+                    self.assertEqual(csv_path.read_bytes(), b"old-csv\n")
+                    self.assertEqual(json_path.read_bytes(), b"old-json\n")
+                else:
+                    self.assertFalse(csv_path.exists())
+                    self.assertFalse(json_path.exists())
+                leftovers = [
+                    path.name
+                    for path in data.iterdir()
+                    if path.name.startswith(".aggregate-")
+                ]
+                self.assertEqual(leftovers, [])
 
 
 if __name__ == "__main__":
