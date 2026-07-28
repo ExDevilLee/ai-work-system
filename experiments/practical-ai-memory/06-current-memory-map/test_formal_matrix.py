@@ -1,0 +1,133 @@
+from __future__ import annotations
+
+import json
+import tempfile
+import unittest
+from argparse import Namespace
+from collections import Counter
+from pathlib import Path
+from subprocess import CompletedProcess
+from unittest.mock import patch
+
+from matrix_support import is_complete_successful_run
+from run_formal_matrix import SCHEDULE, main
+
+
+TASKS = {
+    "active-decision",
+    "superseded-rule",
+    "unresolved-conflict",
+    "scope-boundary",
+    "pending-observation",
+}
+CONDITIONS = {"source-only", "flat-index", "state-projection"}
+
+
+class FormalScheduleTest(unittest.TestCase):
+    def test_has_three_runs_per_task_condition(self) -> None:
+        counts = Counter(pair for _, runs in SCHEDULE for pair in runs)
+        self.assertEqual(len(counts), 15)
+        self.assertEqual(set(counts.values()), {3})
+        self.assertEqual({task for task, _ in counts}, TASKS)
+        self.assertEqual({condition for _, condition in counts}, CONDITIONS)
+
+    def test_run_names_are_unique(self) -> None:
+        names = [
+            f"{label}-{task}-{condition}"
+            for label, runs in SCHEDULE
+            for task, condition in runs
+        ]
+        self.assertEqual(len(names), 45)
+        self.assertEqual(len(names), len(set(names)))
+
+    def test_zero_exit_without_complete_evidence_stops_matrix(self) -> None:
+        args = Namespace(
+            fixture_set="pilot-01",
+            platform_tag="macos",
+            model="synthetic-model",
+            reasoning_effort="medium",
+        )
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            with (
+                patch("run_formal_matrix.ROOT", Path(temporary_directory)),
+                patch(
+                    "run_formal_matrix.SCHEDULE",
+                    (("formal-01", (("active-decision", "source-only"),)),),
+                ),
+                patch("run_formal_matrix.parse_args", return_value=args),
+                patch(
+                    "run_formal_matrix.subprocess.run",
+                    return_value=CompletedProcess([], 0),
+                ),
+            ):
+                self.assertEqual(main(), 1)
+
+    def test_complete_successful_run_can_resume(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            run_dir = Path(temporary_directory)
+            self.write_complete_run(run_dir, exit_code=0, usage={"input_tokens": 1})
+
+            self.assertTrue(is_complete_successful_run(run_dir))
+
+    def test_failed_run_metadata_cannot_resume(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            run_dir = Path(temporary_directory)
+            self.write_complete_run(run_dir, exit_code=1, usage=None)
+
+            self.assertFalse(is_complete_successful_run(run_dir))
+
+    def test_missing_final_answer_cannot_resume(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            run_dir = Path(temporary_directory)
+            self.write_complete_run(run_dir, exit_code=0, usage={"input_tokens": 1})
+            (run_dir / "final.md").unlink()
+
+            self.assertFalse(is_complete_successful_run(run_dir))
+
+    def test_empty_final_answer_cannot_resume(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            run_dir = Path(temporary_directory)
+            self.write_complete_run(run_dir, exit_code=0, usage={"input_tokens": 1})
+            (run_dir / "final.md").write_text(" \n", encoding="utf-8")
+
+            self.assertFalse(is_complete_successful_run(run_dir))
+
+    def test_failed_protocol_gates_cannot_resume(self) -> None:
+        for failed_key in (
+            "protocol_environment_isolated",
+            "workspace_metric_coverage_complete",
+            "workspace_output_bytes_reliable",
+        ):
+            with self.subTest(failed_key=failed_key), tempfile.TemporaryDirectory() as temporary_directory:
+                run_dir = Path(temporary_directory)
+                self.write_complete_run(run_dir, exit_code=0, usage={"input_tokens": 1})
+                metadata_path = run_dir / "metadata.json"
+                metadata = json.loads(metadata_path.read_text(encoding="utf-8"))
+                metadata[failed_key] = False
+                metadata_path.write_text(json.dumps(metadata), encoding="utf-8")
+
+                self.assertFalse(is_complete_successful_run(run_dir))
+
+    @staticmethod
+    def write_complete_run(
+        run_dir: Path, *, exit_code: int, usage: object
+    ) -> None:
+        metadata = {
+            "exit_code": exit_code,
+            "usage": usage,
+            "protocol_environment_isolated": True,
+            "workspace_metric_coverage_complete": True,
+            "workspace_output_bytes_reliable": True,
+        }
+        (run_dir / "metadata.json").write_text(
+            json.dumps(metadata), encoding="utf-8"
+        )
+        (run_dir / "final.md").write_text("answer", encoding="utf-8")
+        (run_dir / "raw.jsonl").write_text("event", encoding="utf-8")
+        (run_dir / "stderr.log").write_text("", encoding="utf-8")
+        (run_dir / "prompt.md").write_text("prompt", encoding="utf-8")
+        (run_dir / "fixture-snapshot").mkdir()
+
+
+if __name__ == "__main__":
+    unittest.main()
