@@ -18,6 +18,12 @@ def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser()
     parser.add_argument("run_dir", type=Path)
     parser.add_argument("--score", type=int, required=True)
+    parser.add_argument(
+        "--criterion-scores",
+        type=Path,
+        required=True,
+        help="JSON file containing ordered criterion_id and score items",
+    )
     parser.add_argument("--protocol-valid", choices=("yes", "no"), required=True)
     parser.add_argument("--review-minutes", type=float)
     parser.add_argument(
@@ -42,7 +48,7 @@ def load_object(path: Path) -> dict[str, Any]:
     return value
 
 
-def task_max_score(task: object) -> int:
+def task_criteria(task: object) -> list[tuple[str, int]]:
     rubric = load_object(RUBRIC_PATH)
     tasks = rubric.get("tasks")
     if not isinstance(task, str) or not isinstance(tasks, dict) or task not in tasks:
@@ -53,7 +59,77 @@ def task_max_score(task: object) -> int:
     maximum = task_rubric.get("max_score")
     if not isinstance(maximum, int) or isinstance(maximum, bool) or maximum <= 0:
         raise SystemExit("frozen task maximum is invalid")
-    return maximum
+    raw_criteria = task_rubric.get("criteria")
+    if not isinstance(raw_criteria, list) or not raw_criteria:
+        raise SystemExit("frozen task criteria are malformed")
+    criteria: list[tuple[str, int]] = []
+    for raw in raw_criteria:
+        if not isinstance(raw, dict):
+            raise SystemExit("frozen task criterion is malformed")
+        criterion_id = raw.get("id")
+        points = raw.get("points")
+        if (
+            not isinstance(criterion_id, str)
+            or not criterion_id
+            or not isinstance(points, int)
+            or isinstance(points, bool)
+            or points <= 0
+        ):
+            raise SystemExit("frozen task criterion is malformed")
+        criteria.append((criterion_id, points))
+    criterion_ids = [criterion_id for criterion_id, _ in criteria]
+    if len(set(criterion_ids)) != len(criterion_ids):
+        raise SystemExit("frozen task criterion IDs must be unique")
+    if sum(points for _, points in criteria) != maximum:
+        raise SystemExit("frozen task criterion points do not match task maximum")
+    return criteria
+
+
+def validated_rubric_items(
+    path: Path, criteria: list[tuple[str, int]], correctness_score: int
+) -> list[dict[str, object]]:
+    try:
+        raw_items = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, UnicodeDecodeError, json.JSONDecodeError) as error:
+        raise SystemExit("criterion-scores must be a readable JSON file") from error
+    if not isinstance(raw_items, list):
+        raise SystemExit("criterion-scores JSON root must be an ordered list")
+    expected_ids = [criterion_id for criterion_id, _ in criteria]
+    actual_ids = [
+        item.get("criterion_id") if isinstance(item, dict) else None
+        for item in raw_items
+    ]
+    if (
+        not all(isinstance(criterion_id, str) for criterion_id in actual_ids)
+        or actual_ids != expected_ids
+        or len(set(actual_ids)) != len(actual_ids)
+    ):
+        raise SystemExit(
+            "criterion IDs must exactly match frozen rubric order and uniqueness"
+        )
+
+    rubric_items: list[dict[str, object]] = []
+    for raw, (criterion_id, maximum) in zip(raw_items, criteria):
+        if not isinstance(raw, dict) or set(raw) != {"criterion_id", "score"}:
+            raise SystemExit("each criterion score must contain only criterion_id and score")
+        score = raw.get("score")
+        if (
+            not isinstance(score, int)
+            or isinstance(score, bool)
+            or not 0 <= score <= maximum
+        ):
+            raise SystemExit("criterion score must be within its frozen range")
+        rubric_items.append(
+            {
+                "criterion_id": criterion_id,
+                "score": score,
+                "max_score": maximum,
+                "passed": score == maximum,
+            }
+        )
+    if sum(int(item["score"]) for item in rubric_items) != correctness_score:
+        raise SystemExit("criterion score sum must equal correctness_score")
+    return rubric_items
 
 
 def main() -> int:
@@ -73,12 +149,16 @@ def main() -> int:
         raise SystemExit("claim counts must not be negative")
 
     metadata = load_object(args.run_dir / "metadata.json")
-    maximum = task_max_score(metadata.get("task"))
+    criteria = task_criteria(metadata.get("task"))
+    maximum = sum(points for _, points in criteria)
     if not 0 <= args.score <= maximum:
         raise SystemExit("score must be between zero and the frozen task maximum")
     for key in ("run_name", "task", "condition"):
         if not isinstance(metadata.get(key), str) or not metadata[key]:
             raise SystemExit(f"metadata field is missing or invalid: {key}")
+    rubric_items = validated_rubric_items(
+        args.criterion_scores, criteria, args.score
+    )
 
     score = {
         "run_name": metadata["run_name"],
@@ -86,6 +166,7 @@ def main() -> int:
         "condition": metadata["condition"],
         "correctness_score": args.score,
         "correctness_max": maximum,
+        "rubric_items": rubric_items,
         "protocol_valid": args.protocol_valid == "yes",
         "unsupported_claims": args.unsupported_claims,
         "irrelevant_facts": args.irrelevant_facts,

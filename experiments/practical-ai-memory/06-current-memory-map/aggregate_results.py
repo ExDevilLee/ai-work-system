@@ -113,12 +113,12 @@ def require_regular_file(path: Path) -> None:
         raise SystemExit(f"required evidence must be a regular file: {path.name}")
 
 
-def frozen_tasks() -> dict[str, int]:
+def frozen_tasks() -> dict[str, list[tuple[str, int]]]:
     rubric = load_object(RUBRIC_PATH)
     raw_tasks = rubric.get("tasks")
     if not isinstance(raw_tasks, dict) or len(raw_tasks) != 5:
         raise SystemExit("frozen rubric must define exactly five tasks")
-    tasks: dict[str, int] = {}
+    tasks: dict[str, list[tuple[str, int]]] = {}
     for task, raw in raw_tasks.items():
         task = require_identifier("task", task)
         if not isinstance(raw, dict):
@@ -126,8 +126,79 @@ def frozen_tasks() -> dict[str, int]:
         maximum = raw.get("max_score")
         if not isinstance(maximum, int) or isinstance(maximum, bool) or maximum <= 0:
             raise SystemExit("frozen task maximum is invalid")
-        tasks[task] = maximum
+        raw_criteria = raw.get("criteria")
+        if not isinstance(raw_criteria, list) or not raw_criteria:
+            raise SystemExit("frozen task criteria are malformed")
+        criteria: list[tuple[str, int]] = []
+        for criterion in raw_criteria:
+            if not isinstance(criterion, dict):
+                raise SystemExit("frozen task criterion is malformed")
+            criterion_id = criterion.get("id")
+            points = criterion.get("points")
+            if (
+                not isinstance(criterion_id, str)
+                or not SAFE_IDENTIFIER.fullmatch(criterion_id)
+                or not isinstance(points, int)
+                or isinstance(points, bool)
+                or points <= 0
+            ):
+                raise SystemExit("frozen task criterion is malformed")
+            criteria.append((criterion_id, points))
+        ids = [criterion_id for criterion_id, _ in criteria]
+        if len(set(ids)) != len(ids) or sum(points for _, points in criteria) != maximum:
+            raise SystemExit("frozen task criteria do not match the task maximum")
+        tasks[task] = criteria
     return tasks
+
+
+def validate_saved_rubric_items(
+    score: dict[str, Any],
+    criteria: list[tuple[str, int]],
+    correctness_score: int,
+    correctness_max: int,
+) -> None:
+    raw_items = score.get("rubric_items")
+    if not isinstance(raw_items, list):
+        raise SystemExit("score rubric_items must be an ordered list")
+    expected_ids = [criterion_id for criterion_id, _ in criteria]
+    actual_ids = [
+        item.get("criterion_id") if isinstance(item, dict) else None
+        for item in raw_items
+    ]
+    if (
+        not all(isinstance(criterion_id, str) for criterion_id in actual_ids)
+        or actual_ids != expected_ids
+        or len(set(actual_ids)) != len(actual_ids)
+    ):
+        raise SystemExit("score rubric IDs do not match the frozen order and uniqueness")
+
+    item_score_sum = 0
+    item_max_sum = 0
+    for item, (criterion_id, maximum) in zip(raw_items, criteria):
+        if not isinstance(item, dict) or set(item) != {
+            "criterion_id",
+            "score",
+            "max_score",
+            "passed",
+        }:
+            raise SystemExit("score rubric item shape is invalid")
+        item_score = item.get("score")
+        item_max = item.get("max_score")
+        passed = item.get("passed")
+        if (
+            item.get("criterion_id") != criterion_id
+            or item_max != maximum
+            or not isinstance(item_score, int)
+            or isinstance(item_score, bool)
+            or not 0 <= item_score <= maximum
+            or not isinstance(passed, bool)
+            or passed != (item_score == maximum)
+        ):
+            raise SystemExit("score rubric item disagrees with the frozen rubric")
+        item_score_sum += item_score
+        item_max_sum += maximum
+    if item_score_sum != correctness_score or item_max_sum != correctness_max:
+        raise SystemExit("score rubric item totals disagree with correctness totals")
 
 
 def expected_run_names(prefix: str, tasks: Iterable[str]) -> set[str]:
@@ -147,12 +218,12 @@ def _validated_row(
     *,
     expected_name: str,
     platform_tag: str,
-    task_maxima: dict[str, int],
+    task_rubrics: dict[str, list[tuple[str, int]]],
 ) -> dict[str, object]:
     run_name = require_identifier("run_name", metadata.get("run_name"))
     task = require_identifier("task", metadata.get("task"))
     condition = require_identifier("condition", metadata.get("condition"))
-    if run_name != expected_name or task not in task_maxima or condition not in CONDITIONS:
+    if run_name != expected_name or task not in task_rubrics or condition not in CONDITIONS:
         raise SystemExit("formal run identity does not match the frozen matrix")
     if metadata.get("purpose") != "formal run":
         raise SystemExit("non-formal run found in formal aggregation")
@@ -170,13 +241,17 @@ def _validated_row(
             raise SystemExit("score identity does not match metadata")
     correctness = score.get("correctness_score")
     correctness_max = score.get("correctness_max")
+    task_maximum = sum(points for _, points in task_rubrics[task])
     if (
         not isinstance(correctness, int)
         or isinstance(correctness, bool)
-        or not 0 <= correctness <= task_maxima[task]
-        or correctness_max != task_maxima[task]
+        or not 0 <= correctness <= task_maximum
+        or correctness_max != task_maximum
     ):
         raise SystemExit("score exceeds or disagrees with the frozen task maximum")
+    validate_saved_rubric_items(
+        score, task_rubrics[task], correctness, correctness_max
+    )
     if score.get("protocol_valid") is not True:
         raise SystemExit("formal aggregate requires protocol_valid=true for all 45 runs")
     unsupported = require_nonnegative_integer(
@@ -329,7 +404,7 @@ def aggregate_runs(
                 score,
                 expected_name=run_name,
                 platform_tag=platform_tag,
-                task_maxima=tasks,
+                task_rubrics=tasks,
             )
         )
 

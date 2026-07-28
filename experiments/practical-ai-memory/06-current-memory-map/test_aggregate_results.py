@@ -19,9 +19,25 @@ TASKS = (
     "pending-observation",
 )
 CONDITIONS = ("source-only", "flat-index", "state-projection")
+RUBRIC = json.loads(
+    (Path(__file__).resolve().parent / "expected" / "rubric.json").read_text(
+        encoding="utf-8"
+    )
+)
 
 
 class AggregateResultsTest(unittest.TestCase):
+    def rubric_items(self, task: str) -> list[dict[str, object]]:
+        return [
+            {
+                "criterion_id": criterion["id"],
+                "score": criterion["points"],
+                "max_score": criterion["points"],
+                "passed": True,
+            }
+            for criterion in RUBRIC["tasks"][task]["criteria"]
+        ]
+
     def make_matrix(self, root: Path) -> Path:
         private = root / "runs" / "private" / "macos"
         for repeat in range(1, 4):
@@ -59,6 +75,7 @@ class AggregateResultsTest(unittest.TestCase):
                         "condition": condition,
                         "correctness_score": 5,
                         "correctness_max": 5,
+                        "rubric_items": self.rubric_items(task),
                         "protocol_valid": True,
                         "unsupported_claims": 0,
                         "irrelevant_facts": 0,
@@ -194,6 +211,56 @@ class AggregateResultsTest(unittest.TestCase):
             metadata.symlink_to(target)
             with self.assertRaisesRegex(SystemExit, "regular file"):
                 self.aggregate(root)
+
+    def test_independently_rejects_tampered_saved_rubric_items(self) -> None:
+        def missing(score: dict[str, object]) -> None:
+            score["rubric_items"] = score["rubric_items"][:-1]  # type: ignore[index]
+
+        def duplicate(score: dict[str, object]) -> None:
+            items = score["rubric_items"]  # type: ignore[assignment]
+            items[1] = dict(items[0])  # type: ignore[index]
+
+        def reordered(score: dict[str, object]) -> None:
+            items = score["rubric_items"]  # type: ignore[assignment]
+            items[0], items[1] = items[1], items[0]  # type: ignore[index]
+
+        def range_error(score: dict[str, object]) -> None:
+            score["rubric_items"][0]["score"] = 2  # type: ignore[index]
+
+        def total_mismatch(score: dict[str, object]) -> None:
+            score["rubric_items"][0]["score"] = 0  # type: ignore[index]
+            score["rubric_items"][0]["passed"] = False  # type: ignore[index]
+
+        def max_mismatch(score: dict[str, object]) -> None:
+            score["rubric_items"][0]["max_score"] = 2  # type: ignore[index]
+
+        def passed_mismatch(score: dict[str, object]) -> None:
+            score["rubric_items"][0]["passed"] = False  # type: ignore[index]
+
+        def unhashable_id(score: dict[str, object]) -> None:
+            score["rubric_items"][0]["criterion_id"] = ["bad"]  # type: ignore[index]
+
+        mutations = (
+            missing,
+            duplicate,
+            reordered,
+            range_error,
+            total_mismatch,
+            max_mismatch,
+            passed_mismatch,
+            unhashable_id,
+        )
+        for mutate in mutations:
+            with self.subTest(mutation=mutate.__name__), tempfile.TemporaryDirectory() as temporary:
+                root = Path(temporary)
+                private = self.make_matrix(root)
+                run_dir = private / "formal-01-active-decision-source-only"
+                score_path = run_dir / "score.json"
+                score = json.loads(score_path.read_text(encoding="utf-8"))
+                mutate(score)
+                score_path.write_text(json.dumps(score) + "\n", encoding="utf-8")
+                with self.assertRaisesRegex(SystemExit, "rubric"):
+                    self.aggregate(root)
 
 
 if __name__ == "__main__":
