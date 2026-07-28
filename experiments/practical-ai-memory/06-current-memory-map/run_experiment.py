@@ -969,6 +969,7 @@ def macos_command_allowlist(codex_executable: str) -> tuple[Path, ...]:
         raise RuntimeError("unable to resolve packaged codex executable")
     native_codex = candidates[0].resolve(strict=True)
     native_root = native_codex.parent.parent
+    code_mode_host = native_codex.parent / "codex-code-mode-host"
     packaged_zsh = native_root / "codex-resources" / "zsh" / "bin" / "zsh"
     bundled_rg = native_root / "codex-path" / "rg"
     read_tools = ("cat", "sed", "nl")
@@ -982,6 +983,7 @@ def macos_command_allowlist(codex_executable: str) -> tuple[Path, ...]:
         launcher,
         Path(node),
         native_codex,
+        code_mode_host,
         Path("/usr/bin/env"),
         packaged_zsh,
         *resolved_read_tools,

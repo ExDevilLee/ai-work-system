@@ -313,13 +313,15 @@ class CodexExecutableTest(unittest.TestCase):
             )
             native.parent.mkdir(parents=True)
             native.write_text("native\n", encoding="utf-8")
+            host = native.parent / "codex-code-mode-host"
+            host.write_text("host\n", encoding="utf-8")
             zsh = native.parent.parent / "codex-resources/zsh/bin/zsh"
             zsh.parent.mkdir(parents=True)
             zsh.write_text("zsh\n", encoding="utf-8")
             rg = native.parent.parent / "codex-path/rg"
             rg.parent.mkdir(parents=True)
             rg.write_text("rg\n", encoding="utf-8")
-            for path in (launcher, native, zsh, rg):
+            for path in (launcher, native, host, zsh, rg):
                 path.chmod(0o755)
             policy = root / "policy.sb"
             with patch("run_experiment.shutil.which", side_effect=lambda name: {
@@ -331,7 +333,7 @@ class CodexExecutableTest(unittest.TestCase):
                 write_macos_execution_policy(policy, str(launcher))
                 allowed = macos_command_allowlist(str(launcher))
             text = policy.read_text(encoding="utf-8")
-            self.assertEqual(len(allowed), 9)
+            self.assertEqual(len(allowed), 10)
             self.assertIn("(deny process-exec)", text)
             self.assertIn('(literal "/bin/cat")', text)
             self.assertIn('(literal "/usr/bin/sed")', text)
