@@ -445,7 +445,15 @@ def command_audit_shape(item: object, workspace: Path) -> str:
         if re.search(r"(?:;|&&|\|\|)", inner):
             executable = "shell-chain"
         else:
-            executable = "shell-wrapper"
+            try:
+                inner_tokens = shlex.split(inner, posix=True)
+            except ValueError:
+                executable = "shell-wrapper-unparseable"
+            else:
+                inner_executable = (
+                    Path(inner_tokens[0]).name.casefold() if inner_tokens else "empty"
+                )
+                executable = f"shell-wrapper-{inner_executable}"
     return f"{executable}:{classify_command_execution(item, workspace)}"
 
 

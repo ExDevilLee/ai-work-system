@@ -633,7 +633,9 @@ class WorkspaceMetricCoverageTest(unittest.TestCase):
 
             self.assertEqual(classify_command_execution(wrapped, workspace), "workspace")
             self.assertEqual(classify_command_execution(chained, workspace), "external")
-            self.assertEqual(command_audit_shape(wrapped, workspace), "shell-wrapper:workspace")
+            self.assertEqual(
+                command_audit_shape(wrapped, workspace), "shell-wrapper-cat:workspace"
+            )
             self.assertEqual(command_audit_shape(chained, workspace), "shell-chain:external")
 
     def test_simple_cross_platform_relative_reads_are_workspace(self) -> None:
