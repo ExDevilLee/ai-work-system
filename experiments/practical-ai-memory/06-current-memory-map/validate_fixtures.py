@@ -3,12 +3,13 @@
 
 from __future__ import annotations
 
+import hashlib
 import json
 import os
 import re
 import unicodedata
 from collections import Counter
-from pathlib import Path
+from pathlib import Path, PurePosixPath, PureWindowsPath
 from typing import Any, Iterable
 
 from fixture_model import VALID_STATUSES, is_canonical_source, load_manifest
@@ -43,24 +44,44 @@ PROJECTION_RECORD_FIELDS = frozenset(
 LIFECYCLE_WORDS = (
     "active",
     "approved",
+    "approval",
+    "authorized",
     "current",
+    "currently",
+    "disagreement",
     "historical",
+    "incompatible",
     "old",
+    "isolated",
     "replacement",
     "replaced",
+    "replaces",
     "stable",
     "one-off",
     "superseded",
     "supersedes",
+    "supersession",
     "conflict",
     "conflicts-with",
     "pending",
     "unapproved",
+    "uncertain",
     "unresolved",
+    "uncertainty",
 )
 FLAT_INDEX_HEADING = "# Flat Record Index"
 FLAT_INDEX_HEADER = "| Title | Source | Summary | Updated At |"
 FLAT_INDEX_SEPARATOR = "| --- | --- | --- | --- |"
+PROTOCOL_PATHS = (
+    "prompts/active-decision.md",
+    "prompts/superseded-rule.md",
+    "prompts/unresolved-conflict.md",
+    "prompts/scope-boundary.md",
+    "prompts/pending-observation.md",
+    "fixtures/pilot-01/conditions/source-only/AGENTS.md",
+    "fixtures/pilot-01/conditions/flat-index/AGENTS.md",
+    "fixtures/pilot-01/conditions/state-projection/AGENTS.md",
+)
 
 _PRIVATE_PATTERNS = (
     ("POSIX user path", re.compile(r"/(?:Users|home)/[^/\s]+/")),
@@ -95,6 +116,21 @@ _PRIVATE_PATTERNS = (
 
 def _has_control_characters(value: str) -> bool:
     return any(ord(character) < 32 or ord(character) == 127 for character in value)
+
+
+def _is_safe_protocol_path(value: object) -> bool:
+    if not isinstance(value, str) or _has_control_characters(value):
+        return False
+    path = PurePosixPath(value)
+    windows_path = PureWindowsPath(value)
+    return (
+        bool(path.parts)
+        and "\\" not in value
+        and not path.is_absolute()
+        and not windows_path.drive
+        and not windows_path.anchor
+        and all(part not in {"", ".", ".."} for part in path.parts)
+    )
 
 
 def _has_symlink_component(path: Path, boundary: Path) -> bool:
@@ -186,7 +222,7 @@ def _normalize_text(value: str) -> str:
     return " ".join(normalized.split())
 
 
-def _contains_lifecycle_vocabulary(value: str) -> bool:
+def contains_lifecycle_vocabulary(value: str) -> bool:
     normalized = _normalize_text(value)
     for word in LIFECYCLE_WORDS:
         pattern = re.escape(word).replace(r"\-", r"[-_ ]")
@@ -260,7 +296,7 @@ def validate_flat_index(
         errors.append("flat index leaks status")
     if "action_boundary" in text.casefold() or "action boundary" in text.casefold():
         errors.append("flat index leaks action boundary")
-    if _contains_lifecycle_vocabulary(text):
+    if contains_lifecycle_vocabulary(text):
         errors.append("flat index leaks answer-bearing lifecycle vocabulary")
     if manifest is not None:
         expected = _flat_index_text(manifest)
@@ -423,6 +459,8 @@ def _validate_prompts(
             errors.append(f"prompt leaks expected answer term: {task_id}")
         if any(term in lowered for term in rubric_terms):
             errors.append(f"prompt leaks rubric ID or wording: {task_id}")
+        if contains_lifecycle_vocabulary(text):
+            errors.append(f"prompt leaks answer-bearing lifecycle vocabulary: {task_id}")
         if not re.findall(r"(?m)^\s*\d+\.\s+", text):
             errors.append(f"prompt must ask numbered questions: {task_id}")
         if "relative" not in lowered or "source" not in lowered or "actually" not in lowered:
@@ -577,6 +615,62 @@ def _validate_frozen_ids(
         errors.append(f"manifest must contain exactly {len(expected)} {label} IDs")
 
 
+def _validate_protocol_lock(
+    root: Path, fixture_root: Path, errors: list[str]
+) -> Path:
+    lock_path = fixture_root / "protocol-lock.json"
+    protocol_lock = _load_json(
+        lock_path,
+        "protocol lock",
+        errors,
+        symlink_boundary=fixture_root,
+    )
+    if protocol_lock is None:
+        return lock_path
+    if not isinstance(protocol_lock, dict):
+        errors.append("protocol lock must be a JSON object")
+        return lock_path
+
+    paths = tuple(protocol_lock)
+    valid_hash_paths: set[str] = set()
+    for path, expected_hash in protocol_lock.items():
+        if not _is_safe_protocol_path(path):
+            errors.append(f"unsafe protocol path: {path!r}")
+        if not isinstance(expected_hash, str) or not re.fullmatch(
+            r"[0-9a-f]{64}", expected_hash
+        ):
+            errors.append(f"malformed protocol hash: {path}")
+        else:
+            valid_hash_paths.add(path)
+    if set(paths) != set(PROTOCOL_PATHS) or len(paths) != len(PROTOCOL_PATHS):
+        errors.append("protocol lock must contain the exact protocol file set")
+
+    for relative_path in PROTOCOL_PATHS:
+        if relative_path not in valid_hash_paths:
+            continue
+        expected_hash = protocol_lock[relative_path]
+
+        target = root / relative_path
+        if _has_symlink_component(target, root):
+            errors.append(
+                f"symlinked fixture file is not allowed: protocol input {relative_path}"
+            )
+            continue
+        try:
+            if not target.is_file():
+                errors.append(f"missing protocol input: {relative_path}")
+                continue
+            actual_hash = hashlib.sha256(target.read_bytes()).hexdigest()
+        except (OSError, ValueError) as error:
+            errors.append(
+                f"cannot hash protocol input: {relative_path}: {type(error).__name__}"
+            )
+            continue
+        if actual_hash != expected_hash:
+            errors.append(f"protocol hash mismatch: {relative_path}")
+    return lock_path
+
+
 def _resolved_within(path: Path, boundary: Path) -> bool:
     try:
         return os.path.commonpath((str(path.resolve()), str(boundary.resolve()))) == str(
@@ -665,7 +759,7 @@ def validate(
             errors.append(f"record updated_at must use YYYY-MM-DD: {record_id}")
         filename = Path(source).stem
         if any(
-            isinstance(value, str) and _contains_lifecycle_vocabulary(value)
+            isinstance(value, str) and contains_lifecycle_vocabulary(value)
             for value in (filename, title, summary)
         ):
             errors.append(
@@ -751,6 +845,7 @@ def validate(
     )
     rubric_tasks = _validate_rubric(rubric_raw, errors)
     prompt_paths = _validate_prompts(root, answers, rubric_tasks, errors)
+    protocol_lock_path = _validate_protocol_lock(root, fixture_root, errors)
 
     generated_root = fixture_root / "generated"
     flat_index = generated_root / "flat-index.md"
@@ -767,7 +862,7 @@ def validate(
         else:
             errors.extend(validate_state_projection(projection, manifest, record_bodies))
 
-    privacy_paths = [manifest_path, answers_path, rubric_path]
+    privacy_paths = [manifest_path, protocol_lock_path, answers_path, rubric_path]
     privacy_paths.extend(actual_records)
     privacy_paths.extend(condition_paths)
     privacy_paths.extend(prompt_paths)

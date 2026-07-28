@@ -1,0 +1,10 @@
+{
+  "prompts/active-decision.md": "5d55e6cfb9e69f8b6629bb1f124fcc2854d980155e2ccfc3ebc5032e11483e49",
+  "prompts/superseded-rule.md": "80868da8f0c6b766c3dcc43fe38ce6f486fb0585919431a0138dcacf6e0ac21b",
+  "prompts/unresolved-conflict.md": "644ef80cd022a763f681567873982522c221fa3eaa3c2220b38774d88000cd4f",
+  "prompts/scope-boundary.md": "a2d877fbec84737a30bf0d5ac60583cbea9617652d2022d8093566f66808c2f9",
+  "prompts/pending-observation.md": "bd1bf1e2a2ffaff5efeec17df4730e601ef5ce8c7e59cc5c9d27a7d8f295b801",
+  "fixtures/pilot-01/conditions/source-only/AGENTS.md": "53c03f26b20b085937073c28ab8aacd8653f473e9f4cb930f7e9e53bcdb6950e",
+  "fixtures/pilot-01/conditions/flat-index/AGENTS.md": "6e394c392cb52bdcc4f8a207753546d552fd8847dc6160e6ab461a6d9fe5fc76",
+  "fixtures/pilot-01/conditions/state-projection/AGENTS.md": "cfc48987b0f2be8c120425ff55dd24bec21878d5cf88e1748340105fa1a976c6"
+}

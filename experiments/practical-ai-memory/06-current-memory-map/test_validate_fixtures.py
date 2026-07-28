@@ -1,12 +1,13 @@
 from __future__ import annotations
 
+import hashlib
 import json
 import shutil
 import tempfile
 import unittest
 from pathlib import Path
 
-from validate_fixtures import ROOT, validate
+from validate_fixtures import ROOT, contains_lifecycle_vocabulary, validate
 
 
 CONDITIONS = ("source-only", "flat-index", "state-projection")
@@ -17,27 +18,19 @@ TASKS = (
     "scope-boundary",
     "pending-observation",
 )
-LIFECYCLE_WORDS = (
-    "active",
-    "approved",
-    "current",
-    "historical",
-    "old",
-    "replacement",
-    "replaced",
-    "stable",
-    "one-off",
-    "superseded",
-    "supersedes",
-    "conflict",
-    "conflicts-with",
-    "pending",
-    "unapproved",
-    "unresolved",
-)
 FLAT_INDEX_HEADING = "# Flat Record Index"
 FLAT_INDEX_HEADER = "| Title | Source | Summary | Updated At |"
 FLAT_INDEX_SEPARATOR = "| --- | --- | --- | --- |"
+PROTOCOL_PATHS = (
+    "prompts/active-decision.md",
+    "prompts/superseded-rule.md",
+    "prompts/unresolved-conflict.md",
+    "prompts/scope-boundary.md",
+    "prompts/pending-observation.md",
+    "fixtures/pilot-01/conditions/source-only/AGENTS.md",
+    "fixtures/pilot-01/conditions/flat-index/AGENTS.md",
+    "fixtures/pilot-01/conditions/state-projection/AGENTS.md",
+)
 
 
 class FixtureValidationTest(unittest.TestCase):
@@ -91,12 +84,22 @@ class FixtureValidationTest(unittest.TestCase):
             {"schema_version": 1, "records": projection_records},
         )
 
+    def write_valid_protocol_lock(self, root: Path) -> None:
+        hashes = {
+            path: hashlib.sha256((root / path).read_bytes()).hexdigest()
+            for path in PROTOCOL_PATHS
+        }
+        self.write_json(
+            root / "fixtures" / "pilot-01" / "protocol-lock.json", hashes
+        )
+
     def validate_copy(
         self,
         mutation=None,
         *,
         require_generated: bool = False,
         with_generated: bool = False,
+        with_protocol_lock: bool = False,
     ) -> list[str]:
         with tempfile.TemporaryDirectory() as temporary_directory:
             root = Path(temporary_directory) / "fixture-copy"
@@ -104,6 +107,8 @@ class FixtureValidationTest(unittest.TestCase):
             self.copy_committed_fixture(root)
             if with_generated:
                 self.write_valid_generated(root)
+            if with_protocol_lock:
+                self.write_valid_protocol_lock(root)
             if mutation is not None:
                 mutation(root)
             return validate(root, require_generated=require_generated)
@@ -123,11 +128,101 @@ class FixtureValidationTest(unittest.TestCase):
                 record.get("summary", ""),
             )
             for value in values:
-                lowered = value.casefold()
                 self.assertFalse(
-                    any(word in lowered for word in LIFECYCLE_WORDS),
+                    contains_lifecycle_vocabulary(value),
                     f"answer-bearing lifecycle word in {value!r}",
                 )
+
+    def test_lifecycle_neutrality_uses_token_boundaries(self) -> None:
+        self.assertTrue(contains_lifecycle_vocabulary("the old instruction"))
+        self.assertTrue(contains_lifecycle_vocabulary("pending-validation"))
+        self.assertTrue(contains_lifecycle_vocabulary("incompatible observations"))
+        self.assertFalse(contains_lifecycle_vocabulary("Folder routing"))
+        self.assertFalse(contains_lifecycle_vocabulary("scaffold action"))
+
+    def test_committed_prompts_are_lifecycle_neutral(self) -> None:
+        for task in TASKS:
+            with self.subTest(task=task):
+                text = (ROOT / "prompts" / f"{task}.md").read_text(encoding="utf-8")
+                self.assertFalse(contains_lifecycle_vocabulary(text))
+
+    def test_prompt_byte_change_breaks_protocol_lock(self) -> None:
+        def mutate(root: Path) -> None:
+            path = root / "prompts" / "superseded-rule.md"
+            path.write_text(
+                path.read_text(encoding="utf-8") + "\nUse 30 days.\n",
+                encoding="utf-8",
+            )
+
+        errors = self.validate_copy(mutate, with_protocol_lock=True)
+        self.assertTrue(any("protocol hash mismatch" in error for error in errors))
+
+    def test_agents_byte_change_breaks_protocol_lock(self) -> None:
+        def mutate(root: Path) -> None:
+            path = (
+                root
+                / "fixtures"
+                / "pilot-01"
+                / "conditions"
+                / "source-only"
+                / "AGENTS.md"
+            )
+            path.write_text(
+                path.read_text(encoding="utf-8") + "\nPrefer one retry.\n",
+                encoding="utf-8",
+            )
+
+        errors = self.validate_copy(mutate, with_protocol_lock=True)
+        self.assertTrue(any("protocol hash mismatch" in error for error in errors))
+
+    def test_rejects_malformed_protocol_hash_without_throwing(self) -> None:
+        def mutate(root: Path) -> None:
+            path = root / "fixtures" / "pilot-01" / "protocol-lock.json"
+            protocol_lock = self.load_json(path)
+            protocol_lock[PROTOCOL_PATHS[0]] = "ABC123"
+            self.write_json(path, protocol_lock)
+
+        errors = self.validate_copy(mutate, with_protocol_lock=True)
+        self.assertTrue(any("malformed protocol hash" in error for error in errors))
+
+    def test_rejects_missing_and_extra_protocol_entries_without_throwing(self) -> None:
+        def mutate(root: Path) -> None:
+            path = root / "fixtures" / "pilot-01" / "protocol-lock.json"
+            protocol_lock = self.load_json(path)
+            del protocol_lock[PROTOCOL_PATHS[0]]
+            protocol_lock["../outside.md"] = "0" * 64
+            self.write_json(path, protocol_lock)
+
+        errors = self.validate_copy(mutate, with_protocol_lock=True)
+        self.assertTrue(any("exact protocol file set" in error for error in errors))
+        self.assertTrue(any("unsafe protocol path" in error for error in errors))
+
+    def test_rejects_malformed_hash_on_extra_protocol_entry(self) -> None:
+        def mutate(root: Path) -> None:
+            path = root / "fixtures" / "pilot-01" / "protocol-lock.json"
+            protocol_lock = self.load_json(path)
+            protocol_lock["prompts/extra.md"] = "ABC123"
+            self.write_json(path, protocol_lock)
+
+        errors = self.validate_copy(mutate, with_protocol_lock=True)
+        self.assertIn("malformed protocol hash: prompts/extra.md", errors)
+
+    def test_rejects_missing_protocol_lock(self) -> None:
+        def mutate(root: Path) -> None:
+            (root / "fixtures" / "pilot-01" / "protocol-lock.json").unlink()
+
+        errors = self.validate_copy(mutate, with_protocol_lock=True)
+        self.assertTrue(any("missing protocol lock" in error for error in errors))
+
+    def test_protocol_lock_is_privacy_scanned(self) -> None:
+        def mutate(root: Path) -> None:
+            path = root / "fixtures" / "pilot-01" / "protocol-lock.json"
+            protocol_lock = self.load_json(path)
+            protocol_lock[PROTOCOL_PATHS[0]] = "/Users/example/private"
+            self.write_json(path, protocol_lock)
+
+        errors = self.validate_copy(mutate, with_protocol_lock=True)
+        self.assertTrue(any("private-data marker" in error for error in errors))
 
     def test_rejects_prompt_condition_leak(self) -> None:
         def mutate(root: Path) -> None:
