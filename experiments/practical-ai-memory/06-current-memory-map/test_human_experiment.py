@@ -108,6 +108,14 @@ class HumanExperimentStoreTests(unittest.TestCase):
         self.assertNotIn("events", encoded)
         self.assertNotIn("path", encoded)
 
+    def test_browser_smoke_mode_never_serves_formal_packs(self):
+        smoke_store = HumanExperimentStore(Path(self.temp_dir.name) / "browser-smoke", mode="browser-smoke")
+        session = smoke_store.create_session()
+
+        self.assertEqual({item["pack_id"] for item in session["conditions"]}, {"browser-smoke-a", "browser-smoke-b"})
+        self.assertNotIn("pack-a", json.dumps(session))
+        self.assertNotIn("pack-b", json.dumps(session))
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -20,6 +20,7 @@ ROOT = Path(__file__).resolve().parent
 HUMAN_DIR = ROOT / "human"
 PACKS_DIR = ROOT / "human-fixtures"
 DEFAULT_RESULTS_DIR = ROOT / "human-results" / "private"
+SMOKE_RESULTS_DIR = DEFAULT_RESULTS_DIR / "browser-smoke"
 CONDITIONS = ("state-table", "visual-map")
 PRIVATE_FIELDS = {"name", "email", "username", "provider", "thread_id"}
 ABSOLUTE_PATH = re.compile(r"(?:^~[\\/]|^/[\\S]*|^[A-Za-z]:[\\/])")
@@ -31,6 +32,46 @@ class SubmissionError(ValueError):
 
 def _read_pack(name: str) -> dict[str, Any]:
     return json.loads((PACKS_DIR / name).read_text(encoding="utf-8"))
+
+
+def _smoke_pack(pack_id: str, prefix: str) -> dict[str, Any]:
+    records = [
+        {
+            "id": f"{prefix}-record-{index}",
+            "title": f"Smoke record {index}",
+            "detail": f"Synthetic browser-smoke record {index}.",
+            "status": status,
+            "scope": "synthetic",
+            "relations": [],
+            "source": f"synthetic/browser-smoke/{prefix}-{index}.md",
+        }
+        for index, status in enumerate(("active", "superseded", "conflict", "pending-validation", "active"), start=1)
+    ]
+    return {
+        "pack_id": pack_id,
+        "records": records,
+        "questions": [
+            {
+                "id": f"{prefix}-question-{index}",
+                "prompt": f"Select the marked browser-smoke answer for item {index}.",
+                "choices": [
+                    {"id": f"{prefix}-{index}-correct", "label": "Marked answer"},
+                    {"id": f"{prefix}-{index}-other-a", "label": "Other answer A"},
+                    {"id": f"{prefix}-{index}-other-b", "label": "Other answer B"},
+                ],
+                "correct_choice": f"{prefix}-{index}-correct",
+            }
+            for index in range(1, 6)
+        ],
+    }
+
+
+def _packs_for_mode(mode: str) -> tuple[dict[str, Any], dict[str, Any]]:
+    if mode == "formal":
+        return _read_pack("pack-a.json"), _read_pack("pack-b.json")
+    if mode == "browser-smoke":
+        return _smoke_pack("browser-smoke-a", "smoke-a"), _smoke_pack("browser-smoke-b", "smoke-b")
+    raise ValueError("unsupported human experiment mode")
 
 
 def _sanitize_pack(pack: dict[str, Any]) -> dict[str, Any]:
@@ -67,10 +108,10 @@ def _require_exact_keys(value: dict[str, Any], allowed: set[str], context: str) 
 
 
 class HumanExperimentStore:
-    def __init__(self, results_dir: Path = DEFAULT_RESULTS_DIR):
+    def __init__(self, results_dir: Path = DEFAULT_RESULTS_DIR, mode: str = "formal"):
         self.results_dir = results_dir.resolve()
         self.results_dir.mkdir(parents=True, exist_ok=True)
-        self._packs = {pack["pack_id"]: pack for pack in (_read_pack("pack-a.json"), _read_pack("pack-b.json"))}
+        self._packs = {pack["pack_id"]: pack for pack in _packs_for_mode(mode)}
         self._sessions: dict[str, dict[str, Any]] = {}
 
     def create_session(self) -> dict[str, Any]:
@@ -230,6 +271,9 @@ class HumanExperimentHandler(BaseHTTPRequestHandler):
             self.send_header("Content-Length", str(len(page)))
             self.end_headers()
             self.wfile.write(page)
+        elif self.path == "/favicon.ico":
+            self.send_response(HTTPStatus.NO_CONTENT)
+            self.end_headers()
         elif self.path == "/human/app.js":
             self._static("app.js", "text/javascript; charset=utf-8")
         elif self.path == "/human/styles.css":
@@ -269,8 +313,13 @@ class HumanExperimentHandler(BaseHTTPRequestHandler):
             self._json(HTTPStatus.BAD_REQUEST, {"error": str(error)})
 
 
-def serve(port: int, results_dir: Path = DEFAULT_RESULTS_DIR) -> None:
-    handler = type("ConfiguredHumanExperimentHandler", (HumanExperimentHandler,), {"store": HumanExperimentStore(results_dir)})
+def serve(port: int, results_dir: Path | None = None, mode: str = "formal") -> None:
+    resolved_results_dir = results_dir or (SMOKE_RESULTS_DIR if mode == "browser-smoke" else DEFAULT_RESULTS_DIR)
+    handler = type(
+        "ConfiguredHumanExperimentHandler",
+        (HumanExperimentHandler,),
+        {"store": HumanExperimentStore(resolved_results_dir, mode=mode)},
+    )
     server = ThreadingHTTPServer(("127.0.0.1", port), handler)
     print(f"human experiment listening on http://127.0.0.1:{port}")
     server.serve_forever()
@@ -279,5 +328,7 @@ def serve(port: int, results_dir: Path = DEFAULT_RESULTS_DIR) -> None:
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Run the local synthetic human experiment.")
     parser.add_argument("--port", type=int, default=8765)
+    parser.add_argument("--mode", choices=("formal", "browser-smoke"), default="formal")
+    parser.add_argument("--results-dir", type=Path)
     args = parser.parse_args()
-    serve(args.port)
+    serve(args.port, args.results_dir, mode=args.mode)

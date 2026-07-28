@@ -5,6 +5,7 @@
 }
 
 * { box-sizing: border-box; }
+[hidden] { display: none !important; }
 body { margin: 0; }
 button, input { font: inherit; }
 button { border: 1px solid #1f6b4f; border-radius: 5px; background: #1f6b4f; color: #fff; cursor: pointer; padding: 0.65rem 0.9rem; }
@@ -43,5 +44,6 @@ th { background: #eaf0ea; }
 @media (max-width: 640px) {
   .shell { width: min(100% - 1.25rem, 1100px); padding-top: 1.25rem; }
   .topbar { align-items: start; flex-direction: column; }.status { text-align: left; }
+  .map { grid-template-columns: 1fr; min-width: 0; }
   .question-actions { align-items: stretch; flex-direction: column; }.question-actions button { width: 100%; }
 }
