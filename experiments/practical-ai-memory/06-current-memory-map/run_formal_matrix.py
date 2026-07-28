@@ -8,7 +8,7 @@ import subprocess
 import sys
 from pathlib import Path
 
-from matrix_support import is_complete_successful_run
+from matrix_support import expected_run_contract, is_complete_successful_run
 
 
 ROOT = Path(__file__).resolve().parent
@@ -56,7 +56,25 @@ def main() -> int:
         for task, condition in runs:
             run_name = f"{label}-{task}-{condition}"
             run_dir = ROOT / "runs" / "private" / args.platform_tag / run_name
-            if is_complete_successful_run(run_dir):
+            try:
+                expected = expected_run_contract(
+                    ROOT,
+                    run_name=run_name,
+                    fixture_set=args.fixture_set,
+                    task=task,
+                    condition=condition,
+                    platform=args.platform_tag,
+                    model=args.model,
+                    reasoning_effort=args.reasoning_effort,
+                )
+            except (OSError, ValueError) as error:
+                print(
+                    f"STOP expected-run contract failed: {run_name}: "
+                    f"{type(error).__name__}",
+                    file=sys.stderr,
+                )
+                return 1
+            if is_complete_successful_run(run_dir, expected):
                 print(f"SKIP {run_name}", flush=True)
                 skipped += 1
                 continue
@@ -85,7 +103,7 @@ def main() -> int:
             if result.returncode != 0:
                 print(f"STOP failed run: {run_name}", file=sys.stderr)
                 return result.returncode
-            if not is_complete_successful_run(run_dir):
+            if not is_complete_successful_run(run_dir, expected):
                 print(f"STOP incomplete successful run: {run_name}", file=sys.stderr)
                 return 1
             completed += 1
