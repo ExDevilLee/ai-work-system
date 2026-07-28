@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import sys
 import unittest
 from argparse import Namespace
 from collections import Counter
@@ -11,7 +12,7 @@ from tempfile import TemporaryDirectory
 from unittest.mock import patch
 
 from matrix_support import ExpectedRun
-from run_pilot_matrix import SCHEDULE, main
+from run_pilot_matrix import SCHEDULE, main, parse_args
 
 
 TASKS = {
@@ -43,6 +44,14 @@ class PilotScheduleTest(unittest.TestCase):
             for condition in conditions
         ]
         self.assertEqual(len(names), len(set(names)))
+
+    def test_pilot_label_rejects_path_escape(self) -> None:
+        for label in ("../pilot", "pilot/one", r"pilot\one", " pilot-01"):
+            with self.subTest(label=label), patch.object(
+                sys, "argv", ["run_pilot_matrix.py", "--label", label]
+            ):
+                with self.assertRaises(SystemExit):
+                    parse_args()
 
     def test_zero_exit_without_complete_evidence_stops_matrix(self) -> None:
         args = Namespace(

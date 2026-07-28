@@ -19,14 +19,19 @@ from run_experiment import (
     adjusted_mixed_workspace_bytes,
     assemble_fixture,
     build_codex_command,
+    classify_command_execution,
+    classify_mcp_tool_call,
+    ensure_contained_path,
     has_unmeasured_mcp_tool_calls,
     mcp_workspace_metrics,
     main,
+    parse_args,
     resident_instruction_bytes,
     resolve_codex_executable,
     runtime_tool_access_count,
     run_utf8_command,
     tree_checksum,
+    validate_path_identifier,
 )
 
 
@@ -94,6 +99,51 @@ class FixtureAssemblyTest(unittest.TestCase):
             self.assertFalse(destination.exists())
 
 
+class PathContainmentTest(unittest.TestCase):
+    def test_rejects_unsafe_path_identifiers(self) -> None:
+        for value in (
+            "",
+            "../pilot",
+            "pilot/one",
+            r"pilot\one",
+            "/absolute",
+            "C:\\absolute",
+            "pilot one",
+            " pilot",
+            "pilot ",
+            "pilot\nnext",
+        ):
+            with self.subTest(value=repr(value)), self.assertRaises(ValueError):
+                validate_path_identifier(value)
+
+    def test_accepts_frozen_identifier_shape(self) -> None:
+        self.assertEqual(validate_path_identifier("pilot-01_v2"), "pilot-01_v2")
+
+    def test_rejects_symlink_ancestor_and_escape(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            root = Path(temporary_directory) / "root"
+            external = Path(temporary_directory) / "external"
+            root.mkdir()
+            external.mkdir()
+            (root / "linked").symlink_to(external, target_is_directory=True)
+            with self.assertRaisesRegex(ValueError, "symlink"):
+                ensure_contained_path(root / "linked" / "item.md", root)
+            with self.assertRaisesRegex(ValueError, "escapes"):
+                ensure_contained_path(root.parent / "outside.md", root)
+
+    def test_cli_rejects_fixture_and_label_escape(self) -> None:
+        cases = (
+            ["run_experiment.py", "../condition"],
+            ["run_experiment.py", "source-only", "--fixture-set", "../pilot"],
+            ["run_experiment.py", "source-only", "--label", "pilot/escape"],
+            ["run_experiment.py", "source-only", "--task", "../prompt"],
+        )
+        for argv in cases:
+            with self.subTest(argv=argv), patch.object(sys, "argv", argv):
+                with self.assertRaises(SystemExit):
+                    parse_args()
+
+
 class MetadataPrivacyTest(unittest.TestCase):
     def test_emitted_metadata_has_no_provider_field(self) -> None:
         with tempfile.TemporaryDirectory() as temporary_directory:
@@ -112,6 +162,8 @@ class MetadataPrivacyTest(unittest.TestCase):
             (root / "prompts" / "active-decision.md").write_text(
                 "Answer the frozen task.\n", encoding="utf-8"
             )
+            external = root / "outside.md"
+            external.write_text("outside\n", encoding="utf-8")
             args = Namespace(
                 condition="source-only",
                 label="pilot-privacy",
@@ -127,11 +179,25 @@ class MetadataPrivacyTest(unittest.TestCase):
             ) -> CompletedProcess[str]:
                 output_path = Path(command[command.index("--output-last-message") + 1])
                 output_path.write_text("synthetic answer\n", encoding="utf-8")
-                stdout = json.dumps(
-                    {
-                        "type": "turn.completed",
-                        "usage": {"input_tokens": 1, "output_tokens": 1},
-                    }
+                stdout = "\n".join(
+                    (
+                        json.dumps(
+                            {
+                                "type": "item.completed",
+                                "item": {
+                                    "type": "command_execution",
+                                    "command": f'cat "{external}"',
+                                    "aggregated_output": "outside\n",
+                                },
+                            }
+                        ),
+                        json.dumps(
+                            {
+                                "type": "turn.completed",
+                                "usage": {"input_tokens": 1, "output_tokens": 1},
+                            }
+                        ),
+                    )
                 ) + "\n"
                 return CompletedProcess(command, 0, stdout=stdout, stderr="")
 
@@ -144,7 +210,7 @@ class MetadataPrivacyTest(unittest.TestCase):
                 patch("run_experiment.run_utf8_command", side_effect=fake_codex_run),
             ):
                 with redirect_stdout(io.StringIO()):
-                    self.assertEqual(main(), 0)
+                    self.assertEqual(main(), 2)
 
             metadata_path = (
                 root
@@ -153,6 +219,12 @@ class MetadataPrivacyTest(unittest.TestCase):
             )
             metadata = json.loads(metadata_path.read_text(encoding="utf-8"))
             self.assertFalse(any("provider" in key.lower() for key in metadata))
+            self.assertFalse(metadata["protocol_environment_isolated"])
+            self.assertFalse(metadata["workspace_metric_coverage_complete"])
+            self.assertFalse(metadata["workspace_output_bytes_reliable"])
+            self.assertEqual(metadata["runtime_tool_access_calls"], 1)
+            self.assertEqual(metadata["workspace_metric_unmeasured_tool_calls"], 1)
+            self.assertNotIn(str(external), json.dumps(metadata))
 
 
 class TreeChecksumTest(unittest.TestCase):
@@ -275,7 +347,7 @@ class WorkspaceMetricCoverageTest(unittest.TestCase):
                         "type": "mcp_tool_call",
                         "server": "node_repl",
                         "tool": "js",
-                        "arguments": {"code": "read PROJECT_NOTES.md"},
+                        "arguments": {"code": "fs.readFile('PROJECT_NOTES.md')"},
                         "result": {
                             "content": [{"type": "text", "text": "fixture notes\n"}]
                         },
@@ -316,7 +388,11 @@ class WorkspaceMetricCoverageTest(unittest.TestCase):
                         "server": "node_repl",
                         "tool": "js",
                         "arguments": {
-                            "code": "read(root + '/references/' + fileName)"
+                            "code": (
+                                "const root = process.cwd(); "
+                                "fs.readFile(root + '/references/checklist.md'); "
+                                "fs.readFile(root + '/references/policy.md')"
+                            )
                         },
                         "result": {
                             "content": [{"type": "text", "text": result_text}]
@@ -353,7 +429,7 @@ class WorkspaceMetricCoverageTest(unittest.TestCase):
                         "type": "mcp_tool_call",
                         "server": "node_repl",
                         "tool": "js",
-                        "arguments": {"code": "read selected lines"},
+                        "arguments": {"code": "fs.readFile('observation.md')"},
                         "result": {
                             "content": [{"type": "text", "text": result_text}]
                         },
@@ -391,7 +467,7 @@ class WorkspaceMetricCoverageTest(unittest.TestCase):
                         "type": "mcp_tool_call",
                         "server": "node_repl",
                         "tool": "js",
-                        "arguments": {"code": "fs.readFile(target)"},
+                        "arguments": {"code": "fs.readFile('decision.md')"},
                         "result": {
                             "content": [{"type": "text", "text": result_text}]
                         },
@@ -426,7 +502,7 @@ class WorkspaceMetricCoverageTest(unittest.TestCase):
                         "type": "mcp_tool_call",
                         "server": "node_repl",
                         "tool": "js",
-                        "arguments": {"code": "fs.readdir(target)"},
+                        "arguments": {"code": "fs.readdir('records')"},
                         "result": {
                             "content": [{"type": "text", "text": result_text}]
                         },
@@ -519,34 +595,152 @@ class WorkspaceMetricCoverageTest(unittest.TestCase):
 
             self.assertEqual(mcp_workspace_metrics(events, fixture), (0, 0, 1))
 
-    def test_detects_runtime_access_in_command_and_mcp_events(self) -> None:
-        events = [
-            {
-                "type": "item.completed",
-                "item": {
-                    "type": "command_execution",
-                    "command": r'type "C:\\Users\\example\\.codex\\plugins\\skill.md"',
+    def test_command_external_absolute_path_is_not_workspace(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            root = Path(temporary_directory)
+            workspace = root / "workspace"
+            workspace.mkdir()
+            external = root / "outside.md"
+            external.write_text("outside", encoding="utf-8")
+            item = {"type": "command_execution", "command": f'cat "{external}"'}
+
+            self.assertEqual(classify_command_execution(item, workspace), "external")
+
+    def test_command_relative_read_is_workspace(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            workspace = Path(temporary_directory) / "workspace"
+            (workspace / "records").mkdir(parents=True)
+            item = {"type": "command_execution", "command": "cat records/item.md"}
+
+            self.assertEqual(classify_command_execution(item, workspace), "workspace")
+
+    def test_command_mixed_workspace_and_external_read_is_external(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            root = Path(temporary_directory)
+            workspace = root / "workspace"
+            workspace.mkdir()
+            external = root / "outside.md"
+            item = {
+                "type": "command_execution",
+                "command": f'cat records/item.md "{external}"',
+            }
+
+            self.assertEqual(classify_command_execution(item, workspace), "external")
+
+    def test_mcp_mixed_workspace_and_external_read_fails_closed(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            root = Path(temporary_directory)
+            workspace = root / "workspace"
+            fixture = workspace
+            (fixture / "records").mkdir(parents=True)
+            body = "frozen fixture body with enough bytes for matching\n"
+            (fixture / "records/item.md").write_text(body, encoding="utf-8")
+            external = root / "outside.md"
+            external.write_text("outside", encoding="utf-8")
+            item = {
+                "type": "mcp_tool_call",
+                "server": "node_repl",
+                "tool": "js",
+                "arguments": {
+                    "code": (
+                        "fs.readFile('records/item.md'); "
+                        f"fs.readFile('{external.as_posix()}')"
+                    )
                 },
-            },
-            {
-                "type": "item.completed",
-                "item": {
-                    "type": "mcp_tool_call",
-                    "arguments": {
-                        "path": "/Users/example/.codex/plugins/example/SKILL.md"
+                "result": {"content": [{"type": "text", "text": body}]},
+            }
+
+            self.assertEqual(
+                classify_mcp_tool_call(item, fixture, workspace),
+                ("external", None),
+            )
+
+    def test_unknown_mcp_tool_with_external_path_is_external(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            root = Path(temporary_directory)
+            workspace = root / "workspace"
+            workspace.mkdir()
+            external = root / "outside.md"
+            item = {
+                "type": "mcp_tool_call",
+                "server": "unrecognized",
+                "tool": "custom",
+                "arguments": {"target": external.as_posix()},
+                "result": {"content": [{"type": "text", "text": "outside"}]},
+            }
+
+            self.assertEqual(
+                classify_mcp_tool_call(item, workspace, workspace),
+                ("external", None),
+            )
+
+    def test_mcp_safe_read_plus_unbound_target_is_unknown(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            workspace = Path(temporary_directory) / "workspace"
+            (workspace / "records").mkdir(parents=True)
+            body = "frozen fixture body with enough bytes for matching\n"
+            (workspace / "records/item.md").write_text(body, encoding="utf-8")
+            item = {
+                "type": "mcp_tool_call",
+                "server": "node_repl",
+                "tool": "js",
+                "arguments": {
+                    "code": (
+                        "fs.readFile('records/item.md'); "
+                        "fs.readFile(unknownTarget)"
+                    )
+                },
+                "result": {"content": [{"type": "text", "text": body}]},
+            }
+
+            self.assertEqual(
+                classify_mcp_tool_call(item, workspace, workspace),
+                ("unknown", None),
+            )
+
+    def test_mcp_relative_read_is_workspace(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            workspace = Path(temporary_directory) / "workspace"
+            (workspace / "records").mkdir(parents=True)
+            body = "frozen fixture body with enough bytes for matching\n"
+            (workspace / "records/item.md").write_text(body, encoding="utf-8")
+            item = {
+                "type": "mcp_tool_call",
+                "server": "node_repl",
+                "tool": "js",
+                "arguments": {"code": "fs.readFile('records/item.md')"},
+                "result": {"content": [{"type": "text", "text": body}]},
+            }
+
+            self.assertEqual(
+                classify_mcp_tool_call(item, workspace, workspace),
+                ("workspace", len(body.encode("utf-8"))),
+            )
+
+    def test_runtime_audit_rejects_external_and_accepts_relative(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            root = Path(temporary_directory)
+            workspace = root / "workspace"
+            workspace.mkdir()
+            external = root / "outside.md"
+            events = [
+                {
+                    "type": "item.completed",
+                    "item": {
+                        "type": "command_execution",
+                        "command": f'cat "{external}"',
                     },
                 },
-            },
-            {
-                "type": "item.completed",
-                "item": {
-                    "type": "command_execution",
-                    "command": "type memory\\MEMORY.md",
+                {
+                    "type": "item.completed",
+                    "item": {
+                        "type": "command_execution",
+                        "command": "cat records/item.md",
+                    },
                 },
-            },
-        ]
+            ]
 
-        self.assertEqual(runtime_tool_access_count(events), 2)
+            self.assertEqual(runtime_tool_access_count(events, workspace, workspace), 1)
 
 
 class ReliableOutputBytesTest(unittest.TestCase):

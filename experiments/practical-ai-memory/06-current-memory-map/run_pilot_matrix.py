@@ -9,6 +9,7 @@ import sys
 from pathlib import Path
 
 from matrix_support import expected_run_contract, is_complete_successful_run
+from run_experiment import argparse_path_identifier
 
 
 ROOT = Path(__file__).resolve().parent
@@ -25,9 +26,16 @@ SCHEDULE = (
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--label", default="pilot-01")
-    parser.add_argument("--fixture-set", default="pilot-01")
-    parser.add_argument("--platform-tag", choices=("macos", "win11"), default="macos")
+    parser.add_argument("--label", type=argparse_path_identifier, default="pilot-01")
+    parser.add_argument(
+        "--fixture-set", type=argparse_path_identifier, default="pilot-01"
+    )
+    parser.add_argument(
+        "--platform-tag",
+        type=argparse_path_identifier,
+        choices=("macos", "win11"),
+        default="macos",
+    )
     parser.add_argument("--model", default=MODEL)
     parser.add_argument("--reasoning-effort", default=REASONING_EFFORT)
     return parser.parse_args()
@@ -66,7 +74,7 @@ def main() -> int:
                 skipped += 1
                 continue
             if run_dir.exists():
-                print(f"STOP incomplete run directory: {run_dir}", file=sys.stderr)
+                print(f"STOP incomplete run directory: {run_name}", file=sys.stderr)
                 return 1
             command = [
                 sys.executable,

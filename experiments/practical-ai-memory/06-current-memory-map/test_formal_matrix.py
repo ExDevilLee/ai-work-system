@@ -16,6 +16,7 @@ from matrix_support import (
     expected_run_contract,
     is_complete_successful_run,
 )
+from run_experiment import tree_checksum
 from run_formal_matrix import SCHEDULE, main
 
 
@@ -182,6 +183,104 @@ class FormalScheduleTest(unittest.TestCase):
             (run_dir / "metadata.json").write_text("[]\n", encoding="utf-8")
 
             self.assertFalse(is_complete_successful_run(run_dir, self.EXPECTED))
+
+    def test_required_file_symlinks_cannot_resume(self) -> None:
+        for name in ("metadata.json", "prompt.md"):
+            with self.subTest(name=name), tempfile.TemporaryDirectory() as temporary_directory:
+                parent = Path(temporary_directory)
+                run_dir = parent / "run"
+                run_dir.mkdir()
+                self.write_complete_run(
+                    run_dir,
+                    self.EXPECTED,
+                    exit_code=0,
+                    usage={"input_tokens": 1},
+                )
+                target = parent / f"external-{name}"
+                target.write_bytes((run_dir / name).read_bytes())
+                (run_dir / name).unlink()
+                (run_dir / name).symlink_to(target)
+
+                self.assertFalse(is_complete_successful_run(run_dir, self.EXPECTED))
+
+    def test_fixture_snapshot_symlink_cannot_resume(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            parent = Path(temporary_directory)
+            run_dir = parent / "run"
+            run_dir.mkdir()
+            self.write_complete_run(
+                run_dir, self.EXPECTED, exit_code=0, usage={"input_tokens": 1}
+            )
+            external = parent / "external-snapshot"
+            external.mkdir()
+            (run_dir / "fixture-snapshot").rmdir()
+            (run_dir / "fixture-snapshot").symlink_to(
+                external, target_is_directory=True
+            )
+
+            self.assertFalse(is_complete_successful_run(run_dir, self.EXPECTED))
+
+    def test_fixture_internal_symlink_cannot_resume_even_with_matching_hash(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            parent = Path(temporary_directory)
+            run_dir = parent / "run"
+            run_dir.mkdir()
+            external = parent / "external.md"
+            external.write_text("synthetic external body\n", encoding="utf-8")
+            snapshot = run_dir / "fixture-snapshot"
+            snapshot.mkdir()
+            (snapshot / "linked.md").symlink_to(external)
+            identity = replace(
+                self.EXPECTED,
+                fixture_sha256=tree_checksum(snapshot),
+            )
+            (run_dir / "final.md").write_text("answer", encoding="utf-8")
+            (run_dir / "raw.jsonl").write_text("event", encoding="utf-8")
+            (run_dir / "stderr.log").write_text("", encoding="utf-8")
+            (run_dir / "prompt.md").write_text("prompt", encoding="utf-8")
+            metadata = {
+                "run_name": identity.run_name,
+                "fixture_set": identity.fixture_set,
+                "task": identity.task,
+                "condition": identity.condition,
+                "platform_tag": identity.platform,
+                "requested_model": identity.model,
+                "reasoning_effort": identity.reasoning_effort,
+                "fixture_sha256": identity.fixture_sha256,
+                "prompt_sha256": identity.prompt_sha256,
+                "exit_code": 0,
+                "usage": {"input_tokens": 1},
+                "protocol_environment_isolated": True,
+                "workspace_metric_coverage_complete": True,
+                "workspace_output_bytes_reliable": True,
+            }
+            (run_dir / "metadata.json").write_text(
+                json.dumps(metadata), encoding="utf-8"
+            )
+
+            self.assertFalse(is_complete_successful_run(run_dir, identity))
+
+    def test_run_directory_symlink_ancestor_cannot_resume(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            parent = Path(temporary_directory)
+            root = parent / "repo"
+            external_runs = parent / "external-runs"
+            root.mkdir()
+            external_runs.mkdir()
+            (root / "runs").symlink_to(external_runs, target_is_directory=True)
+            identity = replace(self.EXPECTED, evidence_root=root)
+            run_dir = (
+                root
+                / "runs/private"
+                / identity.platform
+                / identity.run_name
+            )
+            run_dir.mkdir(parents=True)
+            self.write_complete_run(
+                run_dir, identity, exit_code=0, usage={"input_tokens": 1}
+            )
+
+            self.assertFalse(is_complete_successful_run(run_dir, identity))
 
     def test_expected_contract_hashes_current_frozen_inputs(self) -> None:
         with tempfile.TemporaryDirectory() as temporary_directory:

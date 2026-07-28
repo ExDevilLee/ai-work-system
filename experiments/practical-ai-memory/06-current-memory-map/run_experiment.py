@@ -6,6 +6,8 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import ntpath
+import os
 import platform
 import re
 import shutil
@@ -22,6 +24,13 @@ from validate_fixtures import validate
 
 ROOT = Path(__file__).resolve().parent
 CONDITIONS = ("source-only", "flat-index", "state-projection")
+TASKS = (
+    "active-decision",
+    "superseded-rule",
+    "unresolved-conflict",
+    "scope-boundary",
+    "pending-observation",
+)
 CONDITION_VIEW = {
     "source-only": None,
     "flat-index": "flat-index.md",
@@ -41,6 +50,182 @@ NODE_REPL_FILE_MARKERS = (
 RUNTIME_PATH_PATTERN = re.compile(
     r"((?:[A-Za-z]:[\\/]|/)[^\s\"']*[\\/]\.codex[\\/][^\s\"']+)"
 )
+SAFE_IDENTIFIER_PATTERN = re.compile(r"[A-Za-z0-9][A-Za-z0-9._-]*\Z")
+ABSOLUTE_PATH_PATTERN = re.compile(
+    r"(?:[A-Za-z]:[\\/][^\s\"';|,)]+|(?<![A-Za-z0-9_.-])/(?:[^\s\"';|,)]+))"
+)
+QUOTED_VALUE_PATTERN = re.compile(r"[\"']([^\"']+)[\"']")
+COMMAND_FILE_MARKERS = (
+    "cat ",
+    "type ",
+    "get-content",
+    "get-childitem",
+    "dir ",
+    "find ",
+    "grep ",
+    "rg ",
+    "sed ",
+    "stat ",
+    "head ",
+    "tail ",
+    "wc ",
+    "readalltext",
+    "readallbytes",
+    "read_text",
+    "read_bytes",
+    "readfile",
+    "readdir",
+    "open(",
+    "fs.",
+)
+COMMAND_NON_FILE_PREFIXES = ("pwd", "echo ", "printf ", "whoami", "date", "get-location")
+DANGEROUS_PATH_MARKERS = (
+    "..",
+    "~",
+    "$home",
+    "$env:",
+    "%userprofile%",
+    "process.chdir",
+    "os.chdir",
+    "set-location",
+)
+
+
+def validate_path_identifier(value: str) -> str:
+    if (
+        not isinstance(value, str)
+        or value != value.strip()
+        or ".." in value
+        or not SAFE_IDENTIFIER_PATTERN.fullmatch(value)
+    ):
+        raise ValueError("unsafe path identifier")
+    return value
+
+
+def argparse_path_identifier(value: str) -> str:
+    try:
+        return validate_path_identifier(value)
+    except ValueError as error:
+        raise argparse.ArgumentTypeError(str(error)) from error
+
+
+def ensure_contained_path(
+    path: Path, boundary: Path, *, allow_missing: bool = True
+) -> Path:
+    """Reject lexical escapes and symlink ancestors without exposing paths."""
+    path = Path(os.path.abspath(path))
+    boundary = Path(os.path.abspath(boundary))
+    try:
+        relative = path.relative_to(boundary)
+    except ValueError as error:
+        raise ValueError("path escapes boundary") from error
+    current = boundary
+    for part in relative.parts:
+        if current.is_symlink():
+            raise ValueError("path contains symlink ancestor")
+        current = current / part
+    if current.is_symlink():
+        raise ValueError("path contains symlink ancestor")
+    try:
+        boundary_resolved = boundary.resolve(strict=True)
+        resolved = path.resolve(strict=not allow_missing)
+        resolved.relative_to(boundary_resolved)
+    except (FileNotFoundError, RuntimeError, ValueError) as error:
+        if allow_missing and isinstance(error, FileNotFoundError):
+            resolved = path.resolve(strict=False)
+            try:
+                resolved.relative_to(boundary_resolved)
+            except ValueError as nested:
+                raise ValueError("path escapes boundary") from nested
+        else:
+            raise ValueError("path escapes boundary") from error
+    return path
+
+
+def _absolute_paths(value: str) -> tuple[str, ...]:
+    paths = []
+    for match in ABSOLUTE_PATH_PATTERN.finditer(value):
+        prefix = value[: match.start()].rstrip()
+        if prefix.endswith(("+'", '+"', "+ '", '+ "')):
+            continue
+        paths.append(match.group(0))
+    return tuple(paths)
+
+
+def _absolute_path_is_within(path_text: str, workspace: Path) -> bool:
+    if re.match(r"^[A-Za-z]:[\\/]", path_text):
+        workspace_text = str(workspace).replace("/", "\\")
+        try:
+            return ntpath.commonpath((workspace_text, path_text)).casefold() == ntpath.normpath(
+                workspace_text
+            ).casefold()
+        except ValueError:
+            return False
+    try:
+        Path(path_text).resolve(strict=False).relative_to(
+            workspace.resolve(strict=False)
+        )
+        return True
+    except (OSError, RuntimeError, ValueError):
+        return False
+
+
+def _has_dangerous_relative_path(value: str) -> bool:
+    lowered = value.casefold()
+    return any(marker in lowered for marker in DANGEROUS_PATH_MARKERS)
+
+
+def _has_unproven_file_variable(value: str) -> bool:
+    for match in re.finditer(
+        r"(?:readfile|readdir|readtextfile|stat)\s*\(\s*([A-Za-z_$][A-Za-z0-9_$]*)\s*\)",
+        value,
+        flags=re.IGNORECASE,
+    ):
+        variable = match.group(1)
+        binding = re.search(
+            rf"(?:const|let|var)\s+{re.escape(variable)}\s*=\s*process\.cwd\(\)",
+            value,
+        )
+        if binding is None:
+            return True
+    return False
+
+
+def classify_command_execution(item: object, workspace: Path) -> str:
+    if not isinstance(item, dict):
+        return "unknown"
+    command = str(item.get("command", ""))
+    lowered = command.casefold()
+    if not any(marker in lowered for marker in COMMAND_FILE_MARKERS):
+        stripped = lowered.strip()
+        if any(stripped == prefix or stripped.startswith(prefix) for prefix in COMMAND_NON_FILE_PREFIXES):
+            return "non_workspace"
+        return "unknown"
+    absolute_paths = _absolute_paths(command)
+    if any(not _absolute_path_is_within(path, workspace) for path in absolute_paths):
+        return "external"
+    if _has_dangerous_relative_path(command):
+        return "unknown"
+    if re.search(r"(?:\$[A-Za-z_]\w*|%[A-Za-z_]\w*%)", command):
+        return "unknown"
+    if re.search(r"(?:^|[;&|])\s*cd\s+", lowered):
+        return "unknown"
+    if absolute_paths:
+        return "workspace"
+    quoted_values = QUOTED_VALUE_PATTERN.findall(command)
+    has_safe_relative = any(
+        value
+        and not value.startswith(("/", "~"))
+        and not re.match(r"^[A-Za-z]:[\\/]", value)
+        and not _has_dangerous_relative_path(value)
+        and ("/" in value or "\\" in value or "." in Path(value).name)
+        for value in quoted_values
+    )
+    if has_safe_relative or re.search(r"(?:^|\s)(?:\./)?[A-Za-z0-9_.-]+[/\\][^\s]+", command):
+        return "workspace"
+    if "get-childitem" in lowered or re.search(r"(?:^|\s)(?:rg|find|dir)\s+\.?(?:\s|$)", lowered):
+        return "workspace"
+    return "unknown"
 
 
 def is_runtime_path(value: object) -> bool:
@@ -48,20 +233,31 @@ def is_runtime_path(value: object) -> bool:
     return "/.codex/" in normalized
 
 
-def runtime_tool_access_count(events: Sequence[dict[str, object]]) -> int:
-    """Count completed tool events that expose user-level Codex runtime paths."""
-    return sum(
-        1
-        for event in events
-        if event.get("type") == "item.completed"
-        and isinstance(event.get("item"), dict)
-        and event["item"].get("type") in {"command_execution", "mcp_tool_call"}
-        and is_runtime_path(json.dumps(event["item"], ensure_ascii=False))
-    )
+def runtime_tool_access_count(
+    events: Sequence[dict[str, object]], workspace: Path, fixture: Path
+) -> int:
+    """Count external or unprovable completed file-access events."""
+    unsafe = 0
+    for event in events:
+        if event.get("type") != "item.completed":
+            continue
+        item = event.get("item")
+        if not isinstance(item, dict):
+            continue
+        if item.get("type") == "command_execution":
+            classification = classify_command_execution(item, workspace)
+        elif item.get("type") == "mcp_tool_call":
+            classification = classify_mcp_tool_call(item, fixture, workspace)[0]
+        else:
+            continue
+        if classification in {"external", "unknown"}:
+            unsafe += 1
+    return unsafe
 
 
 def has_unmeasured_mcp_tool_calls(
-    events: Sequence[dict[str, object]], fixture: Optional[Path] = None
+    events: Sequence[dict[str, object]], fixture: Optional[Path] = None,
+    workspace: Optional[Path] = None,
 ) -> bool:
     if fixture is None:
         return any(
@@ -71,7 +267,8 @@ def has_unmeasured_mcp_tool_calls(
             for event in events
         )
     return any(
-        classify_mcp_tool_call(event.get("item"), fixture)[0] == "unknown"
+        classify_mcp_tool_call(event.get("item"), fixture, workspace or fixture)[0]
+        in {"unknown", "external"}
         for event in events
         if event.get("type") == "item.completed"
     )
@@ -167,6 +364,15 @@ def mcp_arguments_text(item: object) -> str:
     return str(arguments or "")
 
 
+def mcp_argument_strings(item: object) -> tuple[str, ...]:
+    if not isinstance(item, dict):
+        return ()
+    arguments = item.get("arguments")
+    if isinstance(arguments, (dict, list, str)):
+        return tuple(structured_string_leaves(arguments))
+    return ()
+
+
 def fixture_path_markers(fixture: Optional[Path]) -> set[str]:
     if fixture is None or not fixture.is_dir():
         return set()
@@ -202,7 +408,7 @@ def result_matches_fixture_paths(
 
 
 def classify_mcp_tool_call(
-    item: object, fixture: Optional[Path]
+    item: object, fixture: Optional[Path], workspace: Optional[Path] = None
 ) -> tuple[str, Optional[int]]:
     """Classify MCP output without persisting tool arguments or absolute paths."""
     if not isinstance(item, dict):
@@ -215,39 +421,72 @@ def classify_mcp_tool_call(
     }:
         return "non_workspace", None
 
-    result_text = mcp_result_text(item)
-    result_candidates = tuple(structured_string_leaves(result_text or ""))
-    if result_text and result_contains_fixture_content(
-        result_candidates, fixture_texts(fixture)
-    ):
-        return "workspace", len(result_text.encode("utf-8"))
-    if result_text and result_matches_fixture_paths(result_candidates, fixture):
-        return "workspace", len(result_text.encode("utf-8"))
-
-    # A node_repl call that does not mention a fixture path is treated as
-    # external/non-workspace; a fixture reference without matching content is
-    # incomplete because the returned representation cannot be measured safely.
-    args_text = mcp_arguments_text(item).replace("\\", "/")
-    markers = fixture_path_markers(fixture)
-    has_file_operation = server == "node_repl" and any(
-        marker in args_text.lower() for marker in NODE_REPL_FILE_MARKERS
+    argument_values = mcp_argument_strings(item)
+    args_text = "\n".join(argument_values).replace("\\", "/")
+    tool_text = str(tool or "").casefold()
+    absolute_paths = _absolute_paths(args_text)
+    has_file_operation = (
+        server == "node_repl"
+        and any(marker in args_text.casefold() for marker in NODE_REPL_FILE_MARKERS)
+    ) or any(
+        marker in tool_text
+        for marker in ("read_file", "readfile", "readdir", "list_directory", "stat")
     )
-    if (
-        result_text
-        and has_file_operation
-        and markers
-        and any(marker in args_text for marker in markers)
-    ):
-        return "workspace", len(result_text.encode("utf-8"))
-    if markers and any(marker in args_text for marker in markers):
+    if not has_file_operation:
+        if absolute_paths:
+            if workspace is not None and all(
+                _absolute_path_is_within(path, workspace)
+                for path in absolute_paths
+            ):
+                return "unknown", None
+            return "external", None
+        if any(
+            marker in args_text
+            for marker in fixture_path_markers(fixture)
+        ):
+            return "unknown", None
+        return "non_workspace", None
+    if workspace is None:
         return "unknown", None
-    if has_file_operation:
+    if any(not _absolute_path_is_within(path, workspace) for path in absolute_paths):
+        return "external", None
+    if _has_dangerous_relative_path(args_text):
         return "unknown", None
-    return "non_workspace", None
+    if _has_unproven_file_variable(args_text):
+        return "unknown", None
+
+    markers = fixture_path_markers(fixture)
+    quoted_values = QUOTED_VALUE_PATTERN.findall(args_text)
+    has_safe_relative = any(
+        value
+        and not re.match(r"^[A-Za-z]:[\\/]", value)
+        and not value.startswith("/")
+        and not _has_dangerous_relative_path(value)
+        and (
+            "/" in value
+            or "\\" in value
+            or "." in Path(value).name
+            or value in {"records", "generated"}
+        )
+        for value in quoted_values
+    )
+    access_is_proven = (
+        bool(absolute_paths)
+        or "process.cwd" in args_text
+        or has_safe_relative
+        or any(marker in args_text for marker in markers)
+    )
+    if not access_is_proven:
+        return "unknown", None
+
+    result_text = mcp_result_text(item)
+    if result_text is None:
+        return "unknown", None
+    return "workspace", len(result_text.encode("utf-8"))
 
 
 def mcp_workspace_metrics(
-    events: Sequence[dict[str, object]], fixture: Path
+    events: Sequence[dict[str, object]], fixture: Path, workspace: Optional[Path] = None
 ) -> tuple[int, int, int]:
     workspace_calls = 0
     workspace_output_bytes = 0
@@ -258,11 +497,13 @@ def mcp_workspace_metrics(
         item = event.get("item")
         if not isinstance(item, dict) or item.get("type") != "mcp_tool_call":
             continue
-        classification, output_bytes = classify_mcp_tool_call(item, fixture)
+        classification, output_bytes = classify_mcp_tool_call(
+            item, fixture, workspace or fixture
+        )
         if classification == "workspace" and output_bytes is not None:
             workspace_calls += 1
             workspace_output_bytes += output_bytes
-        elif classification == "unknown":
+        elif classification in {"unknown", "external"}:
             unmeasured_calls += 1
     return workspace_calls, workspace_output_bytes, unmeasured_calls
 
@@ -286,6 +527,10 @@ def assemble_fixture(fixture_root: Path, condition: str, destination: Path) -> N
     """Build one condition snapshot without exposing unassigned generated views."""
     if condition not in CONDITION_VIEW:
         raise ValueError(f"unsupported condition: {condition}")
+    fixture_root = ensure_contained_path(
+        fixture_root, fixture_root, allow_missing=False
+    )
+    destination = ensure_contained_path(destination, destination.parent)
     if destination.exists():
         raise FileExistsError(f"fixture destination already exists: {destination}")
 
@@ -295,6 +540,8 @@ def assemble_fixture(fixture_root: Path, condition: str, destination: Path) -> N
     required = [records, instructions]
     if selected_view is not None:
         required.append(fixture_root / "generated" / selected_view)
+    for path in required:
+        ensure_contained_path(path, fixture_root, allow_missing=False)
     missing = [path.name for path in required if not path.exists()]
     if missing:
         raise FileNotFoundError("missing fixture input: " + ", ".join(missing))
@@ -397,14 +644,24 @@ def adjusted_mixed_workspace_bytes(item: dict[str, object]) -> Optional[int]:
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser()
-    parser.add_argument("condition", choices=CONDITIONS)
-    parser.add_argument("--label", default="pilot-01")
-    parser.add_argument("--fixture-set", default="pilot-01")
-    parser.add_argument("--task", default="static-reference")
+    parser.add_argument(
+        "condition", type=argparse_path_identifier, choices=CONDITIONS
+    )
+    parser.add_argument("--label", type=argparse_path_identifier, default="pilot-01")
+    parser.add_argument(
+        "--fixture-set", type=argparse_path_identifier, default="pilot-01"
+    )
+    parser.add_argument(
+        "--task",
+        type=argparse_path_identifier,
+        choices=TASKS,
+        default="active-decision",
+    )
     parser.add_argument("--model", help="Lock the model for formal repeated runs")
     parser.add_argument("--reasoning-effort", choices=("low", "medium", "high", "xhigh"))
     parser.add_argument(
         "--platform-tag",
+        type=argparse_path_identifier,
         choices=("macos", "win11"),
         default="macos",
         help="Keep evidence separated by execution platform",
@@ -414,9 +671,6 @@ def parse_args() -> argparse.Namespace:
 
 def main() -> int:
     args = parse_args()
-    fixture_errors = validate(ROOT, args.fixture_set, require_generated=True)
-    if fixture_errors:
-        raise SystemExit("fixture validation failed:\n" + "\n".join(fixture_errors))
     if not args.label.startswith("pilot"):
         missing = [
             name
@@ -429,25 +683,51 @@ def main() -> int:
         if missing:
             raise SystemExit("formal runs must set " + ", ".join(missing))
 
-    fixture_root = ROOT / "fixtures" / args.fixture_set
-    condition_fixture = fixture_root / "conditions" / args.condition
-    prompt_path = ROOT / "prompts" / f"{args.task}.md"
+    try:
+        fixture_root = ensure_contained_path(
+            ROOT / "fixtures" / args.fixture_set, ROOT, allow_missing=False
+        )
+        condition_fixture = ensure_contained_path(
+            fixture_root / "conditions" / args.condition,
+            fixture_root,
+            allow_missing=False,
+        )
+        prompt_path = ensure_contained_path(
+            ROOT / "prompts" / f"{args.task}.md", ROOT, allow_missing=False
+        )
+    except ValueError as error:
+        raise SystemExit(f"path containment failed: {type(error).__name__}") from error
+    fixture_errors = validate(ROOT, args.fixture_set, require_generated=True)
+    if fixture_errors:
+        raise SystemExit("fixture validation failed:\n" + "\n".join(fixture_errors))
     if not condition_fixture.is_dir():
-        raise SystemExit(f"condition fixture directory does not exist: {condition_fixture}")
+        raise SystemExit("condition fixture directory does not exist")
     if not prompt_path.is_file():
-        raise SystemExit(f"prompt does not exist: {prompt_path}")
+        raise SystemExit("prompt does not exist")
 
     codex_executable = resolve_codex_executable()
     started_at = datetime.now(timezone.utc)
     run_name = f"{args.label}-{args.task}-{args.condition}"
-    run_dir = ROOT / "runs" / "private" / args.platform_tag / run_name
+    try:
+        run_dir = ensure_contained_path(
+            ROOT / "runs" / "private" / args.platform_tag / run_name, ROOT
+        )
+    except ValueError as error:
+        raise SystemExit(f"run path containment failed: {type(error).__name__}") from error
 
     if run_dir.exists():
-        raise SystemExit(f"run directory already exists: {run_dir}")
+        raise SystemExit("run directory already exists")
     run_dir.mkdir(parents=True)
+    try:
+        ensure_contained_path(run_dir, ROOT, allow_missing=False)
+    except ValueError as error:
+        raise SystemExit("run path containment failed after creation") from error
     fixture = run_dir / "fixture-snapshot"
-    assemble_fixture(fixture_root, args.condition, fixture)
-    shutil.copy2(prompt_path, run_dir / "prompt.md")
+    try:
+        assemble_fixture(fixture_root, args.condition, fixture)
+        shutil.copy2(prompt_path, run_dir / "prompt.md")
+    except (OSError, ValueError) as error:
+        raise SystemExit(f"fixture assembly failed: {type(error).__name__}") from error
 
     with tempfile.TemporaryDirectory(prefix=f"current-map-poc-{args.condition}-") as temp:
         workspace = Path(temp) / "workspace"
@@ -474,32 +754,34 @@ def main() -> int:
         event["item"]
         for event in events
         if event.get("type") == "item.completed"
-        and event.get("item", {}).get("type") == "command_execution"
+        and isinstance(event.get("item"), dict)
+        and event["item"].get("type") == "command_execution"
     ]
-    fixture_markers = {
-        path.relative_to(fixture).as_posix()
-        for path in fixture.rglob("*")
-        if path.is_file()
-    }
-    fixture_markers.update(path.name for path in fixture.rglob("*") if path.is_file())
-    mixed_scope_commands = [
-        item
+    classified_commands = [
+        (item, classify_command_execution(item, workspace))
         for item in completed_commands
-        if is_runtime_path(item.get("command", ""))
-        and any(marker in item.get("command", "") for marker in fixture_markers)
     ]
     workspace_commands = [
-        item for item in completed_commands if not is_runtime_path(item.get("command", ""))
+        item for item, classification in classified_commands if classification == "workspace"
     ]
-    mixed_adjustments = [
-        adjusted_mixed_workspace_bytes(item) for item in mixed_scope_commands
+    unsafe_command_calls = [
+        item
+        for item, classification in classified_commands
+        if classification in {"external", "unknown"}
+    ]
+    external_command_calls = [
+        item
+        for item, classification in classified_commands
+        if classification == "external"
     ]
     usage_events = [event["usage"] for event in events if event.get("type") == "turn.completed"]
     mcp_workspace_calls, mcp_workspace_bytes, unmeasured_mcp_tool_calls = (
-        mcp_workspace_metrics(events, fixture)
+        mcp_workspace_metrics(events, fixture, workspace)
     )
-    runtime_access_calls = runtime_tool_access_count(events)
-    workspace_metric_coverage_complete = unmeasured_mcp_tool_calls == 0
+    runtime_access_calls = runtime_tool_access_count(events, workspace, fixture)
+    workspace_metric_coverage_complete = (
+        unmeasured_mcp_tool_calls == 0 and not unsafe_command_calls
+    )
 
     metadata = {
         "run_name": run_name,
@@ -533,23 +815,22 @@ def main() -> int:
         "usage": usage_events[-1] if usage_events else None,
         "completed_command_calls": len(completed_commands),
         "workspace_command_calls": (
-            len(workspace_commands) + len(mixed_scope_commands) + mcp_workspace_calls
+            len(workspace_commands) + mcp_workspace_calls
         ),
-        "mixed_scope_command_calls": len(mixed_scope_commands),
+        "mixed_scope_command_calls": len(external_command_calls),
         "workspace_mcp_tool_calls": mcp_workspace_calls,
         "workspace_mcp_output_bytes": mcp_workspace_bytes,
         "workspace_metric_coverage_complete": workspace_metric_coverage_complete,
-        "workspace_metric_unmeasured_tool_calls": unmeasured_mcp_tool_calls,
-        "workspace_output_bytes_reliable": workspace_metric_coverage_complete
-        and all(value is not None for value in mixed_adjustments),
-        "mixed_scope_adjusted_bytes": sum(
-            value for value in mixed_adjustments if value is not None
+        "workspace_metric_unmeasured_command_calls": len(unsafe_command_calls),
+        "workspace_metric_unmeasured_tool_calls": (
+            len(unsafe_command_calls) + unmeasured_mcp_tool_calls
         ),
+        "workspace_output_bytes_reliable": workspace_metric_coverage_complete,
+        "mixed_scope_adjusted_bytes": 0,
         "workspace_output_bytes": sum(
             len(item.get("aggregated_output", "").encode("utf-8"))
             for item in workspace_commands
         )
-        + sum(value for value in mixed_adjustments if value is not None)
         + mcp_workspace_bytes,
         "resident_instruction_bytes": resident_instruction_bytes(fixture),
         "command_shape": "codex exec -C <isolated-workspace> --skip-git-repo-check --sandbox read-only --ephemeral --json --config features.plugins=false --output-last-message <file> [--model <model>] [--config model_reasoning_effort=<effort>] -; prompt transport: UTF-8 stdin",

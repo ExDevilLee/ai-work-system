@@ -5,11 +5,14 @@ from __future__ import annotations
 
 import hashlib
 import json
+import os
+import stat
 import tempfile
 from dataclasses import dataclass
 from pathlib import Path
+from typing import Optional
 
-from run_experiment import assemble_fixture, tree_checksum
+from run_experiment import assemble_fixture, ensure_contained_path, tree_checksum
 
 
 REQUIRED_FILES = (
@@ -32,6 +35,7 @@ class ExpectedRun:
     reasoning_effort: str
     fixture_sha256: str
     prompt_sha256: str
+    evidence_root: Optional[Path] = None
 
 
 def expected_run_contract(
@@ -46,8 +50,13 @@ def expected_run_contract(
     reasoning_effort: str,
 ) -> ExpectedRun:
     """Derive resume identity from the current frozen fixture and prompt bytes."""
-    fixture_root = root / "fixtures" / fixture_set
-    prompt_path = root / "prompts" / f"{task}.md"
+    root = ensure_contained_path(root, root, allow_missing=False)
+    fixture_root = ensure_contained_path(
+        root / "fixtures" / fixture_set, root, allow_missing=False
+    )
+    prompt_path = ensure_contained_path(
+        root / "prompts" / f"{task}.md", root, allow_missing=False
+    )
     if not prompt_path.is_file():
         raise FileNotFoundError(f"missing frozen prompt for task: {task}")
     with tempfile.TemporaryDirectory(prefix="current-map-expected-") as temporary:
@@ -64,13 +73,68 @@ def expected_run_contract(
         reasoning_effort=reasoning_effort,
         fixture_sha256=fixture_sha256,
         prompt_sha256=hashlib.sha256(prompt_path.read_bytes()).hexdigest(),
+        evidence_root=root,
     )
 
 
-def is_complete_successful_run(run_dir: Path, expected: ExpectedRun) -> bool:
-    if not all((run_dir / name).is_file() for name in REQUIRED_FILES):
+def _is_regular_file(path: Path) -> bool:
+    try:
+        return stat.S_ISREG(path.lstat().st_mode)
+    except OSError:
         return False
-    if not (run_dir / "fixture-snapshot").is_dir():
+
+
+def _is_real_directory(path: Path) -> bool:
+    try:
+        return stat.S_ISDIR(path.lstat().st_mode)
+    except OSError:
+        return False
+
+
+def _tree_has_only_real_files(root: Path) -> bool:
+    if not _is_real_directory(root):
+        return False
+    try:
+        for directory, names, files in os.walk(root, followlinks=False):
+            directory_path = Path(directory)
+            if not _is_real_directory(directory_path):
+                return False
+            for name in names:
+                if not _is_real_directory(directory_path / name):
+                    return False
+            for name in files:
+                if not _is_regular_file(directory_path / name):
+                    return False
+    except OSError:
+        return False
+    return True
+
+
+def _run_location_is_safe(run_dir: Path, expected: ExpectedRun) -> bool:
+    if expected.evidence_root is None:
+        return True
+    expected_dir = (
+        expected.evidence_root
+        / "runs"
+        / "private"
+        / expected.platform
+        / expected.run_name
+    )
+    if Path(os.path.abspath(run_dir)) != Path(os.path.abspath(expected_dir)):
+        return False
+    try:
+        ensure_contained_path(run_dir, expected.evidence_root, allow_missing=False)
+    except ValueError:
+        return False
+    return True
+
+
+def is_complete_successful_run(run_dir: Path, expected: ExpectedRun) -> bool:
+    if not _run_location_is_safe(run_dir, expected):
+        return False
+    if not all(_is_regular_file(run_dir / name) for name in REQUIRED_FILES):
+        return False
+    if not _tree_has_only_real_files(run_dir / "fixture-snapshot"):
         return False
     try:
         if not (run_dir / "final.md").read_text(encoding="utf-8").strip():
