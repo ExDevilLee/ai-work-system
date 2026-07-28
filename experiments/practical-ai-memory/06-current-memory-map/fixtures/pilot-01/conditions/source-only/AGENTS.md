@@ -6,3 +6,5 @@
   guide current action.
 - Cite only the relative source paths actually used.
 - Do not use information outside this isolated synthetic workspace.
+- Use only `cat`, `sed`, `nl`, and `rg` for workspace navigation and reading.
+- Do not run Python, Node, shell scripts, or other interpreters.

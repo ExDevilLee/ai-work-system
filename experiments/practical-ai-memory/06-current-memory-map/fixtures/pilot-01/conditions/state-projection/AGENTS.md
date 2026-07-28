@@ -6,3 +6,5 @@
 - Stop and report an inconsistency if the projection and a source disagree.
 - Cite only the relative record source paths actually used.
 - Do not use information outside this isolated synthetic workspace.
+- Use only `cat`, `sed`, `nl`, and `rg` for workspace navigation and reading.
+- Do not run Python, Node, shell scripts, or other interpreters.

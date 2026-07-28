@@ -335,7 +335,7 @@ def _simple_command_targets(command: str) -> Optional[tuple[str, ...]]:
     if not tokens:
         return None
     executable = Path(tokens[0]).name.casefold().removesuffix(".exe")
-    if executable in {"cat", "type", "get-content"}:
+    if executable in {"cat", "type", "get-content", "nl"}:
         return _content_command_targets(executable, tokens)
     if executable == "rg":
         return _rg_command_targets(tokens)

@@ -4,7 +4,7 @@
   "prompts/unresolved-conflict.md": "644ef80cd022a763f681567873982522c221fa3eaa3c2220b38774d88000cd4f",
   "prompts/scope-boundary.md": "a2d877fbec84737a30bf0d5ac60583cbea9617652d2022d8093566f66808c2f9",
   "prompts/pending-observation.md": "bd1bf1e2a2ffaff5efeec17df4730e601ef5ce8c7e59cc5c9d27a7d8f295b801",
-  "fixtures/pilot-01/conditions/source-only/AGENTS.md": "53c03f26b20b085937073c28ab8aacd8653f473e9f4cb930f7e9e53bcdb6950e",
-  "fixtures/pilot-01/conditions/flat-index/AGENTS.md": "6e394c392cb52bdcc4f8a207753546d552fd8847dc6160e6ab461a6d9fe5fc76",
-  "fixtures/pilot-01/conditions/state-projection/AGENTS.md": "cfc48987b0f2be8c120425ff55dd24bec21878d5cf88e1748340105fa1a976c6"
+  "fixtures/pilot-01/conditions/source-only/AGENTS.md": "5a4a69a371f49cf511cb367155ca45c2aeb227877064dcc8d0ced6ef29706d61",
+  "fixtures/pilot-01/conditions/flat-index/AGENTS.md": "301e5a835403373fac721760f1f92fbda3a79c57fc12c64b36fc9983d9f5c0e4",
+  "fixtures/pilot-01/conditions/state-projection/AGENTS.md": "6f6d99ce5a37bf0a1a5e1200ba3ab0014f273c47a9b9a4e1e2a6b0ffac8dec07"
 }
