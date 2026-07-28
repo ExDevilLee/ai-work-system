@@ -15,6 +15,7 @@ import shutil
 import subprocess
 import tempfile
 import time
+from collections import Counter
 from collections.abc import Iterable
 from datetime import datetime, timezone
 from pathlib import Path
@@ -427,6 +428,25 @@ def classify_command_execution(item: object, workspace: Path) -> str:
             return "non_workspace"
         return "unknown"
     return "unknown"
+
+
+def command_audit_shape(item: object, workspace: Path) -> str:
+    """Return a privacy-preserving command shape for reproducible audit review."""
+    if not isinstance(item, dict):
+        return "invalid:unknown"
+    command = str(item.get("command", ""))
+    try:
+        tokens = shlex.split(command, posix=True)
+    except ValueError:
+        return "unparseable:unknown"
+    executable = Path(tokens[0]).name.casefold() if tokens else "empty"
+    if executable in {"sh", "bash", "zsh"} and len(tokens) == 3:
+        inner = tokens[2]
+        if re.search(r"(?:;|&&|\|\|)", inner):
+            executable = "shell-chain"
+        else:
+            executable = "shell-wrapper"
+    return f"{executable}:{classify_command_execution(item, workspace)}"
 
 
 def is_runtime_path(value: object) -> bool:
@@ -1112,6 +1132,9 @@ def main() -> int:
         (item, classify_command_execution(item, workspace))
         for item in completed_commands
     ]
+    command_audit_counts = Counter(
+        command_audit_shape(item, workspace) for item in completed_commands
+    )
     workspace_commands = [
         item for item, classification in classified_commands if classification == "workspace"
     ]
@@ -1166,6 +1189,7 @@ def main() -> int:
         "elapsed_seconds": elapsed_seconds,
         "usage": usage_events[-1] if usage_events else None,
         "completed_command_calls": len(completed_commands),
+        "command_audit_shape_counts": dict(sorted(command_audit_counts.items())),
         "workspace_command_calls": (
             len(workspace_commands) + mcp_workspace_calls
         ),

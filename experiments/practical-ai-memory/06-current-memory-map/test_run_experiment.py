@@ -20,6 +20,7 @@ from run_experiment import (
     assemble_fixture,
     build_codex_command,
     classify_command_execution,
+    command_audit_shape,
     classify_mcp_tool_call,
     command_output_bytes,
     ensure_contained_path,
@@ -632,6 +633,8 @@ class WorkspaceMetricCoverageTest(unittest.TestCase):
 
             self.assertEqual(classify_command_execution(wrapped, workspace), "workspace")
             self.assertEqual(classify_command_execution(chained, workspace), "external")
+            self.assertEqual(command_audit_shape(wrapped, workspace), "shell-wrapper:workspace")
+            self.assertEqual(command_audit_shape(chained, workspace), "shell-chain:external")
 
     def test_simple_cross_platform_relative_reads_are_workspace(self) -> None:
         with tempfile.TemporaryDirectory() as temporary_directory:
