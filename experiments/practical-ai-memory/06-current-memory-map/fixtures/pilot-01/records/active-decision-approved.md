@@ -1,0 +1,10 @@
+# Publication Gate Decision
+
+Record `AD-101` documents the approved operating decision for the synthetic
+Lattice Notes project.
+
+Every publication bundle must pass the Delta checklist before release. The
+project review group approved this decision on 2031-04-08, and no later
+approval has replaced it.
+
+This decision applies to the project publication workflow.

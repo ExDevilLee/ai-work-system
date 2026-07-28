@@ -1,0 +1,58 @@
+{
+  "per_task_max_score": 5,
+  "single_round_max_score": 25,
+  "formal_repeats": 3,
+  "formal_max_score": 75,
+  "tasks": {
+    "active-decision": {
+      "max_score": 5,
+      "criteria": [
+        {"id": "correct-fact-state", "points": 1, "description": "Identifies the approved decision and the unapproved later discussion correctly."},
+        {"id": "correct-current-action", "points": 1, "description": "Requires the Delta checklist for current publication."},
+        {"id": "correct-boundary", "points": 1, "description": "Preserves the approval boundary between a decision and a discussion."},
+        {"id": "no-prohibited-conclusion", "points": 1, "description": "Does not promote the newer discussion into a replacement rule."},
+        {"id": "correct-source-citation", "points": 1, "description": "Cites the actual approved-decision and discussion sources used."}
+      ]
+    },
+    "superseded-rule": {
+      "max_score": 5,
+      "criteria": [
+        {"id": "correct-fact-state", "points": 1, "description": "Identifies the 30-day replacement as current and the 14-day rule as historical."},
+        {"id": "correct-current-action", "points": 1, "description": "Uses 30 days for current bundle retention."},
+        {"id": "correct-boundary", "points": 1, "description": "States the replacement direction from the old rule to the current rule."},
+        {"id": "no-prohibited-conclusion", "points": 1, "description": "Does not let the old retention rule guide current cleanup."},
+        {"id": "correct-source-citation", "points": 1, "description": "Cites the actual old-rule and replacement sources used."}
+      ]
+    },
+    "unresolved-conflict": {
+      "max_score": 5,
+      "criteria": [
+        {"id": "correct-fact-state", "points": 1, "description": "Identifies both cache observations as incompatible and unresolved."},
+        {"id": "correct-current-action", "points": 1, "description": "Proposes a controlled comparison with matched workload variables."},
+        {"id": "correct-boundary", "points": 1, "description": "Preserves uncertainty while dataset size and worker count differ."},
+        {"id": "no-prohibited-conclusion", "points": 1, "description": "Does not silently select either refresh interval."},
+        {"id": "correct-source-citation", "points": 1, "description": "Cites the actual conflicting observation sources used."}
+      ]
+    },
+    "scope-boundary": {
+      "max_score": 5,
+      "criteria": [
+        {"id": "correct-fact-state", "points": 1, "description": "Identifies the distinct current macOS and Win11 preview rules."},
+        {"id": "correct-current-action", "points": 1, "description": "Uses Quartz on macOS and Direct on Win11."},
+        {"id": "correct-boundary", "points": 1, "description": "Keeps the Quartz decision within its macOS scope."},
+        {"id": "no-prohibited-conclusion", "points": 1, "description": "Does not generalize Quartz to Win11 or globally."},
+        {"id": "correct-source-citation", "points": 1, "description": "Cites the actual macOS and Win11 boundary sources used."}
+      ]
+    },
+    "pending-observation": {
+      "max_score": 5,
+      "criteria": [
+        {"id": "correct-fact-state", "points": 1, "description": "Identifies the single-retry rule as established and the third-retry result as one-off."},
+        {"id": "correct-current-action", "points": 1, "description": "Retries once, then stops and records a repeated failure."},
+        {"id": "correct-boundary", "points": 1, "description": "Requires controlled repetition and approval before a rule change."},
+        {"id": "no-prohibited-conclusion", "points": 1, "description": "Does not promote the one-off result into a three-retry rule."},
+        {"id": "correct-source-citation", "points": 1, "description": "Cites the actual stable-rule and one-off observation sources used."}
+      ]
+    }
+  }
+}

@@ -1,0 +1,10 @@
+# Forty-Five-Minute Cache Observation
+
+Record `UC-302` reports a synthetic Cedar Desk test in which a 20-minute cache
+refresh increased lock contention and a 45-minute interval performed better.
+
+The test used a large dataset and four workers. Record `UC-301` reports an
+incompatible result under another workload. No decision resolves which
+interval should become the project rule.
+
+The two workload shapes must be controlled in a comparison before selection.

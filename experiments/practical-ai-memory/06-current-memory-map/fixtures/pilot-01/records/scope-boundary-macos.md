@@ -1,0 +1,10 @@
+# Quartz Preview Rule
+
+Record `SB-401` contains the current synthetic Harbor Page preview rule for
+macOS.
+
+On macOS, local previews must use Quartz mode because the approved rendering
+check covers that platform only. The approval did not evaluate Win11 and did
+not establish a project-wide default.
+
+The rule must remain limited to macOS.

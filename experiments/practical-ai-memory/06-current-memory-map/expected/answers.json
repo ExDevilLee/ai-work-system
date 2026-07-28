@@ -1,0 +1,62 @@
+{
+  "active-decision": {
+    "fact_state": "The Delta checklist decision remains approved; the later automation discussion is unapproved.",
+    "current_action": "Require every publication bundle to pass the Delta checklist before release.",
+    "boundary": "Do not treat a newer discussion or observation as an approved replacement.",
+    "prohibited": [
+      "Replacing the Delta checklist with an automated spot check now"
+    ],
+    "expected_sources": [
+      "records/active-decision-approved.md",
+      "records/active-decision-discussion.md"
+    ]
+  },
+  "superseded-rule": {
+    "fact_state": "The 30-day retention rule is current and explicitly replaces the historical 14-day rule.",
+    "current_action": "Retain publication bundles for 30 days before cleanup.",
+    "boundary": "Keep the 14-day rule only as history and do not let it guide current cleanup.",
+    "prohibited": [
+      "Using the 14-day retention period for current cleanup"
+    ],
+    "expected_sources": [
+      "records/superseded-rule-old.md",
+      "records/superseded-rule-current.md"
+    ]
+  },
+  "unresolved-conflict": {
+    "fact_state": "The 20-minute and 45-minute observations remain incompatible and unresolved.",
+    "current_action": "Run a controlled comparison with matched dataset size and worker count before choosing an interval.",
+    "boundary": "Do not silently select either interval while workload differences remain uncontrolled.",
+    "prohibited": [
+      "Promoting either observed interval to the project rule"
+    ],
+    "expected_sources": [
+      "records/unresolved-conflict-fast.md",
+      "records/unresolved-conflict-slow.md"
+    ]
+  },
+  "scope-boundary": {
+    "fact_state": "Quartz mode is current only on macOS; Direct mode remains current on Win11; no global mode is approved.",
+    "current_action": "Use Quartz mode on macOS and Direct mode on Win11.",
+    "boundary": "Do not generalize the macOS approval to Win11 or to a project-wide default.",
+    "prohibited": [
+      "Applying Quartz mode to Win11 or globally"
+    ],
+    "expected_sources": [
+      "records/scope-boundary-macos.md",
+      "records/scope-boundary-win11.md"
+    ]
+  },
+  "pending-observation": {
+    "fact_state": "The single-retry rule remains established; the third-retry result is a one-off observation awaiting validation.",
+    "current_action": "Retry once, then stop and record the failure if the retry fails.",
+    "boundary": "Repeat the observation under controlled conditions and obtain approval before changing the retry limit.",
+    "prohibited": [
+      "Promoting three retries to the current project rule"
+    ],
+    "expected_sources": [
+      "records/pending-observation-stable.md",
+      "records/pending-observation-one-off.md"
+    ]
+  }
+}

@@ -1,0 +1,122 @@
+{
+  "schema_version": 1,
+  "condition_ids": [
+    "source-only",
+    "flat-index",
+    "state-projection"
+  ],
+  "task_ids": [
+    "active-decision",
+    "superseded-rule",
+    "unresolved-conflict",
+    "scope-boundary",
+    "pending-observation"
+  ],
+  "records": [
+    {
+      "id": "AD-101",
+      "task_id": "active-decision",
+      "title": "Publication gate decision",
+      "status": "active",
+      "scope": "project",
+      "source": "records/active-decision-approved.md",
+      "relations": []
+    },
+    {
+      "id": "AD-102",
+      "task_id": "active-decision",
+      "title": "Automation gate discussion",
+      "status": "pending-validation",
+      "scope": "project",
+      "source": "records/active-decision-discussion.md",
+      "relations": []
+    },
+    {
+      "id": "SR-201",
+      "task_id": "superseded-rule",
+      "title": "Fourteen-day bundle retention",
+      "status": "superseded",
+      "scope": "project",
+      "source": "records/superseded-rule-old.md",
+      "relations": []
+    },
+    {
+      "id": "SR-202",
+      "task_id": "superseded-rule",
+      "title": "Thirty-day bundle retention",
+      "status": "active",
+      "scope": "project",
+      "source": "records/superseded-rule-current.md",
+      "relations": [
+        {
+          "type": "supersedes",
+          "target": "SR-201"
+        }
+      ]
+    },
+    {
+      "id": "UC-301",
+      "task_id": "unresolved-conflict",
+      "title": "Twenty-minute cache observation",
+      "status": "conflict",
+      "scope": "project",
+      "source": "records/unresolved-conflict-fast.md",
+      "relations": [
+        {
+          "type": "conflicts-with",
+          "target": "UC-302"
+        }
+      ]
+    },
+    {
+      "id": "UC-302",
+      "task_id": "unresolved-conflict",
+      "title": "Forty-five-minute cache observation",
+      "status": "conflict",
+      "scope": "project",
+      "source": "records/unresolved-conflict-slow.md",
+      "relations": [
+        {
+          "type": "conflicts-with",
+          "target": "UC-301"
+        }
+      ]
+    },
+    {
+      "id": "SB-401",
+      "task_id": "scope-boundary",
+      "title": "Quartz preview rule",
+      "status": "active",
+      "scope": "macos",
+      "source": "records/scope-boundary-macos.md",
+      "relations": []
+    },
+    {
+      "id": "SB-402",
+      "task_id": "scope-boundary",
+      "title": "Direct preview boundary",
+      "status": "active",
+      "scope": "win11",
+      "source": "records/scope-boundary-win11.md",
+      "relations": []
+    },
+    {
+      "id": "PO-501",
+      "task_id": "pending-observation",
+      "title": "Single-retry stability rule",
+      "status": "active",
+      "scope": "project",
+      "source": "records/pending-observation-stable.md",
+      "relations": []
+    },
+    {
+      "id": "PO-502",
+      "task_id": "pending-observation",
+      "title": "Third-retry isolated observation",
+      "status": "pending-validation",
+      "scope": "project",
+      "source": "records/pending-observation-one-off.md",
+      "relations": []
+    }
+  ]
+}

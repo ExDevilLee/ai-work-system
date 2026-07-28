@@ -1,0 +1,10 @@
+# Twenty-Minute Cache Observation
+
+Record `UC-301` reports a synthetic Cedar Desk test in which a 20-minute cache
+refresh reduced stale reads.
+
+The test used a small dataset and a single worker. Record `UC-302` reports an
+incompatible result under a different workload. No decision resolves which
+interval should become the project rule.
+
+This observation cannot independently determine the current interval.
