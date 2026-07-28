@@ -26,7 +26,6 @@ from run_experiment import (
     has_unmeasured_mcp_tool_calls,
     mcp_workspace_metrics,
     main,
-    macos_command_allowlist,
     parse_args,
     resident_instruction_bytes,
     resolve_codex_executable,
@@ -34,7 +33,6 @@ from run_experiment import (
     run_utf8_command,
     tree_checksum,
     validate_path_identifier,
-    write_macos_execution_policy,
 )
 
 
@@ -286,59 +284,9 @@ class CodexExecutableTest(unittest.TestCase):
         )
 
         self.assertIn("features.plugins=false", command)
+        self.assertIn("--ignore-user-config", command)
+        self.assertIn("--ignore-rules", command)
         self.assertEqual(command[-1], "-")
-
-    def test_build_command_wraps_explicit_policy(self) -> None:
-        command = build_codex_command(
-            "codex",
-            Path("workspace"),
-            Path("final.md"),
-            model=None,
-            reasoning_effort=None,
-            execution_policy_path=Path("command-allowlist.sb"),
-        )
-        self.assertEqual(command[:3], ["sandbox-exec", "-f", "command-allowlist.sb"])
-        self.assertIn("features.plugins=false", command)
-        self.assertEqual(command[-1], "-")
-
-    def test_macos_policy_limits_process_execution_to_read_tools(self) -> None:
-        with tempfile.TemporaryDirectory() as temporary_directory:
-            root = Path(temporary_directory)
-            launcher = root / "bin" / "codex.js"
-            launcher.parent.mkdir()
-            launcher.write_text("#!/usr/bin/env node\n", encoding="utf-8")
-            native = (
-                root
-                / "node_modules/@openai/codex-darwin-arm64/vendor/test/bin/codex"
-            )
-            native.parent.mkdir(parents=True)
-            native.write_text("native\n", encoding="utf-8")
-            host = native.parent / "codex-code-mode-host"
-            host.write_text("host\n", encoding="utf-8")
-            zsh = native.parent.parent / "codex-resources/zsh/bin/zsh"
-            zsh.parent.mkdir(parents=True)
-            zsh.write_text("zsh\n", encoding="utf-8")
-            rg = native.parent.parent / "codex-path/rg"
-            rg.parent.mkdir(parents=True)
-            rg.write_text("rg\n", encoding="utf-8")
-            for path in (launcher, native, host, zsh, rg):
-                path.chmod(0o755)
-            policy = root / "policy.sb"
-            with patch("run_experiment.shutil.which", side_effect=lambda name: {
-                "node": "/bin/cat",
-                "cat": "/bin/cat",
-                "sed": "/usr/bin/sed",
-                "nl": "/usr/bin/nl",
-            }.get(name)):
-                write_macos_execution_policy(policy, str(launcher))
-                allowed = macos_command_allowlist(str(launcher))
-            text = policy.read_text(encoding="utf-8")
-            self.assertEqual(len(allowed), 10)
-            self.assertIn("(deny process-exec)", text)
-            self.assertIn('(literal "/bin/cat")', text)
-            self.assertIn('(literal "/usr/bin/sed")', text)
-            self.assertIn('(literal "/usr/bin/nl")', text)
-            self.assertNotIn("python", text)
 
 
 class Utf8CommandTest(unittest.TestCase):

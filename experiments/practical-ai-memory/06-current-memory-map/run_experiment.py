@@ -940,68 +940,6 @@ def command_output(*args: str) -> str:
     return result.stdout.strip()
 
 
-def _sandbox_literal(path: Path) -> str:
-    """Render one absolute macOS sandbox literal without permitting escaping."""
-    return str(path.resolve(strict=True)).replace("\\", "\\\\").replace('"', '\\"')
-
-
-def macos_command_allowlist(codex_executable: str) -> tuple[Path, ...]:
-    """Return the fixed process-exec surface used by the macOS Pilot.
-
-    Codex's npm launcher starts Node, which then starts the packaged native
-    executable.  The native executable starts its packaged zsh for each shell
-    tool call.  All three links are explicit here so the Pilot cannot quietly
-    fall back to an interpreter or an arbitrary system command.
-    """
-    launcher = Path(codex_executable).resolve(strict=True)
-    node = shutil.which("node")
-    if node is None:
-        raise RuntimeError("node executable was not found on PATH")
-    if launcher.name != "codex.js" or launcher.parent.name != "bin":
-        raise RuntimeError("unsupported codex launcher layout")
-    package_root = launcher.parent.parent
-    candidates = sorted(
-        package_root.glob(
-            "node_modules/@openai/codex-*/vendor/*/bin/codex"
-        )
-    )
-    if len(candidates) != 1:
-        raise RuntimeError("unable to resolve packaged codex executable")
-    native_codex = candidates[0].resolve(strict=True)
-    native_root = native_codex.parent.parent
-    code_mode_host = native_codex.parent / "codex-code-mode-host"
-    packaged_zsh = native_root / "codex-resources" / "zsh" / "bin" / "zsh"
-    bundled_rg = native_root / "codex-path" / "rg"
-    read_tools = ("cat", "sed", "nl")
-    resolved_read_tools = []
-    for tool in read_tools:
-        executable = shutil.which(tool)
-        if executable is None:
-            raise RuntimeError(f"{tool} executable was not found on PATH")
-        resolved_read_tools.append(Path(executable))
-    return (
-        launcher,
-        Path(node),
-        native_codex,
-        code_mode_host,
-        Path("/usr/bin/env"),
-        packaged_zsh,
-        *resolved_read_tools,
-        bundled_rg,
-    )
-
-
-def write_macos_execution_policy(path: Path, codex_executable: str) -> None:
-    """Write a fail-closed process execution policy for one isolated run."""
-    allowed = macos_command_allowlist(codex_executable)
-    lines = ["(version 1)", "(allow default)", "(deny process-exec)"]
-    lines.extend(
-        f'(allow process-exec (literal "{_sandbox_literal(executable)}"))'
-        for executable in allowed
-    )
-    path.write_text("\n".join(lines) + "\n", encoding="utf-8")
-
-
 def build_codex_command(
     codex_executable: str,
     workspace: Path,
@@ -1009,7 +947,6 @@ def build_codex_command(
     *,
     model: Optional[str],
     reasoning_effort: Optional[str],
-    execution_policy_path: Optional[Path] = None,
 ) -> list[str]:
     command = [
         codex_executable,
@@ -1017,6 +954,8 @@ def build_codex_command(
         "-C",
         str(workspace),
         "--skip-git-repo-check",
+        "--ignore-user-config",
+        "--ignore-rules",
         "--sandbox",
         "read-only",
         "--ephemeral",
@@ -1033,8 +972,6 @@ def build_codex_command(
             ["--config", f'model_reasoning_effort="{reasoning_effort}"']
         )
     command.append("-")
-    if execution_policy_path is not None:
-        command = ["sandbox-exec", "-f", str(execution_policy_path), *command]
     return command
 
 
@@ -1146,23 +1083,12 @@ def main() -> int:
     with tempfile.TemporaryDirectory(prefix=f"current-map-poc-{args.condition}-") as temp:
         workspace = Path(temp) / "workspace"
         shutil.copytree(fixture, workspace)
-        execution_policy_path = None
-        if platform.system() == "Darwin":
-            execution_policy_path = Path(temp) / "command-allowlist.sb"
-            try:
-                write_macos_execution_policy(execution_policy_path, codex_executable)
-            except (OSError, RuntimeError) as error:
-                raise SystemExit(
-                    f"macOS command policy setup failed: {type(error).__name__}"
-                ) from error
-
         command = build_codex_command(
             codex_executable,
             workspace,
             run_dir / "final.md",
             model=args.model,
             reasoning_effort=args.reasoning_effort,
-            execution_policy_path=execution_policy_path,
         )
         prompt_text = prompt_path.read_text(encoding="utf-8")
 
@@ -1232,11 +1158,7 @@ def main() -> int:
         "sandbox": "read-only",
         "ephemeral": True,
         "plugins_enabled": False,
-        "command_execution_policy": (
-            "macos-process-exec-allowlist"
-            if platform.system() == "Darwin"
-            else "none"
-        ),
+        "command_execution_policy": "codex-isolated-config-and-rules",
         "runtime_tool_access_calls": runtime_access_calls,
         "protocol_environment_isolated": runtime_access_calls == 0,
         "exit_code": result.returncode,
@@ -1261,7 +1183,7 @@ def main() -> int:
         )
         + mcp_workspace_bytes,
         "resident_instruction_bytes": resident_instruction_bytes(fixture),
-        "command_shape": "[macOS: sandbox-exec process allowlist] codex exec -C <isolated-workspace> --skip-git-repo-check --sandbox read-only --ephemeral --json --config features.plugins=false --output-last-message <file> [--model <model>] [--config model_reasoning_effort=<effort>] -; prompt transport: UTF-8 stdin",
+        "command_shape": "codex exec -C <isolated-workspace> --skip-git-repo-check --ignore-user-config --ignore-rules --sandbox read-only --ephemeral --json --config features.plugins=false --output-last-message <file> [--model <model>] [--config model_reasoning_effort=<effort>] -; prompt transport: UTF-8 stdin",
     }
     metadata["project_context_bytes_reliable"] = metadata[
         "workspace_output_bytes_reliable"
