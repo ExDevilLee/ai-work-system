@@ -307,6 +307,110 @@ class FixtureValidationTest(unittest.TestCase):
             self.validate_copy(require_generated=True, with_generated=True), []
         )
 
+    def test_default_validation_requires_human_packs(self) -> None:
+        def remove_pack(root: Path) -> None:
+            (root / "human-fixtures" / "pack-a.json").unlink()
+
+        errors = self.validate_copy(remove_pack)
+        self.assertTrue(any("missing human fixture pack-a" in error for error in errors))
+
+    def test_default_validation_rejects_malformed_human_pack(self) -> None:
+        def mutate(root: Path) -> None:
+            path = root / "human-fixtures" / "pack-b.json"
+            pack = self.load_json(path)
+            pack["unexpected"] = "value"
+            self.write_canonical_json(path, pack)
+
+        errors = self.validate_copy(mutate)
+        self.assertTrue(
+            any(
+                "human fixture pack-b top-level fields must match contract" in error
+                for error in errors
+            ),
+            errors,
+        )
+
+    def test_cross_pack_scope_shape_rejects_matching_public_view_mutation(self) -> None:
+        def mutate(root: Path) -> None:
+            pack_path = root / "human-fixtures" / "pack-b.json"
+            pack = self.load_json(pack_path)
+            pending = next(
+                record
+                for record in pack["records"]
+                if record["status"] == "pending-validation"
+            )
+            pending["scope"] = "global"
+            self.write_canonical_json(pack_path, pack)
+
+            view_path = (
+                root
+                / "fixtures"
+                / "pilot-01"
+                / "generated"
+                / "visual-map.json"
+            )
+            view = self.load_json(view_path)
+            next(record for record in view["records"] if record["id"] == pending["id"])[
+                "scope"
+            ] = "global"
+            self.write_canonical_json(view_path, view)
+
+        errors = self.validate_copy(
+            mutate, require_generated=True, with_generated=True
+        )
+        self.assertIn("human packs must have equal scope count shape", errors)
+
+    def test_cross_pack_rejects_reused_ids_and_content(self) -> None:
+        def reuse_record_id(pack_a: dict, pack_b: dict) -> None:
+            pack_b["records"][0]["id"] = pack_a["records"][0]["id"]
+            pack_b["records"][0]["source"] = (
+                f"synthetic/pack-b/{pack_a['records'][0]['id'].casefold()}.md"
+            )
+
+        def reuse_question_id(pack_a: dict, pack_b: dict) -> None:
+            pack_b["questions"][0]["id"] = pack_a["questions"][0]["id"]
+
+        def reuse_content(pack_a: dict, pack_b: dict) -> None:
+            pack_b["records"][0]["title"] = pack_a["records"][0]["title"]
+
+        mutations = (
+            ("record IDs", reuse_record_id),
+            ("question IDs", reuse_question_id),
+            ("content", reuse_content),
+        )
+        for expected, mutation in mutations:
+            with self.subTest(expected=expected):
+                def mutate(root: Path, change=mutation) -> None:
+                    pack_a_path = root / "human-fixtures" / "pack-a.json"
+                    pack_b_path = root / "human-fixtures" / "pack-b.json"
+                    pack_a = self.load_json(pack_a_path)
+                    pack_b = self.load_json(pack_b_path)
+                    change(pack_a, pack_b)
+                    self.write_canonical_json(pack_b_path, pack_b)
+
+                errors = self.validate_copy(mutate)
+                self.assertTrue(
+                    any(
+                        "human packs must use distinct" in error and expected in error
+                        for error in errors
+                    ),
+                    errors,
+                )
+
+    def test_cross_pack_rejects_relation_direction_shape_drift(self) -> None:
+        def mutate(root: Path) -> None:
+            path = root / "human-fixtures" / "pack-b.json"
+            pack = self.load_json(path)
+            source = next(record for record in pack["records"] if record["relations"])
+            target_id = source["relations"][0]["target"]
+            target = next(record for record in pack["records"] if record["id"] == target_id)
+            source["scope"] = "global"
+            target["scope"] = "global"
+            self.write_canonical_json(path, pack)
+
+        errors = self.validate_copy(mutate)
+        self.assertIn("human packs must have equal relation direction shape", errors)
+
     def test_rejects_malformed_raw_human_pack_contracts(self) -> None:
         def add_top_field(pack: dict) -> None:
             pack["unexpected"] = "value"

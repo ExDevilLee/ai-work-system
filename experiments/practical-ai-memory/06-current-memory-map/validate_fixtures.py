@@ -543,6 +543,87 @@ def _validate_raw_human_pack(
     return pack, errors
 
 
+def _human_pack_max_score(pack: dict[str, Any]) -> int:
+    """Each of the five frozen human questions is worth one point."""
+    questions = pack.get("questions", [])
+    return sum(1 for _question in questions) if isinstance(questions, list) else 0
+
+
+def _human_relation_shape(pack: dict[str, Any]) -> Counter[tuple[str, str, str, str, str]]:
+    records = pack["records"]
+    records_by_id = {record["id"]: record for record in records}
+    return Counter(
+        (
+            relation["type"],
+            record["status"],
+            records_by_id[relation["target"]]["status"],
+            record["scope"],
+            records_by_id[relation["target"]]["scope"],
+        )
+        for record in records
+        for relation in record["relations"]
+    )
+
+
+def _human_content_values(pack: dict[str, Any]) -> set[str]:
+    values = {
+        record[field]
+        for record in pack["records"]
+        for field in ("title", "source", "detail")
+    }
+    for question in pack["questions"]:
+        values.update((question["prompt"], question["explanation"]))
+        for choice in question["choices"]:
+            values.update((choice["id"], choice["label"]))
+    return values
+
+
+def _validate_human_pack_pair(
+    pack_a: dict[str, Any], pack_b: dict[str, Any]
+) -> list[str]:
+    """Independently enforce the frozen equivalence of the two human packs."""
+    errors: list[str] = []
+    if pack_a.get("pack_id") != "pack-a" or pack_b.get("pack_id") != "pack-b":
+        errors.append("human packs must be bound to pack-a and pack-b")
+
+    status_a = Counter(record["status"] for record in pack_a["records"])
+    status_b = Counter(record["status"] for record in pack_b["records"])
+    if status_a != HUMAN_STATUS_COUNTS or status_b != HUMAN_STATUS_COUNTS or status_a != status_b:
+        errors.append("human packs must have equal frozen status count shape")
+    scope_a = Counter(record["scope"] for record in pack_a["records"])
+    scope_b = Counter(record["scope"] for record in pack_b["records"])
+    if scope_a != scope_b:
+        errors.append("human packs must have equal scope count shape")
+    if _human_relation_shape(pack_a) != _human_relation_shape(pack_b):
+        errors.append("human packs must have equal relation direction shape")
+
+    questions_a = pack_a["questions"]
+    questions_b = pack_b["questions"]
+    if (
+        len(questions_a) != 5
+        or len(questions_b) != 5
+        or _human_pack_max_score(pack_a) != 5
+        or _human_pack_max_score(pack_b) != 5
+    ):
+        errors.append("human packs must each contain five one-point questions")
+    if [len(question["choices"]) for question in questions_a] != [
+        len(question["choices"]) for question in questions_b
+    ]:
+        errors.append("human packs must have equal question choice counts")
+
+    record_ids_a = {record["id"] for record in pack_a["records"]}
+    record_ids_b = {record["id"] for record in pack_b["records"]}
+    if record_ids_a & record_ids_b:
+        errors.append("human packs must use distinct record IDs")
+    question_ids_a = {question["id"] for question in questions_a}
+    question_ids_b = {question["id"] for question in questions_b}
+    if question_ids_a & question_ids_b:
+        errors.append("human packs must use distinct question IDs")
+    if _human_content_values(pack_a) & _human_content_values(pack_b):
+        errors.append("human packs must use distinct content")
+    return errors
+
+
 def validate_human_view(
     path: Path,
     pack_path: Path,
@@ -1150,7 +1231,20 @@ def validate(
     root = Path(root)
     fixture_root = root / "fixtures" / fixture_set
     manifest_path = fixture_root / "manifest.json"
+    pack_a_path = root / "human-fixtures" / "pack-a.json"
+    pack_b_path = root / "human-fixtures" / "pack-b.json"
     manifest = _load_fixture_manifest(manifest_path, fixture_root, errors)
+    pack_a, pack_a_errors = _validate_raw_human_pack(pack_a_path, "pack-a")
+    pack_b, pack_b_errors = _validate_raw_human_pack(pack_b_path, "pack-b")
+    errors.extend(pack_a_errors)
+    errors.extend(pack_b_errors)
+    if (
+        pack_a is not None
+        and pack_b is not None
+        and not pack_a_errors
+        and not pack_b_errors
+    ):
+        errors.extend(_validate_human_pack_pair(pack_a, pack_b))
 
     _validate_frozen_ids(manifest.get("condition_ids"), CONDITION_IDS, "condition", errors)
     _validate_frozen_ids(manifest.get("task_ids"), TASK_IDS, "task", errors)
@@ -1313,13 +1407,7 @@ def validate(
     projection = generated_root / "state-projection.json"
     state_table = generated_root / "state-table.json"
     visual_map = generated_root / "visual-map.json"
-    pack_a_path = root / "human-fixtures" / "pack-a.json"
-    pack_b_path = root / "human-fixtures" / "pack-b.json"
     if require_generated:
-        pack_a, pack_a_errors = _validate_raw_human_pack(pack_a_path, "pack-a")
-        pack_b, pack_b_errors = _validate_raw_human_pack(pack_b_path, "pack-b")
-        errors.extend(pack_a_errors)
-        errors.extend(pack_b_errors)
         if not flat_index.exists() and not flat_index.is_symlink():
             errors.append("missing generated flat index: generated/flat-index.md")
         else:

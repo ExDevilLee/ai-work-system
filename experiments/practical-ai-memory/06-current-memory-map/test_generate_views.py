@@ -313,6 +313,21 @@ class GenerateViewsTest(unittest.TestCase):
         self.assertIn("private-data marker", rendered)
         self.assertNotIn(secret, rendered)
 
+    def test_human_pack_privacy_rejects_frozen_sensitive_corpus(self) -> None:
+        sensitive_values = (
+            "0195f4e2-7c8a-7b3d-9f21-123456789abc",
+            "/private/memory.json",
+            r"D:\private\memory.json",
+            r"\\server\share\private",
+        )
+        for sensitive in sensitive_values:
+            with self.subTest(sensitive=sensitive):
+                pack = self.load_pack("pack-a")
+                pack["questions"][0]["explanation"] = sensitive
+                rendered = "\n".join(validate_human_pack(pack))
+                self.assertIn("private-data marker", rendered)
+                self.assertNotIn(sensitive, rendered)
+
     def test_human_supersedes_records_must_share_scope(self) -> None:
         pack = self.load_pack("pack-a")
         superseded = next(
