@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Current Memory Map Trial</title>
+    <link rel="stylesheet" href="/human/styles.css">
+  </head>
+  <body>
+    <main class="shell">
+      <header class="topbar">
+        <div>
+          <p class="product-name">Current Memory Map</p>
+          <h1>Governance reading trial</h1>
+        </div>
+        <p id="status" class="status" aria-live="polite">Loading synthetic session</p>
+      </header>
+      <section id="trial" class="trial" hidden>
+        <div class="progress-row">
+          <p id="condition-label"></p>
+          <p id="progress"></p>
+        </div>
+        <div id="workspace" class="workspace"></div>
+        <section class="question-area" aria-labelledby="question-title">
+          <h2 id="question-title"></h2>
+          <form id="answers" class="answers"></form>
+          <div class="question-actions">
+            <button id="detail-toggle" class="secondary" type="button" aria-expanded="false">Source details</button>
+            <button id="next" type="button" disabled>Next question</button>
+          </div>
+          <aside id="detail" class="detail" hidden></aside>
+        </section>
+      </section>
+      <section id="confidence" class="confidence" hidden>
+        <h2>Condition complete</h2>
+        <p>How confident are you in your answers?</p>
+        <div id="confidence-options" class="confidence-options" role="group" aria-label="Confidence"></div>
+        <button id="continue" type="button" disabled>Continue</button>
+      </section>
+      <section id="complete" class="complete" hidden>
+        <h2>Trial recorded</h2>
+        <p>Your private synthetic trial data was saved locally.</p>
+      </section>
+    </main>
+    <script src="/human/app.js"></script>
+  </body>
+</html>
