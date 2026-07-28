@@ -695,6 +695,7 @@ class WorkspaceMetricCoverageTest(unittest.TestCase):
                 "rg --files .",
                 "rg --files",
                 "rg pattern",
+                "rg 'active|pending' records",
                 "rg pattern records",
                 "rg -g '*.md' pattern records generated",
                 "find records -type f",

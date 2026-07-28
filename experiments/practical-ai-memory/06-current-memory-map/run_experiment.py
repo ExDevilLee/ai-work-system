@@ -328,8 +328,6 @@ def _get_child_item_targets(tokens: Sequence[str]) -> Optional[tuple[str, ...]]:
 
 def _simple_command_targets(command: str) -> Optional[tuple[str, ...]]:
     """Return all path targets for a strict, read-only command allowlist."""
-    if re.search(r"[;&|<>`]", command):
-        return None
     try:
         tokens = shlex.split(command, posix=True)
     except ValueError:
@@ -337,6 +335,10 @@ def _simple_command_targets(command: str) -> Optional[tuple[str, ...]]:
     if not tokens:
         return None
     executable = Path(tokens[0]).name.casefold().removesuffix(".exe")
+    if re.search(r"[;&<>`]", command):
+        return None
+    if "|" in command and (executable != "rg" or "|" in tokens):
+        return None
     if executable in {"cat", "type", "get-content", "nl"}:
         return _content_command_targets(executable, tokens)
     if executable == "rg":
