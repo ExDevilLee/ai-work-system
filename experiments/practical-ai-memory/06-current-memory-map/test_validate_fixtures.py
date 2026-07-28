@@ -183,7 +183,7 @@ class FixtureValidationTest(unittest.TestCase):
             self.write_json(path, protocol_lock)
 
         errors = self.validate_copy(mutate, with_protocol_lock=True)
-        self.assertTrue(any("malformed protocol hash" in error for error in errors))
+        self.assertTrue(any("has invalid hash" in error for error in errors))
 
     def test_rejects_missing_and_extra_protocol_entries_without_throwing(self) -> None:
         def mutate(root: Path) -> None:
@@ -195,7 +195,7 @@ class FixtureValidationTest(unittest.TestCase):
 
         errors = self.validate_copy(mutate, with_protocol_lock=True)
         self.assertTrue(any("exact protocol file set" in error for error in errors))
-        self.assertTrue(any("unsafe protocol path" in error for error in errors))
+        self.assertTrue(any("has unsafe path" in error for error in errors))
 
     def test_rejects_malformed_hash_on_extra_protocol_entry(self) -> None:
         def mutate(root: Path) -> None:
@@ -205,7 +205,7 @@ class FixtureValidationTest(unittest.TestCase):
             self.write_json(path, protocol_lock)
 
         errors = self.validate_copy(mutate, with_protocol_lock=True)
-        self.assertIn("malformed protocol hash: prompts/extra.md", errors)
+        self.assertTrue(any("has invalid hash" in error for error in errors))
 
     def test_rejects_missing_protocol_lock(self) -> None:
         def mutate(root: Path) -> None:
@@ -223,6 +223,25 @@ class FixtureValidationTest(unittest.TestCase):
 
         errors = self.validate_copy(mutate, with_protocol_lock=True)
         self.assertTrue(any("private-data marker" in error for error in errors))
+
+    def test_protocol_errors_redact_untrusted_keys_and_values(self) -> None:
+        private_path = "/Users/private-operator/secret-input.md"
+        secret_key = "api_key=LOCK_KEY_SHOULD_NOT_LEAK"
+        secret_value = "sk-LOCK_VALUE_SHOULD_NOT_LEAK"
+
+        def mutate(root: Path) -> None:
+            path = root / "fixtures" / "pilot-01" / "protocol-lock.json"
+            protocol_lock = self.load_json(path)
+            protocol_lock[private_path] = "not-a-hash"
+            protocol_lock[secret_key] = secret_value
+            self.write_json(path, protocol_lock)
+
+        errors = self.validate_copy(mutate, with_protocol_lock=True)
+        rendered = "\n".join(errors)
+        self.assertTrue(errors)
+        self.assertNotIn(private_path, rendered)
+        self.assertNotIn(secret_key, rendered)
+        self.assertNotIn(secret_value, rendered)
 
     def test_rejects_prompt_condition_leak(self) -> None:
         def mutate(root: Path) -> None:

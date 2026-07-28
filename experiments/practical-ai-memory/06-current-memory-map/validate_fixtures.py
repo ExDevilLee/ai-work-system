@@ -633,13 +633,15 @@ def _validate_protocol_lock(
 
     paths = tuple(protocol_lock)
     valid_hash_paths: set[str] = set()
-    for path, expected_hash in protocol_lock.items():
+    for entry_index, (path, expected_hash) in enumerate(
+        protocol_lock.items(), start=1
+    ):
         if not _is_safe_protocol_path(path):
-            errors.append(f"unsafe protocol path: {path!r}")
+            errors.append(f"protocol lock entry {entry_index} has unsafe path")
         if not isinstance(expected_hash, str) or not re.fullmatch(
             r"[0-9a-f]{64}", expected_hash
         ):
-            errors.append(f"malformed protocol hash: {path}")
+            errors.append(f"protocol lock entry {entry_index} has invalid hash")
         else:
             valid_hash_paths.add(path)
     if set(paths) != set(PROTOCOL_PATHS) or len(paths) != len(PROTOCOL_PATHS):
