@@ -7,6 +7,7 @@ import argparse
 import json
 import os
 import re
+import stat
 import tempfile
 from collections import Counter
 from pathlib import Path, PurePosixPath, PureWindowsPath
@@ -40,8 +41,12 @@ _JUDGMENT_SUFFIXES = frozenset(
     }
 )
 _PRIVATE_PATTERNS = (
-    ("user path", re.compile(r"/(?:Users|home)/[^/\s]+/", re.I)),
-    ("user path", re.compile(r"[A-Za-z]:\\Users\\[^\\\s]+", re.I)),
+    (
+        "POSIX absolute path",
+        re.compile(r"(?<![:A-Za-z0-9_.-])/(?:[^/\s]+/)*[^/\s]+"),
+    ),
+    ("Windows drive path", re.compile(r"\b[A-Za-z]:[\\/][^\s]+")),
+    ("Windows UNC path", re.compile(r"\\\\[^\\\s]+\\[^\s]+")),
     (
         "credential or API key",
         re.compile(
@@ -62,7 +67,7 @@ _PRIVATE_PATTERNS = (
     (
         "UUID",
         re.compile(
-            r"\b[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-"
+            r"\b[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-"
             r"[89ab][0-9a-f]{3}-[0-9a-f]{12}\b",
             re.I,
         ),
@@ -627,6 +632,10 @@ def _flush_staged_file(temporary) -> None:
     temporary.flush()
 
 
+def _set_staged_mode(path: Path, mode: int) -> None:
+    os.chmod(path, mode)
+
+
 def _fsync_staged_file(temporary) -> None:
     os.fsync(temporary.fileno())
 
@@ -661,13 +670,19 @@ def _validate_output_bytes(outputs: dict[str, bytes]) -> None:
 
 
 def _restore_outputs(
-    output_paths: dict[str, Path], originals: dict[str, bytes | None]
+    output_paths: dict[str, Path], originals: dict[str, tuple[bytes, int] | None]
 ) -> None:
+    first_error: BaseException | None = None
     for name, output in output_paths.items():
         original = originals[name]
         if original is None:
-            output.unlink(missing_ok=True)
+            try:
+                output.unlink(missing_ok=True)
+            except BaseException as error:
+                if first_error is None:
+                    first_error = error
             continue
+        original_bytes, original_mode = original
         temporary_path: Path | None = None
         try:
             with tempfile.NamedTemporaryFile(
@@ -678,27 +693,31 @@ def _restore_outputs(
                 delete=False,
             ) as temporary:
                 temporary_path = Path(temporary.name)
-                temporary.write(original)
+                temporary.write(original_bytes)
                 temporary.flush()
+                os.chmod(temporary_path, original_mode)
                 os.fsync(temporary.fileno())
             os.replace(temporary_path, output)
             temporary_path = None
+        except BaseException as error:
+            if first_error is None:
+                first_error = error
         finally:
             if temporary_path is not None:
-                temporary_path.unlink(missing_ok=True)
+                try:
+                    temporary_path.unlink(missing_ok=True)
+                except BaseException as error:
+                    if first_error is None:
+                        first_error = error
+    if first_error is not None:
+        raise first_error
 
 
 def _safe_failure_detail(error: BaseException) -> str:
-    if isinstance(error, OSError) and error.strerror:
-        detail = error.strerror
-        if error.errno is not None:
-            detail = f"errno {error.errno}: {detail}"
-    else:
-        detail = str(error) or type(error).__name__
-    detail = re.sub(r"/(?:[^\s/:]+/)+[^\s:]*", "[redacted-path]", detail)
-    detail = re.sub(r"[A-Za-z]:\\[^\s]+", "[redacted-path]", detail)
-    detail = " ".join(detail.split())
-    return f"{type(error).__name__}: {detail[:240]}"
+    category = type(error).__name__
+    if isinstance(error, OSError) and error.errno is not None:
+        return f"{category} errno {error.errno}"
+    return category
 
 
 def _write_output_transaction(
@@ -706,14 +725,23 @@ def _write_output_transaction(
 ) -> None:
     _validate_output_bytes(outputs)
     generated = next(iter(output_paths.values())).parent
-    originals = {
-        name: path.read_bytes() if path.exists() else None
-        for name, path in output_paths.items()
-    }
-    generated.mkdir(parents=True, exist_ok=True)
+    generated_existed = generated.exists()
+    originals: dict[str, tuple[bytes, int] | None] = {}
     staged: dict[str, Path] = {}
     replace_started = False
+    original_error: BaseException | None = None
+    rollback_error: BaseException | None = None
     try:
+        originals = {
+            name: (
+                path.read_bytes(),
+                stat.S_IMODE(path.stat().st_mode),
+            )
+            if path.exists()
+            else None
+            for name, path in output_paths.items()
+        }
+        generated.mkdir(parents=True, exist_ok=True)
         for name, content in outputs.items():
             temporary = _open_staged_file(generated, name)
             temporary_path = Path(temporary.name)
@@ -721,6 +749,8 @@ def _write_output_transaction(
             try:
                 _write_staged_file(temporary, content)
                 _flush_staged_file(temporary)
+                target_mode = originals[name][1] if originals[name] is not None else 0o644
+                _set_staged_mode(temporary_path, target_mode)
                 _fsync_staged_file(temporary)
             finally:
                 temporary.close()
@@ -728,22 +758,33 @@ def _write_output_transaction(
         for name in outputs:
             _replace_staged_file(staged[name], output_paths[name])
             staged.pop(name)
-    except BaseException as original_error:
+    except BaseException as error:
+        original_error = error
         if replace_started:
             try:
                 _restore_outputs(output_paths, originals)
-            except BaseException as rollback_error:
-                raise RuntimeError(
-                    "generation failed ("
-                    + _safe_failure_detail(original_error)
-                    + "); rollback failed ("
-                    + _safe_failure_detail(rollback_error)
-                    + ")"
-                ) from original_error
-        raise
+            except BaseException as error:
+                rollback_error = error
     finally:
         for temporary_path in staged.values():
-            temporary_path.unlink(missing_ok=True)
+            try:
+                temporary_path.unlink(missing_ok=True)
+            except BaseException as error:
+                if rollback_error is None:
+                    rollback_error = error
+        if original_error is not None and not generated_existed:
+            try:
+                generated.rmdir()
+            except FileNotFoundError:
+                pass
+            except BaseException as error:
+                if rollback_error is None:
+                    rollback_error = error
+    if original_error is not None:
+        message = "generation failed (" + _safe_failure_detail(original_error) + ")"
+        if rollback_error is not None:
+            message += "; rollback failed (" + _safe_failure_detail(rollback_error) + ")"
+        raise RuntimeError(message) from original_error
 
 
 def generate_all(root: Path, fixture_set: str = "pilot-01") -> None:

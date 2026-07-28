@@ -49,8 +49,26 @@ HUMAN_FACT_FIELDS = frozenset(
     {"id", "title", "status", "scope", "source", "relations", "detail"}
 )
 HUMAN_MAP_FIELDS = HUMAN_FACT_FIELDS | {"group", "tone", "edge_direction"}
+HUMAN_PACK_FIELDS = frozenset({"schema_version", "pack_id", "records", "questions"})
+HUMAN_QUESTION_FIELDS = frozenset(
+    {"id", "prompt", "choices", "correct_choice", "explanation"}
+)
+HUMAN_RELATION_FIELDS = frozenset({"type", "target"})
 PUBLIC_QUESTION_FIELDS = frozenset({"id", "prompt", "choices"})
 PUBLIC_CHOICE_FIELDS = frozenset({"id", "label"})
+HUMAN_SCOPES = frozenset({"global", "project", "macos", "win11"})
+HUMAN_STATUS_COUNTS = Counter(
+    {"active": 2, "superseded": 1, "conflict": 1, "pending-validation": 1}
+)
+HUMAN_JUDGMENTS = frozenset(
+    {
+        "current-active",
+        "replacement-relation",
+        "unresolved-conflict",
+        "scope-boundary",
+        "pending-observation",
+    }
+)
 MAP_PRESENTATION = {
     "active": ("current", "positive"),
     "superseded": ("history", "muted"),
@@ -100,8 +118,12 @@ PROTOCOL_PATHS = (
 )
 
 _PRIVATE_PATTERNS = (
-    ("POSIX user path", re.compile(r"/(?:Users|home)/[^/\s]+/")),
-    ("Windows user path", re.compile(r"[A-Za-z]:\\Users\\[^\\\s]+", re.I)),
+    (
+        "POSIX absolute path",
+        re.compile(r"(?<![:A-Za-z0-9_.-])/(?:[^/\s]+/)*[^/\s]+"),
+    ),
+    ("Windows drive path", re.compile(r"\b[A-Za-z]:[\\/][^\s]+")),
+    ("Windows UNC path", re.compile(r"\\\\[^\\\s]+\\[^\s]+")),
     (
         "credential or API key",
         re.compile(
@@ -120,9 +142,9 @@ _PRIVATE_PATTERNS = (
         re.compile(r"\b(?:thread|session)[_ -]?(?:id|identifier)\b", re.I),
     ),
     (
-        "thread or session identifier",
+        "UUID",
         re.compile(
-            r"\b[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-"
+            r"\b[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-"
             r"[89ab][0-9a-f]{3}-[0-9a-f]{12}\b",
             re.I,
         ),
@@ -348,12 +370,186 @@ def _validate_human_pack_sources(
             )
 
 
+def _nonempty_text(value: Any) -> bool:
+    return isinstance(value, str) and bool(value.strip()) and not _has_control_characters(value)
+
+
+def _validate_raw_human_pack(
+    path: Path, pack_id: str
+) -> tuple[dict[str, Any] | None, list[str]]:
+    """Validate one frozen human pack without using generator code."""
+    errors: list[str] = []
+    label = f"human fixture {pack_id}"
+    pack = _load_canonical_json(
+        path, label, errors, symlink_boundary=path.parent
+    )
+    if pack is None:
+        return None, errors
+    if not isinstance(pack, dict):
+        return None, [*errors, f"{label} must be a JSON object"]
+    if set(pack) != HUMAN_PACK_FIELDS:
+        errors.append(f"{label} top-level fields must match contract")
+    if type(pack.get("schema_version")) is not int or pack.get("schema_version") != 1:
+        errors.append(f"{label} schema_version must be integer 1")
+    if pack.get("pack_id") != pack_id or not isinstance(pack.get("pack_id"), str):
+        errors.append(f"{label} pack_id must be {pack_id}")
+
+    records = pack.get("records")
+    if not isinstance(records, list) or len(records) != 5:
+        errors.append(f"{label} must contain exactly 5 records")
+        records = records if isinstance(records, list) else []
+    record_ids: list[str] = []
+    statuses: Counter[str] = Counter()
+    relations: list[tuple[str, str]] = []
+    records_by_id: dict[str, dict[str, Any]] = {}
+    for index, record in enumerate(records):
+        if not isinstance(record, dict):
+            errors.append(f"{label} record[{index}] must be an object")
+            continue
+        if set(record) != HUMAN_FACT_FIELDS:
+            errors.append(f"{label} record fields must match contract: index {index}")
+        for field in ("id", "title", "status", "scope", "source", "detail"):
+            if not _nonempty_text(record.get(field)):
+                errors.append(f"{label} record {field} must be nonempty text: index {index}")
+        record_id = record.get("id")
+        if isinstance(record_id, str) and record_id:
+            record_ids.append(record_id)
+            records_by_id.setdefault(record_id, record)
+        status = record.get("status")
+        if isinstance(status, str) and status in VALID_STATUSES:
+            statuses[status] += 1
+        else:
+            errors.append(f"{label} record status is invalid: index {index}")
+        if record.get("scope") not in HUMAN_SCOPES:
+            errors.append(f"{label} record scope is invalid: index {index}")
+        record_relations = record.get("relations")
+        if not isinstance(record_relations, list):
+            errors.append(f"{label} record relations must be an array: index {index}")
+            continue
+        for relation_index, relation in enumerate(record_relations):
+            if not isinstance(relation, dict) or set(relation) != HUMAN_RELATION_FIELDS:
+                errors.append(
+                    f"{label} relation fields must match contract: "
+                    f"record {index} relation {relation_index}"
+                )
+                continue
+            relation_type = relation.get("type")
+            target = relation.get("target")
+            if relation_type != "supersedes" or not _nonempty_text(target):
+                errors.append(
+                    f"{label} relation fields must contain supersedes and a text target: "
+                    f"record {index} relation {relation_index}"
+                )
+                continue
+            if isinstance(record_id, str) and isinstance(target, str):
+                relations.append((record_id, target))
+
+    if len(record_ids) != len(set(record_ids)):
+        errors.append(f"{label} must use unique record IDs")
+    if statuses != HUMAN_STATUS_COUNTS:
+        errors.append(f"{label} must use the frozen status distribution")
+    if len(relations) != 1:
+        errors.append(f"{label} must contain exactly one supersedes relation")
+    elif len(set(record_ids)) == len(record_ids):
+        source_id, target_id = relations[0]
+        source = records_by_id.get(source_id, {})
+        target = records_by_id.get(target_id, {})
+        if (
+            source_id == target_id
+            or source.get("status") != "active"
+            or target.get("status") != "superseded"
+            or source.get("scope") != target.get("scope")
+        ):
+            errors.append(f"{label} supersedes relation violates status or scope invariants")
+    platform_active = [
+        record
+        for record in records
+        if isinstance(record, dict)
+        and record.get("status") == "active"
+        and record.get("scope") in {"macos", "win11"}
+    ]
+    if len(platform_active) != 1:
+        errors.append(f"{label} must contain exactly one platform-scoped active record")
+    conflict_records = [
+        record
+        for record in records
+        if isinstance(record, dict) and record.get("status") == "conflict"
+    ]
+    if len(conflict_records) == 1:
+        detail = conflict_records[0].get("detail")
+        values = set(re.findall(r"\b\d+(?:\.\d+)?\b", detail)) if isinstance(detail, str) else set()
+        if len(values) < 2:
+            errors.append(f"{label} conflict detail must contain two distinct values")
+    _validate_human_pack_sources(pack, pack_id, errors)
+
+    questions = pack.get("questions")
+    if not isinstance(questions, list) or len(questions) != 5:
+        errors.append(f"{label} must contain exactly 5 questions")
+        questions = questions if isinstance(questions, list) else []
+    question_ids: list[str] = []
+    for index, question in enumerate(questions):
+        if not isinstance(question, dict):
+            errors.append(f"{label} question[{index}] must be an object")
+            continue
+        if set(question) != HUMAN_QUESTION_FIELDS:
+            errors.append(f"{label} question fields must match contract: index {index}")
+        for field in ("id", "prompt", "correct_choice", "explanation"):
+            if not _nonempty_text(question.get(field)):
+                errors.append(f"{label} question {field} must be nonempty text: index {index}")
+        question_id = question.get("id")
+        if isinstance(question_id, str) and question_id:
+            question_ids.append(question_id)
+        choices = question.get("choices")
+        if not isinstance(choices, list) or len(choices) != 3:
+            errors.append(f"{label} question[{index}] must contain exactly 3 choices")
+            choices = choices if isinstance(choices, list) else []
+        choice_ids: list[str] = []
+        for choice_index, choice in enumerate(choices):
+            if not isinstance(choice, dict) or set(choice) != PUBLIC_CHOICE_FIELDS:
+                errors.append(
+                    f"{label} choice fields must match contract: "
+                    f"question {index} choice {choice_index}"
+                )
+                continue
+            if not _nonempty_text(choice.get("id")) or not _nonempty_text(choice.get("label")):
+                errors.append(
+                    f"{label} choice values must be nonempty text: "
+                    f"question {index} choice {choice_index}"
+                )
+            if isinstance(choice.get("id"), str) and choice["id"]:
+                choice_ids.append(choice["id"])
+        if len(choice_ids) != len(set(choice_ids)):
+            errors.append(f"{label} question[{index}] must use unique choice IDs")
+        if question.get("correct_choice") not in choice_ids:
+            errors.append(f"{label} question[{index}] correct_choice must reference a choice ID")
+    if len(question_ids) != len(set(question_ids)):
+        errors.append(f"{label} must use unique question IDs")
+    judgment_suffixes = {
+        question_id.split("-", 1)[1]
+        for question_id in question_ids
+        if "-" in question_id
+    }
+    if judgment_suffixes != HUMAN_JUDGMENTS:
+        errors.append(f"{label} questions must cover the five governance judgments")
+
+    private_labels = {
+        private_label
+        for value in _all_strings(pack)
+        for private_label, pattern in _PRIVATE_PATTERNS
+        if pattern.search(value)
+    }
+    for private_label in sorted(private_labels):
+        errors.append(f"{label} contains private-data marker ({private_label})")
+    return pack, errors
+
+
 def validate_human_view(
     path: Path,
     pack_path: Path,
     *,
     view_type: str,
     pack_id: str,
+    validated_pack: dict[str, Any] | None = None,
 ) -> list[str]:
     """Independently validate one generated human view against its source pack."""
     errors: list[str] = []
@@ -361,15 +557,12 @@ def validate_human_view(
     view = _load_canonical_json(
         path, label, errors, symlink_boundary=path.parent
     )
-    pack = _load_json(
-        pack_path,
-        f"human fixture {pack_id}",
-        errors,
-        symlink_boundary=pack_path.parent,
-    )
+    pack = validated_pack
+    if pack is None:
+        pack, pack_errors = _validate_raw_human_pack(pack_path, pack_id)
+        errors.extend(pack_errors)
     if view is None or pack is None:
         return errors
-    _validate_human_pack_sources(pack, pack_id, errors)
     short_label = "state table" if view_type == "state-table" else "visual map"
     if not isinstance(view, dict):
         return [*errors, f"{short_label} must be a JSON object"]
@@ -535,8 +728,26 @@ def validate_flat_index(
     sorted by record ID and contain only manifest navigation fields.
     """
     errors: list[str] = []
-    text = _read_text(path, "generated flat index", errors, symlink_boundary=path.parent)
-    if text is None:
+    if path.is_symlink() or _has_symlink_component(path, path.parent):
+        return ["symlinked fixture file is not allowed: generated flat index"]
+    try:
+        raw = path.read_bytes()
+    except FileNotFoundError:
+        return [f"missing generated flat index: {path.name}"]
+    except OSError as error:
+        return [f"cannot read generated flat index: {path.name}: {type(error).__name__}"]
+    try:
+        text = raw.decode("utf-8")
+    except UnicodeError:
+        return [f"cannot read generated flat index as UTF-8: {path.name}"]
+    if not raw.endswith(b"\n") or b"\r" in raw:
+        errors.append("flat index does not match required UTF-8 bytes")
+    if manifest is not None:
+        expected = _flat_index_text(manifest)
+        if expected is None or raw != expected.encode("utf-8"):
+            if "flat index does not match required UTF-8 bytes" not in errors:
+                errors.append("flat index does not match required UTF-8 bytes")
+    if not text:
         return errors
     frozen_terms = tuple(VALID_STATUSES) + RELATION_KEYS
     if any(
@@ -548,10 +759,8 @@ def validate_flat_index(
         errors.append("flat index leaks action boundary")
     if contains_lifecycle_vocabulary(text):
         errors.append("flat index leaks answer-bearing lifecycle vocabulary")
-    if manifest is not None:
-        expected = _flat_index_text(manifest)
-        if expected is None or text != expected:
-            errors.append("flat index does not match required format")
+    if manifest is not None and raw != (_flat_index_text(manifest) or "").encode("utf-8"):
+        errors.append("flat index does not match required format")
     return errors
 
 
@@ -562,7 +771,7 @@ def validate_state_projection(
 ) -> list[str]:
     """Validate projection schema, manifest equivalence, and body separation."""
     errors: list[str] = []
-    projection = _load_json(
+    projection = _load_canonical_json(
         path,
         "generated state projection",
         errors,
@@ -1107,6 +1316,10 @@ def validate(
     pack_a_path = root / "human-fixtures" / "pack-a.json"
     pack_b_path = root / "human-fixtures" / "pack-b.json"
     if require_generated:
+        pack_a, pack_a_errors = _validate_raw_human_pack(pack_a_path, "pack-a")
+        pack_b, pack_b_errors = _validate_raw_human_pack(pack_b_path, "pack-b")
+        errors.extend(pack_a_errors)
+        errors.extend(pack_b_errors)
         if not flat_index.exists() and not flat_index.is_symlink():
             errors.append("missing generated flat index: generated/flat-index.md")
         else:
@@ -1119,24 +1332,26 @@ def validate(
             errors.extend(validate_state_projection(projection, manifest, record_bodies))
         if not state_table.exists() and not state_table.is_symlink():
             errors.append("missing generated state table: generated/state-table.json")
-        else:
+        elif pack_a is not None and not pack_a_errors:
             errors.extend(
                 validate_human_view(
                     state_table,
                     pack_a_path,
                     view_type="state-table",
                     pack_id="pack-a",
+                    validated_pack=pack_a,
                 )
             )
         if not visual_map.exists() and not visual_map.is_symlink():
             errors.append("missing generated visual map: generated/visual-map.json")
-        else:
+        elif pack_b is not None and not pack_b_errors:
             errors.extend(
                 validate_human_view(
                     visual_map,
                     pack_b_path,
                     view_type="visual-map",
                     pack_id="pack-b",
+                    validated_pack=pack_b,
                 )
             )
 

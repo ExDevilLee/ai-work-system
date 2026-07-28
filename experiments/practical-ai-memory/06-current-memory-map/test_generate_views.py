@@ -1,8 +1,10 @@
 from __future__ import annotations
 
 import json
+import os
 import re
 import shutil
+import stat
 import tempfile
 import unicodedata
 import unittest
@@ -78,6 +80,11 @@ def full_human_fact_set(view: dict[str, object]) -> set[tuple[object, ...]]:
         )
         for record in view["records"]
     }
+
+
+def pack_max_score(pack: dict[str, object]) -> int:
+    """Each frozen human question is worth exactly one point."""
+    return sum(1 for _question in pack["questions"])
 
 
 class GenerateViewsTest(unittest.TestCase):
@@ -221,10 +228,8 @@ class GenerateViewsTest(unittest.TestCase):
             {"active": 2, "superseded": 1, "conflict": 1, "pending-validation": 1}
         )
 
-        def shape(pack: dict[str, object]) -> tuple[Counter, Counter, Counter, int, int]:
+        def shape(pack: dict[str, object]) -> tuple[Counter, Counter, Counter]:
             records = pack["records"]
-            question_count = len(pack["questions"])
-            max_score = sum(1 for _question in pack["questions"])
             return (
                 Counter(record["status"] for record in records),
                 Counter(
@@ -233,13 +238,13 @@ class GenerateViewsTest(unittest.TestCase):
                     for relation in record["relations"]
                 ),
                 Counter(record["scope"] for record in records),
-                question_count,
-                max_score,
             )
 
         self.assertEqual(shape(pack_a), shape(pack_b))
         self.assertEqual(shape(pack_a)[0], expected_statuses)
-        self.assertEqual(shape(pack_a)[3:], (5, 5))
+        for pack in (pack_a, pack_b):
+            self.assertEqual(len(pack["questions"]), 5)
+            self.assertEqual(pack_max_score(pack), 5)
         self.assertEqual(
             {record["id"] for record in pack_a["records"]}
             & {record["id"] for record in pack_b["records"]},
@@ -537,6 +542,7 @@ class GenerateViewsTest(unittest.TestCase):
             "_open_staged_file",
             "_write_staged_file",
             "_flush_staged_file",
+            "_set_staged_mode",
             "_fsync_staged_file",
             "_replace_staged_file",
         )
@@ -553,11 +559,24 @@ class GenerateViewsTest(unittest.TestCase):
                             if not existing:
                                 shutil.rmtree(generated)
                             before = {
-                                name: (generated / name).read_bytes()
+                                name: (
+                                    (generated / name).read_bytes(),
+                                    stat.S_IMODE((generated / name).stat().st_mode),
+                                )
                                 if (generated / name).exists()
                                 else None
                                 for name in GENERATED_NAMES
                             }
+                            if existing:
+                                for index, name in enumerate(GENERATED_NAMES):
+                                    (generated / name).chmod(0o600 + index)
+                                before = {
+                                    name: (
+                                        (generated / name).read_bytes(),
+                                        stat.S_IMODE((generated / name).stat().st_mode),
+                                    )
+                                    for name in GENERATED_NAMES
+                                }
                             original = getattr(generate_views_module, operation)
                             calls = 0
 
@@ -573,18 +592,86 @@ class GenerateViewsTest(unittest.TestCase):
                             with mock.patch.object(
                                 generate_views_module, operation, side_effect=injected
                             ):
-                                with self.assertRaisesRegex(OSError, "injected"):
+                                with self.assertRaises(RuntimeError) as raised:
                                     generate_all(root)
 
+                            self.assertIsInstance(raised.exception.__cause__, OSError)
+                            self.assertNotIn("injected", str(raised.exception))
+
                             after = {
-                                name: (generated / name).read_bytes()
+                                name: (
+                                    (generated / name).read_bytes(),
+                                    stat.S_IMODE((generated / name).stat().st_mode),
+                                )
                                 if (generated / name).exists()
                                 else None
                                 for name in GENERATED_NAMES
                             }
                             self.assertEqual(after, before)
+                            if not existing:
+                                self.assertFalse(generated.exists())
                             self.assertEqual(list(root.rglob("*.tmp")), [])
                             self.assertEqual(list(root.rglob("*.bak")), [])
+
+    def test_success_preserves_existing_modes_and_creates_0644_outputs(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            root = Path(temporary_directory)
+            self.copy_generation_root(root)
+            generated = root / "fixtures" / "pilot-01" / "generated"
+            expected_modes = {}
+            for index, name in enumerate(GENERATED_NAMES):
+                mode = 0o600 + index
+                (generated / name).chmod(mode)
+                expected_modes[name] = mode
+
+            generate_all(root)
+
+            self.assertEqual(
+                {
+                    name: stat.S_IMODE((generated / name).stat().st_mode)
+                    for name in GENERATED_NAMES
+                },
+                expected_modes,
+            )
+
+            shutil.rmtree(generated)
+            previous_umask = os.umask(0o077)
+            try:
+                generate_all(root)
+            finally:
+                os.umask(previous_umask)
+            self.assertEqual(
+                {
+                    stat.S_IMODE((generated / name).stat().st_mode)
+                    for name in GENERATED_NAMES
+                },
+                {0o644},
+            )
+
+    def test_successful_rollback_sanitizes_original_failure(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            root = Path(temporary_directory)
+            self.copy_generation_root(root)
+            private_message = "replace failed at /private/memory.json for LeeSecret"
+            original = generate_views_module._replace_staged_file
+            calls = 0
+
+            def injected(*args, **kwargs):
+                nonlocal calls
+                calls += 1
+                if calls == 4:
+                    raise OSError(private_message)
+                return original(*args, **kwargs)
+
+            with mock.patch.object(
+                generate_views_module, "_replace_staged_file", side_effect=injected
+            ):
+                with self.assertRaises(RuntimeError) as raised:
+                    generate_all(root)
+
+            self.assertIsInstance(raised.exception.__cause__, OSError)
+            self.assertNotIn("/private/memory.json", str(raised.exception))
+            self.assertNotIn("LeeSecret", str(raised.exception))
 
     def test_rollback_failure_reports_both_causes_without_sensitive_paths(self) -> None:
         with tempfile.TemporaryDirectory() as temporary_directory:
@@ -611,9 +698,11 @@ class GenerateViewsTest(unittest.TestCase):
             rendered = str(raised.exception)
             self.assertIn("generation failed", rendered)
             self.assertIn("rollback failed", rendered)
-            self.assertIn("commit exploded", rendered)
-            self.assertIn("rollback exploded", rendered)
+            self.assertIn("OSError", rendered)
+            self.assertNotIn("commit exploded", rendered)
+            self.assertNotIn("rollback exploded", rendered)
             self.assertNotIn("private-operator", rendered)
+            self.assertIsInstance(raised.exception.__cause__, OSError)
             self.assertEqual(list(root.rglob("*.tmp")), [])
 
     def test_real_generator_rerun_leaves_committed_artifacts_unchanged(self) -> None:

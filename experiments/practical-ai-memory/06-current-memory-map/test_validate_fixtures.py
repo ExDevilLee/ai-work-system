@@ -307,6 +307,95 @@ class FixtureValidationTest(unittest.TestCase):
             self.validate_copy(require_generated=True, with_generated=True), []
         )
 
+    def test_rejects_malformed_raw_human_pack_contracts(self) -> None:
+        def add_top_field(pack: dict) -> None:
+            pack["unexpected"] = "value"
+
+        def remove_correct_choice(pack: dict) -> None:
+            del pack["questions"][0]["correct_choice"]
+
+        def invalidate_correct_choice(pack: dict) -> None:
+            pack["questions"][0]["correct_choice"] = "missing-choice"
+
+        def remove_question(pack: dict) -> None:
+            pack["questions"].pop()
+
+        def remove_record(pack: dict) -> None:
+            pack["records"].pop()
+
+        def change_status_distribution(pack: dict) -> None:
+            pack["records"][0]["status"] = "pending-validation"
+
+        def malformed_choices(pack: dict) -> None:
+            pack["questions"][0]["choices"] = [{"id": "only", "label": "Only"}]
+
+        def malformed_relations(pack: dict) -> None:
+            related = next(record for record in pack["records"] if record["relations"])
+            related["relations"] = [{"type": "supersedes", "target": 17}]
+
+        def duplicate_record_id(pack: dict) -> None:
+            pack["records"][1]["id"] = pack["records"][0]["id"]
+
+        def duplicate_question_id(pack: dict) -> None:
+            pack["questions"][1]["id"] = pack["questions"][0]["id"]
+
+        def duplicate_choice_id(pack: dict) -> None:
+            choices = pack["questions"][0]["choices"]
+            choices[1]["id"] = choices[0]["id"]
+
+        mutations = (
+            ("top-level fields", add_top_field),
+            ("question fields", remove_correct_choice),
+            ("correct_choice", invalidate_correct_choice),
+            ("exactly 5 questions", remove_question),
+            ("exactly 5 records", remove_record),
+            ("status distribution", change_status_distribution),
+            ("exactly 3 choices", malformed_choices),
+            ("relation fields", malformed_relations),
+            ("unique record IDs", duplicate_record_id),
+            ("unique question IDs", duplicate_question_id),
+            ("unique choice IDs", duplicate_choice_id),
+        )
+        for expected, mutation in mutations:
+            with self.subTest(expected=expected):
+                def mutate(root: Path, change=mutation) -> None:
+                    path = root / "human-fixtures" / "pack-a.json"
+                    pack = self.load_json(path)
+                    change(pack)
+                    self.write_canonical_json(path, pack)
+
+                errors = self.validate_copy(
+                    mutate, require_generated=True, with_generated=True
+                )
+                self.assertTrue(
+                    any(
+                        "human fixture pack-a" in error and expected in error
+                        for error in errors
+                    ),
+                    errors,
+                )
+
+    def test_rejects_noncanonical_raw_human_pack_bytes(self) -> None:
+        def mutate(root: Path) -> None:
+            path = root / "human-fixtures" / "pack-b.json"
+            pack = self.load_json(path)
+            path.write_bytes(
+                (json.dumps(pack, ensure_ascii=False, indent=2) + "\r\n").encode(
+                    "utf-8"
+                )
+            )
+
+        errors = self.validate_copy(
+            mutate, require_generated=True, with_generated=True
+        )
+        self.assertTrue(
+            any(
+                "human fixture pack-b must use canonical JSON with one LF" in error
+                for error in errors
+            ),
+            errors,
+        )
+
     def test_rejects_empty_human_views(self) -> None:
         for name, label in (
             ("state-table.json", "state table"),
@@ -463,6 +552,28 @@ class FixtureValidationTest(unittest.TestCase):
         self.assertNotIn(uuid, rendered)
         self.assertNotIn(secret, rendered)
 
+    def test_human_pack_privacy_rejects_generic_uuid_and_absolute_paths(self) -> None:
+        sensitive_values = (
+            "0195f4e2-7c8a-7b3d-9f21-123456789abc",
+            "/private/memory.json",
+            r"D:\private\memory.json",
+            r"\\server\share\private",
+        )
+        for sensitive in sensitive_values:
+            with self.subTest(sensitive=sensitive):
+                def mutate(root: Path, value=sensitive) -> None:
+                    path = root / "human-fixtures" / "pack-a.json"
+                    pack = self.load_json(path)
+                    pack["questions"][0]["explanation"] = value
+                    self.write_canonical_json(path, pack)
+
+                errors = self.validate_copy(
+                    mutate, require_generated=True, with_generated=True
+                )
+                rendered = "\n".join(errors)
+                self.assertIn("private-data marker", rendered)
+                self.assertNotIn(sensitive, rendered)
+
     def test_rejects_flat_index_status_leak(self) -> None:
         def mutate(root: Path) -> None:
             path = (
@@ -499,6 +610,16 @@ class FixtureValidationTest(unittest.TestCase):
         )
         self.assertIn("flat index does not match required format", errors)
 
+    def test_rejects_flat_index_crlf_bytes(self) -> None:
+        def mutate(root: Path) -> None:
+            path = root / "fixtures" / "pilot-01" / "generated" / "flat-index.md"
+            path.write_bytes(path.read_bytes().replace(b"\n", b"\r\n"))
+
+        errors = self.validate_copy(
+            mutate, require_generated=True, with_generated=True
+        )
+        self.assertIn("flat index does not match required UTF-8 bytes", errors)
+
     def test_rejects_projection_shape_and_record_field_changes(self) -> None:
         def mutate(root: Path) -> None:
             path = (
@@ -520,6 +641,49 @@ class FixtureValidationTest(unittest.TestCase):
         self.assertTrue(
             any("projection records do not match manifest" in error for error in errors)
         )
+
+    def test_rejects_noncanonical_projection_bytes(self) -> None:
+        mutations = {
+            "pretty": lambda canonical, value: (
+                json.dumps(value, ensure_ascii=False, indent=2) + "\n"
+            ).encode("utf-8"),
+            "crlf": lambda canonical, value: canonical.replace(b"\n", b"\r\n"),
+            "missing-lf": lambda canonical, value: canonical.rstrip(b"\n"),
+            "extra-lf": lambda canonical, value: canonical + b"\n",
+        }
+        for label, transform in mutations.items():
+            with self.subTest(label=label):
+                def mutate(root: Path, byte_transform=transform) -> None:
+                    path = (
+                        root
+                        / "fixtures"
+                        / "pilot-01"
+                        / "generated"
+                        / "state-projection.json"
+                    )
+                    projection = self.load_json(path)
+                    canonical = (
+                        json.dumps(
+                            projection,
+                            sort_keys=True,
+                            ensure_ascii=False,
+                            allow_nan=False,
+                            separators=(",", ":"),
+                        )
+                        + "\n"
+                    ).encode("utf-8")
+                    path.write_bytes(byte_transform(canonical, projection))
+
+                errors = self.validate_copy(
+                    mutate, require_generated=True, with_generated=True
+                )
+                self.assertTrue(
+                    any(
+                        "state projection must use canonical JSON with one LF" in error
+                        for error in errors
+                    ),
+                    errors,
+                )
 
     def test_rejects_projection_fact_or_relation_drift(self) -> None:
         def mutate(root: Path) -> None:
