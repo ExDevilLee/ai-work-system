@@ -634,6 +634,49 @@ class WorkspaceMetricCoverageTest(unittest.TestCase):
                         classify_command_execution(item, workspace), "workspace"
                     )
 
+    def test_powershell_provider_paths_fail_closed(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            workspace = Path(temporary_directory) / "workspace"
+            workspace.mkdir()
+            commands = (
+                "Get-ChildItem Env:",
+                "Get-Content Env:HOME",
+                "Get-Content Variable:HOME",
+                r"Get-ChildItem HKCU:\Software",
+                r"Get-Content Cert:\CurrentUser\My",
+            )
+            events = []
+            for command in commands:
+                with self.subTest(command=command):
+                    item = {"type": "command_execution", "command": command}
+                    self.assertEqual(
+                        classify_command_execution(item, workspace), "external"
+                    )
+                    events.append({"type": "item.completed", "item": item})
+            self.assertEqual(
+                runtime_tool_access_count(events, workspace, workspace),
+                len(commands),
+            )
+
+    def test_powershell_drive_paths_use_windows_containment(self) -> None:
+        workspace = Path(r"C:\workspace")
+        inside = {
+            "type": "command_execution",
+            "command": r"Get-Content C:\workspace\records\item.md",
+        }
+        outside = {
+            "type": "command_execution",
+            "command": r"Get-Content C:\outside\item.md",
+        }
+        relative = {
+            "type": "command_execution",
+            "command": r"Get-ChildItem -Recurse -File records",
+        }
+
+        self.assertEqual(classify_command_execution(inside, workspace), "workspace")
+        self.assertEqual(classify_command_execution(outside, workspace), "external")
+        self.assertEqual(classify_command_execution(relative, workspace), "workspace")
+
     def test_proven_read_only_discovery_commands_are_workspace(self) -> None:
         with tempfile.TemporaryDirectory() as temporary_directory:
             workspace = Path(temporary_directory) / "workspace"

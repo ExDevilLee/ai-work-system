@@ -116,6 +116,7 @@ NODE_FILE_CALL_PATTERN = re.compile(
     r"(?:fs\s*\.\s*)?(?:readfilesync|readfile|readdir|readtextfile|stat)\s*\(",
     flags=re.IGNORECASE,
 )
+POWERSHELL_PROVIDER_PATTERN = re.compile(r"^([A-Za-z][A-Za-z0-9.-]*):(.*)$")
 
 
 def validate_path_identifier(value: str) -> str:
@@ -347,6 +348,28 @@ def _simple_command_targets(command: str) -> Optional[tuple[str, ...]]:
     return None
 
 
+def _uses_powershell_provider(command: str) -> bool:
+    try:
+        tokens = shlex.split(command, posix=False)
+    except ValueError:
+        return False
+    if not tokens:
+        return False
+    executable = Path(tokens[0].strip("\"'")).name.casefold().removesuffix(".exe")
+    if executable not in {"get-content", "get-childitem"}:
+        return False
+    for token in tokens[1:]:
+        target = token.strip("\"'")
+        match = POWERSHELL_PROVIDER_PATTERN.fullmatch(target)
+        if match is None:
+            continue
+        provider_name, remainder = match.groups()
+        if len(provider_name) == 1 and remainder.startswith(("\\", "/")):
+            continue
+        return True
+    return False
+
+
 def command_output_bytes(item: object) -> int:
     if not isinstance(item, dict):
         return 0
@@ -364,6 +387,8 @@ def classify_command_execution(item: object, workspace: Path) -> str:
         return "unknown"
     if re.search(r"(?:\$[A-Za-z_]\w*|%[A-Za-z_]\w*%|\$\(|`)", command):
         return "unknown"
+    if _uses_powershell_provider(command):
+        return "external"
     absolute_paths = _absolute_paths(command)
     if any(not _absolute_path_is_within(path, workspace) for path in absolute_paths):
         return "external"
