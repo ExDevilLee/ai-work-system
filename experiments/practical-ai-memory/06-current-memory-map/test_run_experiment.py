@@ -620,6 +620,16 @@ class WorkspaceMetricCoverageTest(unittest.TestCase):
 
             self.assertEqual(classify_command_execution(item, workspace), "workspace")
 
+    def test_read_only_zsh_wrapper_preserves_workspace_classification(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            workspace = Path(temporary_directory) / "workspace"
+            (workspace / "records").mkdir(parents=True)
+            wrapped = {"type": "command_execution", "command": "/bin/zsh -lc 'cat records/item.md'"}
+            chained = {"type": "command_execution", "command": "/bin/zsh -lc 'cat records/item.md; pwd'"}
+
+            self.assertEqual(classify_command_execution(wrapped, workspace), "workspace")
+            self.assertEqual(classify_command_execution(chained, workspace), "external")
+
     def test_simple_cross_platform_relative_reads_are_workspace(self) -> None:
         with tempfile.TemporaryDirectory() as temporary_directory:
             workspace = Path(temporary_directory) / "workspace"
