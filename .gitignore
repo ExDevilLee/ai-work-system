@@ -7,3 +7,4 @@ __pycache__/
 docs/superpowers/
 docs/reviews/
 docs/plans/
+.worktrees/
