@@ -177,8 +177,10 @@ class MetadataPrivacyTest(unittest.TestCase):
             )
 
             def fake_codex_run(
-                command: list[str], *, check: bool = False, input_text: str | None = None
+                command: list[str], *, check: bool = False, input_text: str | None = None,
+                cwd: Path | None = None,
             ) -> CompletedProcess[str]:
+                self.assertIsNotNone(cwd)
                 output_path = Path(command[command.index("--output-last-message") + 1])
                 output_path.write_text("synthetic answer\n", encoding="utf-8")
                 stdout = "\n".join(

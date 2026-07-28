@@ -951,7 +951,8 @@ def resolve_codex_executable() -> str:
 
 
 def run_utf8_command(
-    command: Sequence[str], *, check: bool = False, input_text: Optional[str] = None
+    command: Sequence[str], *, check: bool = False, input_text: Optional[str] = None,
+    cwd: Optional[Path] = None,
 ) -> subprocess.CompletedProcess[str]:
     return subprocess.run(
         command,
@@ -960,6 +961,7 @@ def run_utf8_command(
         text=True,
         encoding="utf-8",
         input=input_text,
+        cwd=cwd,
     )
 
 
@@ -1122,7 +1124,7 @@ def main() -> int:
         prompt_text = prompt_path.read_text(encoding="utf-8")
 
         started = time.monotonic()
-        result = run_utf8_command(command, input_text=prompt_text)
+        result = run_utf8_command(command, input_text=prompt_text, cwd=workspace)
         elapsed_seconds = round(time.monotonic() - started, 3)
 
     (run_dir / "raw.jsonl").write_text(result.stdout, encoding="utf-8")
