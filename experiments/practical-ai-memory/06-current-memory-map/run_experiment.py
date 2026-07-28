@@ -113,7 +113,7 @@ NESTED_INTERPRETER_PATTERN = re.compile(
     flags=re.IGNORECASE,
 )
 NODE_FILE_CALL_PATTERN = re.compile(
-    r"(?:fs\s*\.\s*)?(?:readfile|readdir|readtextfile|stat)\s*\(",
+    r"(?:fs\s*\.\s*)?(?:readfilesync|readfile|readdir|readtextfile|stat)\s*\(",
     flags=re.IGNORECASE,
 )
 
@@ -223,20 +223,9 @@ def _path_target_classification(path_text: str, workspace: Path) -> str:
     return "workspace"
 
 
-def _simple_command_targets(command: str) -> Optional[tuple[str, ...]]:
-    """Return every target for a deliberately small read-only command allowlist."""
-    if re.search(r"[;&|<>`]", command):
-        return None
-    try:
-        tokens = shlex.split(command, posix=True)
-    except ValueError:
-        return None
-    if not tokens:
-        return None
-    executable = Path(tokens[0]).name.casefold()
-    if executable not in {"cat", "type", "get-content"}:
-        return None
-
+def _content_command_targets(
+    executable: str, tokens: Sequence[str]
+) -> Optional[tuple[str, ...]]:
     targets: list[str] = []
     index = 1
     while index < len(tokens):
@@ -258,6 +247,110 @@ def _simple_command_targets(command: str) -> Optional[tuple[str, ...]]:
         targets.append(token)
         index += 1
     return tuple(targets) if targets else None
+
+
+def _rg_command_targets(tokens: Sequence[str]) -> Optional[tuple[str, ...]]:
+    files_mode = "--files" in tokens[1:]
+    positional: list[str] = []
+    index = 1
+    while index < len(tokens):
+        token = tokens[index]
+        lowered = token.casefold()
+        if lowered in {"--files", "--hidden", "--no-ignore", "-n", "-i"}:
+            index += 1
+            continue
+        if lowered in {"-g", "--glob"}:
+            index += 2
+            if index > len(tokens):
+                return None
+            continue
+        if lowered.startswith("--glob="):
+            index += 1
+            continue
+        if token.startswith("-"):
+            return None
+        positional.append(token)
+        index += 1
+    if files_mode:
+        return tuple(positional) if positional else None
+    if len(positional) < 2:
+        return None
+    return tuple(positional[1:])
+
+
+def _find_command_targets(tokens: Sequence[str]) -> Optional[tuple[str, ...]]:
+    expression_index = next(
+        (index for index, token in enumerate(tokens[1:], start=1) if token.startswith("-")),
+        len(tokens),
+    )
+    targets = tuple(tokens[1:expression_index])
+    expression = tuple(token.casefold() for token in tokens[expression_index:])
+    if not targets or expression != ("-type", "f"):
+        return None
+    return targets
+
+
+def _sed_command_targets(tokens: Sequence[str]) -> Optional[tuple[str, ...]]:
+    index = 1
+    if index < len(tokens) and tokens[index] == "-n":
+        index += 1
+    if index >= len(tokens) or re.fullmatch(r"\d+(?:,\d+)?p", tokens[index]) is None:
+        return None
+    targets = tuple(tokens[index + 1 :])
+    return targets if targets else None
+
+
+def _get_child_item_targets(tokens: Sequence[str]) -> Optional[tuple[str, ...]]:
+    targets: list[str] = []
+    index = 1
+    while index < len(tokens):
+        token = tokens[index]
+        lowered = token.casefold()
+        if lowered in {"-recurse", "-file"}:
+            index += 1
+            continue
+        if lowered in {"-path", "-literalpath"}:
+            index += 1
+            if index >= len(tokens):
+                return None
+            targets.append(tokens[index])
+            index += 1
+            continue
+        if token.startswith("-"):
+            return None
+        targets.append(token)
+        index += 1
+    return tuple(targets) if targets else None
+
+
+def _simple_command_targets(command: str) -> Optional[tuple[str, ...]]:
+    """Return all path targets for a strict, read-only command allowlist."""
+    if re.search(r"[;&|<>`]", command):
+        return None
+    try:
+        tokens = shlex.split(command, posix=True)
+    except ValueError:
+        return None
+    if not tokens:
+        return None
+    executable = Path(tokens[0]).name.casefold().removesuffix(".exe")
+    if executable in {"cat", "type", "get-content"}:
+        return _content_command_targets(executable, tokens)
+    if executable == "rg":
+        return _rg_command_targets(tokens)
+    if executable == "find":
+        return _find_command_targets(tokens)
+    if executable == "sed":
+        return _sed_command_targets(tokens)
+    if executable == "get-childitem":
+        return _get_child_item_targets(tokens)
+    return None
+
+
+def command_output_bytes(item: object) -> int:
+    if not isinstance(item, dict):
+        return 0
+    return len(str(item.get("aggregated_output", "")).encode("utf-8"))
 
 
 def classify_command_execution(item: object, workspace: Path) -> str:
@@ -493,12 +586,61 @@ def _cwd_variable_is_bound(code: str, variable: str) -> bool:
     return binding is not None and len(assignments) == 1
 
 
+def _split_expression_arguments(value: str) -> Optional[tuple[str, ...]]:
+    arguments: list[str] = []
+    quote: Optional[str] = None
+    escaped = False
+    start = 0
+    for index, character in enumerate(value):
+        if quote is not None:
+            if escaped:
+                escaped = False
+            elif character == "\\":
+                escaped = True
+            elif character == quote:
+                quote = None
+            continue
+        if character in {"'", '"'}:
+            quote = character
+        elif character in "()":
+            return None
+        elif character == ",":
+            arguments.append(value[start:index].strip())
+            start = index + 1
+    if quote is not None:
+        return None
+    arguments.append(value[start:].strip())
+    return tuple(arguments) if all(arguments) else None
+
+
+def _literal_path_join(expression: str, workspace: Path) -> Optional[str]:
+    match = re.fullmatch(r"\s*path\.join\s*\((.*)\)\s*", expression, re.DOTALL)
+    if match is None:
+        return None
+    arguments = _split_expression_arguments(match.group(1))
+    if arguments is None:
+        return None
+    fragments: list[str] = []
+    for argument in arguments:
+        fragment = _literal_string(argument)
+        if fragment is None:
+            return None
+        if _path_target_classification(fragment, workspace) != "workspace":
+            return None
+        fragments.append(fragment.strip("/\\"))
+    return "/".join(fragment for fragment in fragments if fragment)
+
+
 def _node_target_classification(
     expression: str, code: str, workspace: Path
 ) -> str:
     literal = _literal_string(expression)
     if literal is not None:
         return _path_target_classification(literal, workspace)
+
+    literal_join = _literal_path_join(expression, workspace)
+    if literal_join is not None:
+        return _path_target_classification(literal_join, workspace)
 
     if re.fullmatch(r"\s*process\.cwd\(\)\s*", expression):
         return "workspace"
@@ -991,8 +1133,7 @@ def main() -> int:
         "workspace_output_bytes_reliable": workspace_metric_coverage_complete,
         "mixed_scope_adjusted_bytes": 0,
         "workspace_output_bytes": sum(
-            len(item.get("aggregated_output", "").encode("utf-8"))
-            for item in workspace_commands
+            command_output_bytes(item) for item in workspace_commands
         )
         + mcp_workspace_bytes,
         "resident_instruction_bytes": resident_instruction_bytes(fixture),

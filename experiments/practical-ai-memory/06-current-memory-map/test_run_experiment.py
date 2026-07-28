@@ -21,6 +21,7 @@ from run_experiment import (
     build_codex_command,
     classify_command_execution,
     classify_mcp_tool_call,
+    command_output_bytes,
     ensure_contained_path,
     has_unmeasured_mcp_tool_calls,
     mcp_workspace_metrics,
@@ -633,6 +634,35 @@ class WorkspaceMetricCoverageTest(unittest.TestCase):
                         classify_command_execution(item, workspace), "workspace"
                     )
 
+    def test_proven_read_only_discovery_commands_are_workspace(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            workspace = Path(temporary_directory) / "workspace"
+            (workspace / "records").mkdir(parents=True)
+            commands = (
+                "rg --files .",
+                "rg pattern records",
+                "rg -g '*.md' pattern records generated",
+                "find records -type f",
+                "sed -n 1,40p records/item.md",
+                "Get-ChildItem -Recurse -File records",
+            )
+            for command in commands:
+                with self.subTest(command=command):
+                    item = {"type": "command_execution", "command": command}
+                    self.assertEqual(
+                        classify_command_execution(item, workspace), "workspace"
+                    )
+
+    def test_discovery_command_bytes_use_actual_tool_output(self) -> None:
+        output = "records/alpha.md\nrecords/中文.md\n"
+        item = {
+            "type": "command_execution",
+            "command": "rg --files .",
+            "aggregated_output": output,
+        }
+
+        self.assertEqual(command_output_bytes(item), len(output.encode("utf-8")))
+
     def test_non_file_command_remains_non_workspace(self) -> None:
         with tempfile.TemporaryDirectory() as temporary_directory:
             workspace = Path(temporary_directory) / "workspace"
@@ -668,6 +698,10 @@ class WorkspaceMetricCoverageTest(unittest.TestCase):
                 "cat $HOME/outside.md",
                 "cat $(pwd)/records/item.md",
                 "node -e \"require('fs').readFileSync('records/item.md')\"",
+                "rg pattern $HOME",
+                "find $(pwd) -type f",
+                "sed -n 1,40p $USERPROFILE/outside.md",
+                "Get-ChildItem -Recurse -File $env:USERPROFILE",
             )
             for command in commands:
                 with self.subTest(command=command):
@@ -682,12 +716,15 @@ class WorkspaceMetricCoverageTest(unittest.TestCase):
             workspace = root / "workspace"
             workspace.mkdir()
             external = root / "outside.md"
-            item = {
-                "type": "command_execution",
-                "command": f'cat records/item.md "{external}"',
-            }
-
-            self.assertEqual(classify_command_execution(item, workspace), "external")
+            for command in (
+                f'cat records/item.md "{external}"',
+                f'rg pattern records "{external}"',
+            ):
+                with self.subTest(command=command):
+                    item = {"type": "command_execution", "command": command}
+                    self.assertEqual(
+                        classify_command_execution(item, workspace), "external"
+                    )
 
     def test_mcp_mixed_workspace_and_external_read_fails_closed(self) -> None:
         with tempfile.TemporaryDirectory() as temporary_directory:
@@ -784,13 +821,38 @@ class WorkspaceMetricCoverageTest(unittest.TestCase):
                 ("unknown", None),
             )
 
-    def test_mcp_unresolved_path_expressions_are_unknown(self) -> None:
+    def test_mcp_literal_path_join_and_sync_read_are_workspace(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            workspace = Path(temporary_directory) / "workspace"
+            (workspace / "records").mkdir(parents=True)
+            output = "fixture result 中文\n"
+            for code in (
+                "fs.readFileSync('records/item.md')",
+                "fs.readFileSync(path.join('records', 'item.md'))",
+            ):
+                with self.subTest(code=code):
+                    item = {
+                        "type": "mcp_tool_call",
+                        "server": "node_repl",
+                        "tool": "js",
+                        "arguments": {"code": code},
+                        "result": {
+                            "content": [{"type": "text", "text": output}]
+                        },
+                    }
+                    self.assertEqual(
+                        classify_mcp_tool_call(item, workspace, workspace),
+                        ("workspace", len(output.encode("utf-8"))),
+                    )
+
+    def test_mcp_dynamic_path_join_remains_unknown(self) -> None:
         with tempfile.TemporaryDirectory() as temporary_directory:
             workspace = Path(temporary_directory) / "workspace"
             (workspace / "records").mkdir(parents=True)
             for code in (
-                "fs.readFile(path.join('records', 'item.md'))",
+                "fs.readFile(path.join('records', selectedName))",
                 "fs.readFile('records/' + selectedName)",
+                "fs.readFileSync(path.join(process.env.HOME, 'outside.md'))",
             ):
                 with self.subTest(code=code):
                     item = {
