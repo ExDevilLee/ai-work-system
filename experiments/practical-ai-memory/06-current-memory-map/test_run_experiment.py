@@ -693,6 +693,8 @@ class WorkspaceMetricCoverageTest(unittest.TestCase):
             (workspace / "records").mkdir(parents=True)
             commands = (
                 "rg --files .",
+                "rg --files",
+                "rg pattern",
                 "rg pattern records",
                 "rg -g '*.md' pattern records generated",
                 "find records -type f",

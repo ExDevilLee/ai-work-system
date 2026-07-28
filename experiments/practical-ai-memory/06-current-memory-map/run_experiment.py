@@ -273,7 +273,9 @@ def _rg_command_targets(tokens: Sequence[str]) -> Optional[tuple[str, ...]]:
         positional.append(token)
         index += 1
     if files_mode:
-        return tuple(positional) if positional else None
+        return tuple(positional) if positional else (".",)
+    if len(positional) == 1:
+        return (".",)
     if len(positional) < 2:
         return None
     return tuple(positional[1:])
