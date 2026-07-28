@@ -186,7 +186,12 @@ class MetadataPrivacyTest(unittest.TestCase):
                                 "type": "item.completed",
                                 "item": {
                                     "type": "command_execution",
-                                    "command": f'cat "{external}"',
+                                    "command": (
+                                        "cat records/record.md; "
+                                        "python -c \"import os; "
+                                        "open(os.path.join(os.getenv('HOME'), "
+                                        "'outside.md'))\""
+                                    ),
                                     "aggregated_output": "outside\n",
                                 },
                             }
@@ -614,6 +619,63 @@ class WorkspaceMetricCoverageTest(unittest.TestCase):
 
             self.assertEqual(classify_command_execution(item, workspace), "workspace")
 
+    def test_simple_cross_platform_relative_reads_are_workspace(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            workspace = Path(temporary_directory) / "workspace"
+            (workspace / "records").mkdir(parents=True)
+            for command in (
+                "type records/item.md",
+                "Get-Content records/item.md",
+            ):
+                with self.subTest(command=command):
+                    item = {"type": "command_execution", "command": command}
+                    self.assertEqual(
+                        classify_command_execution(item, workspace), "workspace"
+                    )
+
+    def test_non_file_command_remains_non_workspace(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            workspace = Path(temporary_directory) / "workspace"
+            workspace.mkdir()
+            item = {"type": "command_execution", "command": "pwd"}
+
+            self.assertEqual(
+                classify_command_execution(item, workspace), "non_workspace"
+            )
+
+    def test_nested_interpreter_environment_read_is_unknown(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            workspace = Path(temporary_directory) / "workspace"
+            (workspace / "records").mkdir(parents=True)
+            item = {
+                "type": "command_execution",
+                "command": (
+                    "cat records/alpha.md; "
+                    "python -c \"import os; "
+                    "open(os.path.join(os.getenv('HOME'),'outside.md'))\""
+                ),
+            }
+
+            self.assertEqual(
+                classify_command_execution(item, workspace), "unknown"
+            )
+
+    def test_dynamic_or_nested_command_targets_are_unknown(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            workspace = Path(temporary_directory) / "workspace"
+            workspace.mkdir()
+            commands = (
+                "cat $HOME/outside.md",
+                "cat $(pwd)/records/item.md",
+                "node -e \"require('fs').readFileSync('records/item.md')\"",
+            )
+            for command in commands:
+                with self.subTest(command=command):
+                    item = {"type": "command_execution", "command": command}
+                    self.assertEqual(
+                        classify_command_execution(item, workspace), "unknown"
+                    )
+
     def test_command_mixed_workspace_and_external_read_is_external(self) -> None:
         with tempfile.TemporaryDirectory() as temporary_directory:
             root = Path(temporary_directory)
@@ -697,6 +759,53 @@ class WorkspaceMetricCoverageTest(unittest.TestCase):
                 classify_mcp_tool_call(item, workspace, workspace),
                 ("unknown", None),
             )
+
+    def test_mcp_safe_read_plus_environment_target_is_unknown(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            workspace = Path(temporary_directory) / "workspace"
+            (workspace / "records").mkdir(parents=True)
+            body = "frozen fixture body with enough bytes for matching\n"
+            (workspace / "records/item.md").write_text(body, encoding="utf-8")
+            item = {
+                "type": "mcp_tool_call",
+                "server": "node_repl",
+                "tool": "js",
+                "arguments": {
+                    "code": (
+                        "fs.readFile('records/item.md'); "
+                        "fs.readFile(process.env.HOME + '/outside.md')"
+                    )
+                },
+                "result": {"content": [{"type": "text", "text": body}]},
+            }
+
+            self.assertEqual(
+                classify_mcp_tool_call(item, workspace, workspace),
+                ("unknown", None),
+            )
+
+    def test_mcp_unresolved_path_expressions_are_unknown(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            workspace = Path(temporary_directory) / "workspace"
+            (workspace / "records").mkdir(parents=True)
+            for code in (
+                "fs.readFile(path.join('records', 'item.md'))",
+                "fs.readFile('records/' + selectedName)",
+            ):
+                with self.subTest(code=code):
+                    item = {
+                        "type": "mcp_tool_call",
+                        "server": "node_repl",
+                        "tool": "js",
+                        "arguments": {"code": code},
+                        "result": {
+                            "content": [{"type": "text", "text": "untrusted"}]
+                        },
+                    }
+                    self.assertEqual(
+                        classify_mcp_tool_call(item, workspace, workspace),
+                        ("unknown", None),
+                    )
 
     def test_mcp_relative_read_is_workspace(self) -> None:
         with tempfile.TemporaryDirectory() as temporary_directory:

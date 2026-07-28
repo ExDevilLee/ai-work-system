@@ -10,6 +10,7 @@ import ntpath
 import os
 import platform
 import re
+import shlex
 import shutil
 import subprocess
 import tempfile
@@ -54,7 +55,6 @@ SAFE_IDENTIFIER_PATTERN = re.compile(r"[A-Za-z0-9][A-Za-z0-9._-]*\Z")
 ABSOLUTE_PATH_PATTERN = re.compile(
     r"(?:[A-Za-z]:[\\/][^\s\"';|,)]+|(?<![A-Za-z0-9_.-])/(?:[^\s\"';|,)]+))"
 )
-QUOTED_VALUE_PATTERN = re.compile(r"[\"']([^\"']+)[\"']")
 COMMAND_FILE_MARKERS = (
     "cat ",
     "type ",
@@ -88,6 +88,33 @@ DANGEROUS_PATH_MARKERS = (
     "process.chdir",
     "os.chdir",
     "set-location",
+)
+ENVIRONMENT_PATH_MARKERS = (
+    "process.env",
+    "getenv(",
+    "os.getenv",
+    "os.environ",
+    "expanduser",
+    "homedir(",
+    "path.home(",
+    "environment.getfolderpath",
+    "userprofile",
+    "$home",
+    "${",
+    "$env",
+    "$env:",
+    "%home%",
+    "%homepath%",
+    "%userprofile%",
+)
+NESTED_INTERPRETER_PATTERN = re.compile(
+    r"(?:^|[;&|]\s*)(?:python(?:3)?|node|(?:ba|z)?sh|cmd|powershell|pwsh)"
+    r"(?:\.exe)?\s+(?:-[A-Za-z]*[ce]\b|/c\b|-command\b)",
+    flags=re.IGNORECASE,
+)
+NODE_FILE_CALL_PATTERN = re.compile(
+    r"(?:fs\s*\.\s*)?(?:readfile|readdir|readtextfile|stat)\s*\(",
+    flags=re.IGNORECASE,
 )
 
 
@@ -175,20 +202,62 @@ def _has_dangerous_relative_path(value: str) -> bool:
     return any(marker in lowered for marker in DANGEROUS_PATH_MARKERS)
 
 
-def _has_unproven_file_variable(value: str) -> bool:
-    for match in re.finditer(
-        r"(?:readfile|readdir|readtextfile|stat)\s*\(\s*([A-Za-z_$][A-Za-z0-9_$]*)\s*\)",
-        value,
-        flags=re.IGNORECASE,
-    ):
-        variable = match.group(1)
-        binding = re.search(
-            rf"(?:const|let|var)\s+{re.escape(variable)}\s*=\s*process\.cwd\(\)",
-            value,
+def _path_target_classification(path_text: str, workspace: Path) -> str:
+    path_text = path_text.strip()
+    if not path_text or _has_dangerous_relative_path(path_text):
+        return "unknown"
+    if re.match(r"^[A-Za-z]:[\\/]", path_text) or path_text.startswith("/"):
+        return (
+            "workspace"
+            if _absolute_path_is_within(path_text, workspace)
+            else "external"
         )
-        if binding is None:
-            return True
-    return False
+    if any(character in path_text for character in ("\0", "\n", "\r")):
+        return "unknown"
+    try:
+        (workspace / path_text).resolve(strict=False).relative_to(
+            workspace.resolve(strict=False)
+        )
+    except (OSError, RuntimeError, ValueError):
+        return "external"
+    return "workspace"
+
+
+def _simple_command_targets(command: str) -> Optional[tuple[str, ...]]:
+    """Return every target for a deliberately small read-only command allowlist."""
+    if re.search(r"[;&|<>`]", command):
+        return None
+    try:
+        tokens = shlex.split(command, posix=True)
+    except ValueError:
+        return None
+    if not tokens:
+        return None
+    executable = Path(tokens[0]).name.casefold()
+    if executable not in {"cat", "type", "get-content"}:
+        return None
+
+    targets: list[str] = []
+    index = 1
+    while index < len(tokens):
+        token = tokens[index]
+        lowered = token.casefold()
+        if token.startswith("-"):
+            if executable == "get-content" and lowered in {
+                "-path",
+                "-literalpath",
+            }:
+                index += 1
+                if index >= len(tokens):
+                    return None
+                targets.append(tokens[index])
+            elif executable == "get-content" and lowered != "-raw":
+                return None
+            index += 1
+            continue
+        targets.append(token)
+        index += 1
+    return tuple(targets) if targets else None
 
 
 def classify_command_execution(item: object, workspace: Path) -> str:
@@ -196,35 +265,30 @@ def classify_command_execution(item: object, workspace: Path) -> str:
         return "unknown"
     command = str(item.get("command", ""))
     lowered = command.casefold()
+    if NESTED_INTERPRETER_PATTERN.search(command):
+        return "unknown"
+    if any(marker in lowered for marker in ENVIRONMENT_PATH_MARKERS):
+        return "unknown"
+    if re.search(r"(?:\$[A-Za-z_]\w*|%[A-Za-z_]\w*%|\$\(|`)", command):
+        return "unknown"
+    absolute_paths = _absolute_paths(command)
+    if any(not _absolute_path_is_within(path, workspace) for path in absolute_paths):
+        return "external"
+    targets = _simple_command_targets(command)
+    if targets is not None:
+        classifications = {
+            _path_target_classification(target, workspace) for target in targets
+        }
+        if "external" in classifications:
+            return "external"
+        if classifications == {"workspace"}:
+            return "workspace"
+        return "unknown"
     if not any(marker in lowered for marker in COMMAND_FILE_MARKERS):
         stripped = lowered.strip()
         if any(stripped == prefix or stripped.startswith(prefix) for prefix in COMMAND_NON_FILE_PREFIXES):
             return "non_workspace"
         return "unknown"
-    absolute_paths = _absolute_paths(command)
-    if any(not _absolute_path_is_within(path, workspace) for path in absolute_paths):
-        return "external"
-    if _has_dangerous_relative_path(command):
-        return "unknown"
-    if re.search(r"(?:\$[A-Za-z_]\w*|%[A-Za-z_]\w*%)", command):
-        return "unknown"
-    if re.search(r"(?:^|[;&|])\s*cd\s+", lowered):
-        return "unknown"
-    if absolute_paths:
-        return "workspace"
-    quoted_values = QUOTED_VALUE_PATTERN.findall(command)
-    has_safe_relative = any(
-        value
-        and not value.startswith(("/", "~"))
-        and not re.match(r"^[A-Za-z]:[\\/]", value)
-        and not _has_dangerous_relative_path(value)
-        and ("/" in value or "\\" in value or "." in Path(value).name)
-        for value in quoted_values
-    )
-    if has_safe_relative or re.search(r"(?:^|\s)(?:\./)?[A-Za-z0-9_.-]+[/\\][^\s]+", command):
-        return "workspace"
-    if "get-childitem" in lowered or re.search(r"(?:^|\s)(?:rg|find|dir)\s+\.?(?:\s|$)", lowered):
-        return "workspace"
     return "unknown"
 
 
@@ -373,6 +437,107 @@ def mcp_argument_strings(item: object) -> tuple[str, ...]:
     return ()
 
 
+def _first_call_argument(value: str, opening_parenthesis: int) -> Optional[str]:
+    depth = 0
+    quote: Optional[str] = None
+    escaped = False
+    start = opening_parenthesis + 1
+    for index in range(start, len(value)):
+        character = value[index]
+        if quote is not None:
+            if escaped:
+                escaped = False
+            elif character == "\\":
+                escaped = True
+            elif character == quote:
+                quote = None
+            continue
+        if character in {"'", '"'}:
+            quote = character
+        elif character == "(":
+            depth += 1
+        elif character == ")":
+            if depth == 0:
+                return value[start:index].strip()
+            depth -= 1
+        elif character == "," and depth == 0:
+            return value[start:index].strip()
+    return None
+
+
+def _node_file_targets(code: str) -> Optional[tuple[str, ...]]:
+    targets: list[str] = []
+    for match in NODE_FILE_CALL_PATTERN.finditer(code):
+        target = _first_call_argument(code, match.end() - 1)
+        if target is None:
+            return None
+        targets.append(target)
+    return tuple(targets) if targets else None
+
+
+def _literal_string(expression: str) -> Optional[str]:
+    match = re.fullmatch(r"\s*(['\"])(.*?)\1\s*", expression, flags=re.DOTALL)
+    if match is None:
+        return None
+    return match.group(2)
+
+
+def _cwd_variable_is_bound(code: str, variable: str) -> bool:
+    binding = re.search(
+        rf"(?:const|let|var)\s+{re.escape(variable)}\s*=\s*process\.cwd\(\)\s*;?",
+        code,
+    )
+    assignments = re.findall(
+        rf"\b{re.escape(variable)}\s*(?:[+\-*/])?=(?!=)", code
+    )
+    return binding is not None and len(assignments) == 1
+
+
+def _node_target_classification(
+    expression: str, code: str, workspace: Path
+) -> str:
+    literal = _literal_string(expression)
+    if literal is not None:
+        return _path_target_classification(literal, workspace)
+
+    if re.fullmatch(r"\s*process\.cwd\(\)\s*", expression):
+        return "workspace"
+    variable_match = re.fullmatch(r"\s*([A-Za-z_$][A-Za-z0-9_$]*)\s*", expression)
+    if variable_match and _cwd_variable_is_bound(code, variable_match.group(1)):
+        return "workspace"
+
+    cwd_suffix = re.fullmatch(
+        r"\s*(process\.cwd\(\)|[A-Za-z_$][A-Za-z0-9_$]*)\s*\+\s*"
+        r"(['\"])(.*?)\2\s*",
+        expression,
+        flags=re.DOTALL,
+    )
+    if cwd_suffix is not None:
+        root = cwd_suffix.group(1)
+        if root != "process.cwd()" and not _cwd_variable_is_bound(code, root):
+            return "unknown"
+        suffix = cwd_suffix.group(3).lstrip("/\\")
+        return _path_target_classification(suffix, workspace)
+
+    scoped_entry = re.fullmatch(
+        r"\s*(['\"])([^'\"]*[/\\])\1\s*\+\s*"
+        r"([A-Za-z_$][A-Za-z0-9_$]*)\s*",
+        expression,
+    )
+    if scoped_entry is not None:
+        prefix = scoped_entry.group(2).rstrip("/\\")
+        variable = scoped_entry.group(3)
+        escaped_prefix = re.escape(prefix)
+        listing_pattern = re.compile(
+            rf"(?:fs\s*\.\s*)?readdir\s*\(\s*(['\"])"
+            rf"{escaped_prefix}\1\s*\).*?\b{re.escape(variable)}\s*=>",
+            flags=re.IGNORECASE | re.DOTALL,
+        )
+        if listing_pattern.search(code):
+            return _path_target_classification(prefix, workspace)
+    return "unknown"
+
+
 def fixture_path_markers(fixture: Optional[Path]) -> set[str]:
     if fixture is None or not fixture.is_dir():
         return set()
@@ -423,6 +588,7 @@ def classify_mcp_tool_call(
 
     argument_values = mcp_argument_strings(item)
     args_text = "\n".join(argument_values).replace("\\", "/")
+    lowered_args = args_text.casefold()
     tool_text = str(tool or "").casefold()
     absolute_paths = _absolute_paths(args_text)
     has_file_operation = (
@@ -448,36 +614,33 @@ def classify_mcp_tool_call(
         return "non_workspace", None
     if workspace is None:
         return "unknown", None
+    if any(marker in lowered_args for marker in ENVIRONMENT_PATH_MARKERS):
+        return "unknown", None
+    if re.search(r"(?:\$\(|`|\$[A-Za-z_]\w*|%[A-Za-z_]\w*%)", args_text):
+        return "unknown", None
     if any(not _absolute_path_is_within(path, workspace) for path in absolute_paths):
         return "external", None
     if _has_dangerous_relative_path(args_text):
         return "unknown", None
-    if _has_unproven_file_variable(args_text):
-        return "unknown", None
 
-    markers = fixture_path_markers(fixture)
-    quoted_values = QUOTED_VALUE_PATTERN.findall(args_text)
-    has_safe_relative = any(
-        value
-        and not re.match(r"^[A-Za-z]:[\\/]", value)
-        and not value.startswith("/")
-        and not _has_dangerous_relative_path(value)
-        and (
-            "/" in value
-            or "\\" in value
-            or "." in Path(value).name
-            or value in {"records", "generated"}
-        )
-        for value in quoted_values
-    )
-    access_is_proven = (
-        bool(absolute_paths)
-        or "process.cwd" in args_text
-        or has_safe_relative
-        or any(marker in args_text for marker in markers)
-    )
-    if not access_is_proven:
-        return "unknown", None
+    if server == "node_repl":
+        targets = _node_file_targets(args_text)
+        if targets is None:
+            return "unknown", None
+        classifications = {
+            _node_target_classification(target, args_text, workspace)
+            for target in targets
+        }
+        if "external" in classifications:
+            return "external", None
+        if classifications != {"workspace"}:
+            return "unknown", None
+    else:
+        if len(argument_values) != 1:
+            return "unknown", None
+        classification = _path_target_classification(argument_values[0], workspace)
+        if classification != "workspace":
+            return classification, None
 
     result_text = mcp_result_text(item)
     if result_text is None:
