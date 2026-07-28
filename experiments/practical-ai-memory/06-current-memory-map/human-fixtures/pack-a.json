@@ -1,0 +1,113 @@
+{
+  "schema_version": 1,
+  "pack_id": "pack-a",
+  "records": [
+    {
+      "id": "A-ORBIT-11",
+      "title": "Orbit Preview Rule",
+      "status": "active",
+      "scope": "macos",
+      "source": "brief-a-orbit",
+      "relations": [],
+      "detail": "Quartz preview is approved for macOS release checks and has no authority outside that platform."
+    },
+    {
+      "id": "A-VAULT-21",
+      "title": "Vault Retention Draft",
+      "status": "superseded",
+      "scope": "project",
+      "source": "brief-a-vault-old",
+      "relations": [],
+      "detail": "Release bundles were once kept for 10 days; this entry remains only to explain earlier cleanup."
+    },
+    {
+      "id": "A-VAULT-22",
+      "title": "Vault Retention Decision",
+      "status": "active",
+      "scope": "project",
+      "source": "brief-a-vault-new",
+      "relations": [
+        {
+          "type": "supersedes",
+          "target": "A-VAULT-21"
+        }
+      ],
+      "detail": "Release bundles are kept for 28 days before cleanup under the approved project decision."
+    },
+    {
+      "id": "A-PULSE-31",
+      "title": "Pulse Interval Comparison",
+      "status": "conflict",
+      "scope": "project",
+      "source": "brief-a-pulse",
+      "relations": [],
+      "detail": "One controlled run favored a 12-minute refresh while another workload favored a 36-minute refresh; no selection is approved."
+    },
+    {
+      "id": "A-SPARK-41",
+      "title": "Spark Retry Observation",
+      "status": "pending-validation",
+      "scope": "project",
+      "source": "brief-a-spark",
+      "relations": [],
+      "detail": "A single trial completed after a fourth retry, but repetition and review are still required before changing recovery rules."
+    }
+  ],
+  "questions": [
+    {
+      "id": "QA-current-active",
+      "prompt": "Which retention entry currently guides cleanup for this project?",
+      "choices": [
+        {"id": "QA1-vault-old", "label": "Vault Retention Draft"},
+        {"id": "QA1-vault-new", "label": "Vault Retention Decision"},
+        {"id": "QA1-spark", "label": "Spark Retry Observation"}
+      ],
+      "correct_choice": "QA1-vault-new",
+      "explanation": "The 28-day decision is active and project-scoped."
+    },
+    {
+      "id": "QA-replacement-relation",
+      "prompt": "How should the earlier 10-day retention entry be treated?",
+      "choices": [
+        {"id": "QA2-continue", "label": "Continue using it for every cleanup"},
+        {"id": "QA2-history", "label": "Keep it only as history after its replacement"},
+        {"id": "QA2-conflict", "label": "Treat both retention entries as unresolved"}
+      ],
+      "correct_choice": "QA2-history",
+      "explanation": "The active 28-day entry explicitly supersedes the 10-day entry."
+    },
+    {
+      "id": "QA-unresolved-conflict",
+      "prompt": "What is justified by the two Pulse refresh results?",
+      "choices": [
+        {"id": "QA3-twelve", "label": "Adopt 12 minutes immediately"},
+        {"id": "QA3-thirty-six", "label": "Adopt 36 minutes immediately"},
+        {"id": "QA3-pause", "label": "Preserve both values until comparison resolves them"}
+      ],
+      "correct_choice": "QA3-pause",
+      "explanation": "The record is a single unresolved conflict containing two workload results."
+    },
+    {
+      "id": "QA-scope-boundary",
+      "prompt": "Where may the Orbit Quartz preview rule guide a release check?",
+      "choices": [
+        {"id": "QA4-everywhere", "label": "Every platform in the project"},
+        {"id": "QA4-macos", "label": "macOS only"},
+        {"id": "QA4-nowhere", "label": "No platform until another trial"}
+      ],
+      "correct_choice": "QA4-macos",
+      "explanation": "The active rule is explicitly limited to macOS."
+    },
+    {
+      "id": "QA-pending-observation",
+      "prompt": "What should happen after the one-off fourth-retry result?",
+      "choices": [
+        {"id": "QA5-promote", "label": "Make four retries the stable rule"},
+        {"id": "QA5-discard", "label": "Delete the result without review"},
+        {"id": "QA5-validate", "label": "Validate it before changing recovery actions"}
+      ],
+      "correct_choice": "QA5-validate",
+      "explanation": "The observation is pending validation and cannot change the rule yet."
+    }
+  ]
+}

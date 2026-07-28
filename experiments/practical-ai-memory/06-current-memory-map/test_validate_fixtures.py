@@ -105,8 +105,11 @@ class FixtureValidationTest(unittest.TestCase):
             root = Path(temporary_directory) / "fixture-copy"
             root.mkdir()
             self.copy_committed_fixture(root)
+            generated = root / "fixtures" / "pilot-01" / "generated"
             if with_generated:
                 self.write_valid_generated(root)
+            elif generated.is_dir():
+                shutil.rmtree(generated)
             if with_protocol_lock:
                 self.write_valid_protocol_lock(root)
             if mutation is not None:
