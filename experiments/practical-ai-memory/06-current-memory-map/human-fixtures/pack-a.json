@@ -7,7 +7,7 @@
       "title": "Orbit Preview Rule",
       "status": "active",
       "scope": "macos",
-      "source": "brief-a-orbit",
+      "source": "synthetic/pack-a/a-orbit-11.md",
       "relations": [],
       "detail": "Quartz preview is approved for macOS release checks and has no authority outside that platform."
     },
@@ -16,7 +16,7 @@
       "title": "Vault Retention Draft",
       "status": "superseded",
       "scope": "project",
-      "source": "brief-a-vault-old",
+      "source": "synthetic/pack-a/a-vault-21.md",
       "relations": [],
       "detail": "Release bundles were once kept for 10 days; this entry remains only to explain earlier cleanup."
     },
@@ -25,7 +25,7 @@
       "title": "Vault Retention Decision",
       "status": "active",
       "scope": "project",
-      "source": "brief-a-vault-new",
+      "source": "synthetic/pack-a/a-vault-22.md",
       "relations": [
         {
           "type": "supersedes",
@@ -39,7 +39,7 @@
       "title": "Pulse Interval Comparison",
       "status": "conflict",
       "scope": "project",
-      "source": "brief-a-pulse",
+      "source": "synthetic/pack-a/a-pulse-31.md",
       "relations": [],
       "detail": "One controlled run favored a 12-minute refresh while another workload favored a 36-minute refresh; no selection is approved."
     },
@@ -48,7 +48,7 @@
       "title": "Spark Retry Observation",
       "status": "pending-validation",
       "scope": "project",
-      "source": "brief-a-spark",
+      "source": "synthetic/pack-a/a-spark-41.md",
       "relations": [],
       "detail": "A single trial completed after a fourth retry, but repetition and review are still required before changing recovery rules."
     }

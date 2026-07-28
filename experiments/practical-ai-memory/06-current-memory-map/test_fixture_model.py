@@ -39,7 +39,7 @@ def valid_manifest() -> dict:
                 "scope": "global",
                 "source": "records/observations/conflict.md",
                 "relations": [
-                    {"type": "conflicts-with", "target": "MEM-001"}
+                    {"type": "conflicts-with", "target": "MEM-006"}
                 ],
             },
             {
@@ -53,6 +53,15 @@ def valid_manifest() -> dict:
                 "status": "active",
                 "scope": "macos",
                 "source": "records/rules/scoped.md",
+            },
+            {
+                "id": "MEM-006",
+                "status": "conflict",
+                "scope": "global",
+                "source": "records/observations/conflict-peer.md",
+                "relations": [
+                    {"type": "conflicts-with", "target": "MEM-003"}
+                ],
             },
         ],
     }
@@ -77,7 +86,7 @@ class FixtureModelTest(unittest.TestCase):
             ),
         )
         self.assertEqual(validate_manifest(model), [])
-        self.assertEqual(len(model["records"]), 5)
+        self.assertEqual(len(model["records"]), 6)
         self.assertEqual(model["records"][4]["scope"], "macos")
 
     def test_missing_or_empty_source_is_rejected(self) -> None:
@@ -218,6 +227,43 @@ class FixtureModelTest(unittest.TestCase):
             any("unknown relation target 'MEM-999'" in error for error in validate_manifest(manifest))
         )
 
+    def test_conflict_relations_must_be_symmetric_between_conflict_records(self) -> None:
+        manifest = valid_manifest()
+        manifest["records"][5]["relations"] = []
+        self.assertTrue(
+            any("conflicts-with must be symmetric" in error for error in validate_manifest(manifest))
+        )
+
+        manifest = valid_manifest()
+        manifest["records"][5]["status"] = "active"
+        self.assertTrue(
+            any("conflicts-with endpoints must have conflict status" in error for error in validate_manifest(manifest))
+        )
+
+    def test_supersedes_relations_enforce_direction_scope_task_and_no_contradiction(self) -> None:
+        mutations = (
+            ("source status", lambda manifest: manifest["records"][0].update(status="conflict")),
+            ("target status", lambda manifest: manifest["records"][1].update(status="active")),
+            ("scope", lambda manifest: manifest["records"][1].update(scope="global")),
+            ("task", lambda manifest: (
+                manifest["records"][0].update(task_id="task-a"),
+                manifest["records"][1].update(task_id="task-b"),
+            )),
+            ("reverse", lambda manifest: manifest["records"][1].update(
+                relations=[{"type": "supersedes", "target": "MEM-001"}]
+            )),
+            ("contradictory", lambda manifest: manifest["records"][0]["relations"].append(
+                {"type": "conflicts-with", "target": "MEM-002"}
+            )),
+        )
+        for label, mutate in mutations:
+            with self.subTest(label=label):
+                manifest = valid_manifest()
+                mutate(manifest)
+                self.assertTrue(
+                    any("supersedes" in error or "contradictory" in error for error in validate_manifest(manifest))
+                )
+
     def test_validate_manifest_returns_errors_without_raising(self) -> None:
         errors = validate_manifest({"records": "not-a-list"})
 
@@ -258,6 +304,7 @@ class FixtureModelTest(unittest.TestCase):
                 ("MEM-003", "conflict", "global", "records/observations/conflict.md"),
                 ("MEM-004", "pending-validation", "global", "records/observations/pending.md"),
                 ("MEM-005", "active", "macos", "records/rules/scoped.md"),
+                ("MEM-006", "conflict", "global", "records/observations/conflict-peer.md"),
             },
         )
 

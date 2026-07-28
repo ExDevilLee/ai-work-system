@@ -7,7 +7,7 @@
       "title": "Harbor Render Boundary",
       "status": "active",
       "scope": "macos",
-      "source": "memo-b-harbor",
+      "source": "synthetic/pack-b/b-harbor-51.md",
       "relations": [],
       "detail": "Metal rendering is authorized for macOS review builds and must not be generalized to another platform."
     },
@@ -16,7 +16,7 @@
       "title": "Archive Window Legacy",
       "status": "superseded",
       "scope": "project",
-      "source": "memo-b-archive-prior",
+      "source": "synthetic/pack-b/b-archive-61.md",
       "relations": [],
       "detail": "Audit snapshots previously remained available for 8 days; the note now serves as background for old removals."
     },
@@ -25,7 +25,7 @@
       "title": "Archive Window Policy",
       "status": "active",
       "scope": "project",
-      "source": "memo-b-archive-current",
+      "source": "synthetic/pack-b/b-archive-62.md",
       "relations": [
         {
           "type": "supersedes",
@@ -39,7 +39,7 @@
       "title": "Cadence Timing Dispute",
       "status": "conflict",
       "scope": "project",
-      "source": "memo-b-cadence",
+      "source": "synthetic/pack-b/b-cadence-71.md",
       "relations": [],
       "detail": "A narrow dataset favored a 15-minute scan while a broad dataset favored a 42-minute scan; the evidence has no approved winner."
     },
@@ -48,7 +48,7 @@
       "title": "Circuit Recovery Finding",
       "status": "pending-validation",
       "scope": "project",
-      "source": "memo-b-circuit",
+      "source": "synthetic/pack-b/b-circuit-81.md",
       "relations": [],
       "detail": "One rehearsal recovered on a fifth attempt, yet repeat evidence and governance review are absent."
     }

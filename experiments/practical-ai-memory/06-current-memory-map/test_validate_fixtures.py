@@ -1,13 +1,15 @@
 from __future__ import annotations
 
 import hashlib
+import io
 import json
 import shutil
 import tempfile
 import unittest
+from contextlib import redirect_stdout
 from pathlib import Path
 
-from validate_fixtures import ROOT, contains_lifecycle_vocabulary, validate
+from validate_fixtures import ROOT, contains_lifecycle_vocabulary, main, validate
 
 
 CONDITIONS = ("source-only", "flat-index", "state-projection")
@@ -41,11 +43,26 @@ class FixtureValidationTest(unittest.TestCase):
             encoding="utf-8",
         )
 
+    def write_canonical_json(self, path: Path, value: object) -> None:
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_bytes(
+            (
+                json.dumps(
+                    value,
+                    sort_keys=True,
+                    ensure_ascii=False,
+                    allow_nan=False,
+                    separators=(",", ":"),
+                )
+                + "\n"
+            ).encode("utf-8")
+        )
+
     def load_json(self, path: Path) -> dict:
         return json.loads(path.read_text(encoding="utf-8"))
 
     def copy_committed_fixture(self, destination: Path) -> None:
-        for name in ("expected", "fixtures", "prompts"):
+        for name in ("expected", "fixtures", "human-fixtures", "prompts"):
             shutil.copytree(ROOT / name, destination / name)
 
     def load_manifest(self, root: Path) -> dict:
@@ -106,9 +123,7 @@ class FixtureValidationTest(unittest.TestCase):
             root.mkdir()
             self.copy_committed_fixture(root)
             generated = root / "fixtures" / "pilot-01" / "generated"
-            if with_generated:
-                self.write_valid_generated(root)
-            elif generated.is_dir():
+            if not with_generated and generated.is_dir():
                 shutil.rmtree(generated)
             if with_protocol_lock:
                 self.write_valid_protocol_lock(root)
@@ -257,18 +272,196 @@ class FixtureValidationTest(unittest.TestCase):
         errors = self.validate_copy(mutate)
         self.assertTrue(any("prompt leaks condition name" in error for error in errors))
 
-    def test_require_generated_reports_both_missing_files(self) -> None:
+    def test_require_generated_reports_all_missing_files(self) -> None:
         errors = self.validate_copy(require_generated=True)
         self.assertIn("missing generated flat index: generated/flat-index.md", errors)
         self.assertIn(
             "missing generated state projection: generated/state-projection.json",
             errors,
         )
+        self.assertIn(
+            "missing generated state table: generated/state-table.json", errors
+        )
+        self.assertIn(
+            "missing generated visual map: generated/visual-map.json", errors
+        )
+
+    def test_cli_require_generated_enables_generated_gate(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            root = Path(temporary_directory) / "fixture-copy"
+            root.mkdir()
+            self.copy_committed_fixture(root)
+            shutil.rmtree(root / "fixtures" / "pilot-01" / "generated")
+            output = io.StringIO()
+
+            with redirect_stdout(output):
+                exit_code = main(
+                    ["--root", str(root), "--require-generated"]
+                )
+
+            self.assertEqual(exit_code, 1)
+            self.assertIn("missing generated state table", output.getvalue())
 
     def test_fully_valid_generated_views_pass(self) -> None:
         self.assertEqual(
             self.validate_copy(require_generated=True, with_generated=True), []
         )
+
+    def test_rejects_empty_human_views(self) -> None:
+        for name, label in (
+            ("state-table.json", "state table"),
+            ("visual-map.json", "visual map"),
+        ):
+            with self.subTest(name=name):
+                def mutate(root: Path, current_name=name) -> None:
+                    path = root / "fixtures" / "pilot-01" / "generated" / current_name
+                    self.write_canonical_json(path, {})
+
+                errors = self.validate_copy(
+                    mutate, require_generated=True, with_generated=True
+                )
+                self.assertTrue(any(label in error for error in errors))
+
+    def test_rejects_human_view_full_fact_drift(self) -> None:
+        mutations = (
+            ("state-table.json", "title", "Changed title"),
+            ("state-table.json", "detail", "Changed detail"),
+            ("visual-map.json", "relations", []),
+        )
+        for name, field, value in mutations:
+            with self.subTest(name=name, field=field):
+                def mutate(
+                    root: Path,
+                    current_name=name,
+                    current_field=field,
+                    current_value=value,
+                ) -> None:
+                    path = root / "fixtures" / "pilot-01" / "generated" / current_name
+                    view = self.load_json(path)
+                    record = (
+                        next(item for item in view["records"] if item["relations"])
+                        if current_field == "relations"
+                        else view["records"][2]
+                    )
+                    record[current_field] = current_value
+                    self.write_canonical_json(path, view)
+
+                errors = self.validate_copy(
+                    mutate, require_generated=True, with_generated=True
+                )
+                self.assertTrue(any("facts do not match human pack" in error for error in errors))
+
+    def test_rejects_nested_answer_field_in_human_view(self) -> None:
+        def mutate(root: Path) -> None:
+            path = root / "fixtures" / "pilot-01" / "generated" / "state-table.json"
+            view = self.load_json(path)
+            view["questions"][0]["choices"][0]["metadata"] = {
+                "correct_choice": "LEAK"
+            }
+            self.write_canonical_json(path, view)
+
+        errors = self.validate_copy(
+            mutate, require_generated=True, with_generated=True
+        )
+        self.assertTrue(any("answer-like field" in error for error in errors))
+
+    def test_rejects_extra_visual_map_record_field(self) -> None:
+        def mutate(root: Path) -> None:
+            path = root / "fixtures" / "pilot-01" / "generated" / "visual-map.json"
+            view = self.load_json(path)
+            view["records"][0]["priority"] = "high"
+            self.write_canonical_json(path, view)
+
+        errors = self.validate_copy(
+            mutate, require_generated=True, with_generated=True
+        )
+        self.assertTrue(any("visual map record fields" in error for error in errors))
+
+    def test_rejects_noncanonical_human_view_json_and_line_endings(self) -> None:
+        for name in ("state-table.json", "visual-map.json"):
+            with self.subTest(name=name):
+                def mutate(root: Path, current_name=name) -> None:
+                    path = root / "fixtures" / "pilot-01" / "generated" / current_name
+                    value = self.load_json(path)
+                    path.write_bytes(
+                        (json.dumps(value, ensure_ascii=False, indent=2) + "\r\n").encode(
+                            "utf-8"
+                        )
+                    )
+
+                errors = self.validate_copy(
+                    mutate, require_generated=True, with_generated=True
+                )
+                self.assertTrue(any("canonical JSON with one LF" in error for error in errors))
+
+    def test_rejects_human_view_invalid_utf8_without_throwing(self) -> None:
+        for name in ("state-table.json", "visual-map.json"):
+            with self.subTest(name=name):
+                def mutate(root: Path, current_name=name) -> None:
+                    path = root / "fixtures" / "pilot-01" / "generated" / current_name
+                    path.write_bytes(b"\xff\xfe\x00")
+
+                errors = self.validate_copy(
+                    mutate, require_generated=True, with_generated=True
+                )
+                self.assertTrue(any("UTF-8" in error for error in errors))
+
+    def test_rejects_symlinked_human_view_without_reading_target(self) -> None:
+        for name in ("state-table.json", "visual-map.json"):
+            with self.subTest(name=name):
+                with tempfile.TemporaryDirectory() as temporary_directory:
+                    base = Path(temporary_directory)
+                    root = base / "fixture-copy"
+                    root.mkdir()
+                    self.copy_committed_fixture(root)
+                    target = base / "outside-secret.json"
+                    target.write_text('{"secret":"DO_NOT_READ"}', encoding="utf-8")
+                    path = root / "fixtures" / "pilot-01" / "generated" / name
+                    path.unlink()
+                    path.symlink_to(target)
+
+                    errors = validate(root, require_generated=True)
+
+                    self.assertTrue(
+                        any("symlinked fixture file" in error for error in errors)
+                    )
+                    self.assertNotIn("DO_NOT_READ", "\n".join(errors))
+
+    def test_rejects_unsafe_human_pack_sources(self) -> None:
+        for source in (
+            "../outside.md",
+            r"C:\synthetic\pack-a\a-orbit-11.md",
+            r"\\server\share\a-orbit-11.md",
+        ):
+            with self.subTest(source=source):
+                def mutate(root: Path, current_source=source) -> None:
+                    path = root / "human-fixtures" / "pack-a.json"
+                    pack = self.load_json(path)
+                    pack["records"][0]["source"] = current_source
+                    self.write_json(path, pack)
+
+                errors = self.validate_copy(
+                    mutate, require_generated=True, with_generated=True
+                )
+                self.assertTrue(any("frozen synthetic source" in error for error in errors))
+
+    def test_human_pack_privacy_errors_redact_uuid_and_secret(self) -> None:
+        uuid = "123e4567-e89b-42d3-a456-426614174000"
+        secret = "sk-VALIDATOR_SECRET_12345"
+
+        def mutate(root: Path) -> None:
+            path = root / "human-fixtures" / "pack-a.json"
+            pack = self.load_json(path)
+            pack["records"][0]["detail"] = f"{uuid} {secret}"
+            self.write_json(path, pack)
+
+        errors = self.validate_copy(
+            mutate, require_generated=True, with_generated=True
+        )
+        rendered = "\n".join(errors)
+        self.assertIn("private-data marker", rendered)
+        self.assertNotIn(uuid, rendered)
+        self.assertNotIn(secret, rendered)
 
     def test_rejects_flat_index_status_leak(self) -> None:
         def mutate(root: Path) -> None:

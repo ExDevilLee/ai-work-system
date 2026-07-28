@@ -52,6 +52,7 @@ def validate_manifest(manifest: dict) -> list[str]:
 
     seen_ids: set[str] = set()
     known_ids: set[str] = set()
+    relation_pairs: set[tuple[str, str, str]] = set()
     for index, record in enumerate(records):
         if not isinstance(record, dict):
             errors.append(f"record[{index}] must be an object")
@@ -109,6 +110,52 @@ def validate_manifest(manifest: dict) -> list[str]:
                 errors.append(f"{prefix} is a malformed relation: missing target")
             elif target not in known_ids:
                 errors.append(f"{prefix} has unknown relation target '{target}'")
+            if (
+                isinstance(record.get("id"), str)
+                and isinstance(relation_type, str)
+                and relation_type in _VALID_RELATIONS
+                and isinstance(target, str)
+                and target in known_ids
+            ):
+                relation_pairs.add((record["id"], relation_type, target))
+
+    records_by_id = {
+        record["id"]: record
+        for record in records
+        if isinstance(record, dict) and isinstance(record.get("id"), str)
+    }
+    relation_types_by_pair: dict[tuple[str, str], set[str]] = {}
+    for source_id, relation_type, target_id in relation_pairs:
+        relation_types_by_pair.setdefault((source_id, target_id), set()).add(
+            relation_type
+        )
+        source = records_by_id[source_id]
+        target = records_by_id[target_id]
+        if source_id == target_id:
+            errors.append(f"relation from '{source_id}' cannot target itself")
+        if relation_type == "conflicts-with":
+            if source.get("status") != "conflict" or target.get("status") != "conflict":
+                errors.append("conflicts-with endpoints must have conflict status")
+            if (target_id, "conflicts-with", source_id) not in relation_pairs:
+                errors.append("conflicts-with must be symmetric")
+        elif relation_type == "supersedes":
+            if source.get("status") != "active" or target.get("status") != "superseded":
+                errors.append("supersedes must point from active to superseded")
+            if source.get("scope") != target.get("scope"):
+                errors.append("supersedes records must have the same scope")
+            source_task = source.get("task_id")
+            target_task = target.get("task_id")
+            if (
+                isinstance(source_task, str)
+                and isinstance(target_task, str)
+                and source_task != target_task
+            ):
+                errors.append("supersedes records must have the same task")
+            if (target_id, "supersedes", source_id) in relation_pairs:
+                errors.append("supersedes target must not supersede its source")
+
+    if any(len(types) > 1 for types in relation_types_by_pair.values()):
+        errors.append("relation pair has contradictory relation types")
 
     return errors
 

@@ -9,8 +9,7 @@ import os
 import re
 import tempfile
 from collections import Counter
-from pathlib import Path
-from typing import Any
+from pathlib import Path, PurePosixPath, PureWindowsPath
 
 from fixture_model import VALID_STATUSES, canonical_json, load_manifest, validate_manifest
 
@@ -41,10 +40,38 @@ _JUDGMENT_SUFFIXES = frozenset(
     }
 )
 _PRIVATE_PATTERNS = (
-    re.compile(r"/(?:Users|home)/[^/\s]+/", re.I),
-    re.compile(r"[A-Za-z]:\\Users\\", re.I),
-    re.compile(r"\b(?:provider|api[_ -]?key|access[_ -]?token|password)\b", re.I),
-    re.compile(r"\b(?:thread|session)[_ -]?(?:id|identifier)\b", re.I),
+    ("user path", re.compile(r"/(?:Users|home)/[^/\s]+/", re.I)),
+    ("user path", re.compile(r"[A-Za-z]:\\Users\\[^\\\s]+", re.I)),
+    (
+        "credential or API key",
+        re.compile(
+            r"\b(?:api[_ -]?key|access[_ -]?token|client[_ -]?secret|password|"
+            r"bearer)\b|\bsk-[A-Za-z0-9_-]{8,}",
+            re.I,
+        ),
+    ),
+    ("provider", re.compile(r"\bprovider\b", re.I)),
+    (
+        "user identity",
+        re.compile(r"\b(?:username|user[_ -]?id|account[_ -]?id|email)\b", re.I),
+    ),
+    (
+        "thread or session identifier",
+        re.compile(r"\b(?:thread|session)[_ -]?(?:id|identifier)\b", re.I),
+    ),
+    (
+        "UUID",
+        re.compile(
+            r"\b[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-"
+            r"[89ab][0-9a-f]{3}-[0-9a-f]{12}\b",
+            re.I,
+        ),
+    ),
+    (
+        "real repository path",
+        re.compile(r"\b(?:CodexClawProj|ai-work-system|codex-external-repos)\b"),
+    ),
+    ("storage address", re.compile(r"\b(?:s3|gs|az|file|https?)://[^\s]+", re.I)),
 )
 
 
@@ -78,6 +105,8 @@ def render_flat_index(manifest: dict[str, object]) -> str:
 def _action_boundary(record: dict[str, object]) -> str:
     status = record["status"]
     relations = record.get("relations", [])
+    if any(relation.get("type") == "conflicts-with" for relation in relations):
+        return "Pause selection until the competing evidence is resolved."
     if any(relation.get("type") == "supersedes" for relation in relations):
         return "Use the replacement in scope; retain its target only as history."
     if status == "active":
@@ -168,6 +197,27 @@ def validate_human_pack(pack: dict[str, object]) -> list[str]:
         scope = record.get("scope")
         if not isinstance(scope, str) or scope not in _VALID_SCOPES:
             errors.append(f"human record[{index}] has unsupported scope")
+        source = record.get("source")
+        expected_source = (
+            f"synthetic/{pack_id}/{record_id.casefold()}.md"
+            if isinstance(pack_id, str) and isinstance(record_id, str)
+            else None
+        )
+        if (
+            not isinstance(source, str)
+            or source != expected_source
+            or "\\" in source
+            or PurePosixPath(source).is_absolute()
+            or PureWindowsPath(source).drive
+            or PureWindowsPath(source).anchor
+            or any(
+                component in {"", ".", ".."} for component in source.split("/")
+            )
+            or any(ord(character) < 32 or ord(character) == 127 for character in source)
+        ):
+            errors.append(
+                f"human record[{index}] must use its frozen synthetic source"
+            )
         record_relations = record.get("relations")
         if not isinstance(record_relations, list):
             errors.append(f"human record[{index}] relations must be a list")
@@ -209,11 +259,18 @@ def validate_human_pack(pack: dict[str, object]) -> list[str]:
         for relation in supersedes
         if by_id.get(relation[0], {}).get("status") == "active"
         and by_id.get(relation[2], {}).get("status") == "superseded"
+        and by_id.get(relation[0], {}).get("scope")
+        == by_id.get(relation[2], {}).get("scope")
     ]
     if len(supersedes) != 1 or len(valid_supersedes) != 1:
         errors.append("exactly one active record must supersede the superseded record")
     if len(relations) != 1:
         errors.append("human pack must contain exactly one replacement relation")
+    if len(supersedes) == 1 and (
+        by_id.get(supersedes[0][0], {}).get("scope")
+        != by_id.get(supersedes[0][2], {}).get("scope")
+    ):
+        errors.append("human supersedes records must have the same scope")
     platform_active = [
         record
         for record in records
@@ -288,8 +345,14 @@ def validate_human_pack(pack: dict[str, object]) -> list[str]:
     if judgment_suffixes != _JUDGMENT_SUFFIXES:
         errors.append("human questions must cover the five governance judgments")
 
-    if any(pattern.search(value) for value in _all_strings(pack) for pattern in _PRIVATE_PATTERNS):
-        errors.append("human pack contains identity, private, provider, session, or path data")
+    private_labels = {
+        label
+        for value in _all_strings(pack)
+        for label, pattern in _PRIVATE_PATTERNS
+        if pattern.search(value)
+    }
+    for label in sorted(private_labels):
+        errors.append(f"human pack contains private-data marker ({label})")
     return errors
 
 
@@ -342,7 +405,10 @@ def build_state_table(pack: dict[str, object]) -> dict[str, object]:
         "schema_version": 1,
         "pack_id": pack["pack_id"],
         "view_type": "state-table",
-        "records": [_copy_human_record(record) for record in pack["records"]],
+        "records": [
+            _copy_human_record(record)
+            for record in sorted(pack["records"], key=lambda item: item["id"])
+        ],
         "questions": _public_questions(pack),
     }
 
@@ -363,7 +429,7 @@ def build_visual_map(pack: dict[str, object]) -> dict[str, object]:
         "pending-validation": "caution",
     }
     records = []
-    for source_record in pack["records"]:
+    for source_record in sorted(pack["records"], key=lambda item: item["id"]):
         record = _copy_human_record(source_record)
         record.update(
             {
@@ -398,15 +464,91 @@ def human_fact_set(view: dict[str, object]) -> set[tuple[str, str, str, str]]:
     return facts
 
 
-def _load_pack(path: Path) -> dict[str, object]:
+def _load_pack(path: Path, *, validate: bool = True) -> dict[str, object]:
     try:
         value = json.loads(path.read_text(encoding="utf-8"))
     except (OSError, UnicodeError, json.JSONDecodeError) as error:
         raise ValueError(f"cannot load human pack {path.name}: {error}") from error
     if not isinstance(value, dict):
         raise ValueError(f"cannot load human pack {path.name}: root must be an object")
-    _validated_pack(value)
+    if validate:
+        _validated_pack(value)
     return value
+
+
+def _is_safe_fixture_set(value: object) -> bool:
+    if not isinstance(value, str) or not value or value in {".", ".."}:
+        return False
+    windows_path = PureWindowsPath(value)
+    return (
+        "/" not in value
+        and "\\" not in value
+        and not windows_path.drive
+        and not windows_path.anchor
+        and not any(ord(character) < 32 or ord(character) == 127 for character in value)
+    )
+
+
+def _is_within(path: Path, boundary: Path) -> bool:
+    try:
+        return os.path.commonpath((str(path.resolve()), str(boundary.resolve()))) == str(
+            boundary.resolve()
+        )
+    except (OSError, ValueError):
+        return False
+
+
+def _has_symlink_component(path: Path, boundary: Path) -> bool:
+    try:
+        relative = path.relative_to(boundary)
+    except ValueError:
+        return True
+    current = boundary
+    if current.is_symlink():
+        return True
+    for component in relative.parts:
+        current = current / component
+        if current.is_symlink():
+            return True
+    return False
+
+
+def _generation_paths(
+    root: Path, fixture_set: str
+) -> tuple[Path, Path, Path, dict[str, Path]]:
+    if not _is_safe_fixture_set(fixture_set):
+        raise ValueError("fixture_set must be one safe path component")
+    root = Path(root).absolute()
+    if not root.is_dir() or root.is_symlink():
+        raise ValueError("generation root must be a real directory, not a symlink")
+    fixture_root = root / "fixtures" / fixture_set
+    manifest_path = fixture_root / "manifest.json"
+    pack_a_path = root / "human-fixtures" / "pack-a.json"
+    pack_b_path = root / "human-fixtures" / "pack-b.json"
+    generated = fixture_root / "generated"
+    outputs = {
+        name: generated / name
+        for name in (
+            "flat-index.md",
+            "state-projection.json",
+            "state-table.json",
+            "visual-map.json",
+        )
+    }
+    checks = (
+        (fixture_root, "fixture root"),
+        (manifest_path, "manifest"),
+        (pack_a_path, "human pack-a"),
+        (pack_b_path, "human pack-b"),
+        (generated, "generated parent"),
+        *((path, f"generated output {name}") for name, path in outputs.items()),
+    )
+    for path, label in checks:
+        if _has_symlink_component(path, root):
+            raise ValueError(f"{label} must not contain a symlink component")
+        if not _is_within(path, root):
+            raise ValueError(f"{label} must remain under generation root")
+    return manifest_path, pack_a_path, pack_b_path, outputs
 
 
 def _validate_pack_pair(pack_a: dict[str, object], pack_b: dict[str, object]) -> None:
@@ -452,35 +594,169 @@ def _validate_pack_pair(pack_a: dict[str, object], pack_b: dict[str, object]) ->
         )
 
 
-def _atomic_write(path: Path, content: bytes) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
-    temporary_path: Path | None = None
+def _validate_pack_bindings(
+    pack_a: dict[str, object], pack_b: dict[str, object]
+) -> None:
+    errors = []
+    if pack_a.get("pack_id") != "pack-a":
+        errors.append("first human pack must have pack_id 'pack-a'")
+    if pack_b.get("pack_id") != "pack-b":
+        errors.append("second human pack must have pack_id 'pack-b'")
+    if errors:
+        raise ValueError(
+            "invalid human pack pair:\n"
+            + "\n".join(f"- {error}" for error in errors)
+        )
+
+
+def _open_staged_file(directory: Path, name: str):
+    return tempfile.NamedTemporaryFile(
+        mode="wb",
+        dir=directory,
+        prefix=f".{name}.",
+        suffix=".tmp",
+        delete=False,
+    )
+
+
+def _write_staged_file(temporary, content: bytes) -> None:
+    temporary.write(content)
+
+
+def _flush_staged_file(temporary) -> None:
+    temporary.flush()
+
+
+def _fsync_staged_file(temporary) -> None:
+    os.fsync(temporary.fileno())
+
+
+def _replace_staged_file(staged: Path, output: Path) -> None:
+    os.replace(staged, output)
+
+
+def _validate_output_bytes(outputs: dict[str, bytes]) -> None:
+    expected_names = {
+        "flat-index.md",
+        "state-projection.json",
+        "state-table.json",
+        "visual-map.json",
+    }
+    if set(outputs) != expected_names:
+        raise ValueError("generation must prepare exactly four output files")
+    for name, content in outputs.items():
+        if not isinstance(content, bytes) or not content.endswith(b"\n") or b"\r" in content:
+            raise ValueError(f"prepared {name} must be UTF-8 with LF endings")
+        try:
+            text = content.decode("utf-8")
+        except UnicodeError as error:
+            raise ValueError(f"prepared {name} must be UTF-8") from error
+        if name.endswith(".json"):
+            try:
+                value = json.loads(text)
+            except json.JSONDecodeError as error:
+                raise ValueError(f"prepared {name} must be valid JSON") from error
+            if canonical_json(value) != content:
+                raise ValueError(f"prepared {name} must be canonical JSON")
+
+
+def _restore_outputs(
+    output_paths: dict[str, Path], originals: dict[str, bytes | None]
+) -> None:
+    for name, output in output_paths.items():
+        original = originals[name]
+        if original is None:
+            output.unlink(missing_ok=True)
+            continue
+        temporary_path: Path | None = None
+        try:
+            with tempfile.NamedTemporaryFile(
+                mode="wb",
+                dir=output.parent,
+                prefix=f".{output.name}.restore.",
+                suffix=".tmp",
+                delete=False,
+            ) as temporary:
+                temporary_path = Path(temporary.name)
+                temporary.write(original)
+                temporary.flush()
+                os.fsync(temporary.fileno())
+            os.replace(temporary_path, output)
+            temporary_path = None
+        finally:
+            if temporary_path is not None:
+                temporary_path.unlink(missing_ok=True)
+
+
+def _safe_failure_detail(error: BaseException) -> str:
+    if isinstance(error, OSError) and error.strerror:
+        detail = error.strerror
+        if error.errno is not None:
+            detail = f"errno {error.errno}: {detail}"
+    else:
+        detail = str(error) or type(error).__name__
+    detail = re.sub(r"/(?:[^\s/:]+/)+[^\s:]*", "[redacted-path]", detail)
+    detail = re.sub(r"[A-Za-z]:\\[^\s]+", "[redacted-path]", detail)
+    detail = " ".join(detail.split())
+    return f"{type(error).__name__}: {detail[:240]}"
+
+
+def _write_output_transaction(
+    output_paths: dict[str, Path], outputs: dict[str, bytes]
+) -> None:
+    _validate_output_bytes(outputs)
+    generated = next(iter(output_paths.values())).parent
+    originals = {
+        name: path.read_bytes() if path.exists() else None
+        for name, path in output_paths.items()
+    }
+    generated.mkdir(parents=True, exist_ok=True)
+    staged: dict[str, Path] = {}
+    replace_started = False
     try:
-        with tempfile.NamedTemporaryFile(
-            mode="wb",
-            dir=path.parent,
-            prefix=f".{path.name}.",
-            suffix=".tmp",
-            delete=False,
-        ) as temporary:
+        for name, content in outputs.items():
+            temporary = _open_staged_file(generated, name)
             temporary_path = Path(temporary.name)
-            temporary.write(content)
-            temporary.flush()
-            os.fsync(temporary.fileno())
-        os.replace(temporary_path, path)
-        temporary_path = None
+            staged[name] = temporary_path
+            try:
+                _write_staged_file(temporary, content)
+                _flush_staged_file(temporary)
+                _fsync_staged_file(temporary)
+            finally:
+                temporary.close()
+        replace_started = True
+        for name in outputs:
+            _replace_staged_file(staged[name], output_paths[name])
+            staged.pop(name)
+    except BaseException as original_error:
+        if replace_started:
+            try:
+                _restore_outputs(output_paths, originals)
+            except BaseException as rollback_error:
+                raise RuntimeError(
+                    "generation failed ("
+                    + _safe_failure_detail(original_error)
+                    + "); rollback failed ("
+                    + _safe_failure_detail(rollback_error)
+                    + ")"
+                ) from original_error
+        raise
     finally:
-        if temporary_path is not None:
+        for temporary_path in staged.values():
             temporary_path.unlink(missing_ok=True)
 
 
 def generate_all(root: Path, fixture_set: str = "pilot-01") -> None:
     """Validate all sources, then atomically write the four generated views."""
-    root = Path(root)
-    fixture_root = root / "fixtures" / fixture_set
-    manifest = load_manifest(fixture_root / "manifest.json")
-    pack_a = _load_pack(root / "human-fixtures" / "pack-a.json")
-    pack_b = _load_pack(root / "human-fixtures" / "pack-b.json")
+    manifest_path, pack_a_path, pack_b_path, output_paths = _generation_paths(
+        Path(root), fixture_set
+    )
+    manifest = load_manifest(manifest_path)
+    pack_a = _load_pack(pack_a_path, validate=False)
+    pack_b = _load_pack(pack_b_path, validate=False)
+    _validate_pack_bindings(pack_a, pack_b)
+    _validated_pack(pack_a)
+    _validated_pack(pack_b)
     _validate_pack_pair(pack_a, pack_b)
 
     outputs = {
@@ -489,9 +765,7 @@ def generate_all(root: Path, fixture_set: str = "pilot-01") -> None:
         "state-table.json": canonical_json(build_state_table(pack_a)),
         "visual-map.json": canonical_json(build_visual_map(pack_b)),
     }
-    generated = fixture_root / "generated"
-    for name, content in outputs.items():
-        _atomic_write(generated / name, content)
+    _write_output_transaction(output_paths, outputs)
 
 
 def main() -> None:

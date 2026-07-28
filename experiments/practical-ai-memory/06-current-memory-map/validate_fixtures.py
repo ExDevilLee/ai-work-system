@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 
+import argparse
 import hashlib
 import json
 import os
@@ -41,6 +42,21 @@ ANSWER_STRING_KEYS = ("fact_state", "current_action", "boundary", "prohibited")
 PROJECTION_RECORD_FIELDS = frozenset(
     {"id", "status", "scope", "source", "relations", "action_boundary"}
 )
+HUMAN_VIEW_FIELDS = frozenset(
+    {"schema_version", "pack_id", "view_type", "records", "questions"}
+)
+HUMAN_FACT_FIELDS = frozenset(
+    {"id", "title", "status", "scope", "source", "relations", "detail"}
+)
+HUMAN_MAP_FIELDS = HUMAN_FACT_FIELDS | {"group", "tone", "edge_direction"}
+PUBLIC_QUESTION_FIELDS = frozenset({"id", "prompt", "choices"})
+PUBLIC_CHOICE_FIELDS = frozenset({"id", "label"})
+MAP_PRESENTATION = {
+    "active": ("current", "positive"),
+    "superseded": ("history", "muted"),
+    "conflict": ("review", "critical"),
+    "pending-validation": ("evidence", "caution"),
+}
 LIFECYCLE_WORDS = (
     "active",
     "approved",
@@ -96,6 +112,10 @@ _PRIVATE_PATTERNS = (
     ),
     ("provider field or name", re.compile(r"\bprovider\b", re.I)),
     (
+        "user identity",
+        re.compile(r"\b(?:username|user[_ -]?id|account[_ -]?id|email)\b", re.I),
+    ),
+    (
         "thread or session identifier",
         re.compile(r"\b(?:thread|session)[_ -]?(?:id|identifier)\b", re.I),
     ),
@@ -110,6 +130,10 @@ _PRIVATE_PATTERNS = (
     (
         "real repository path",
         re.compile(r"\b(?:CodexClawProj|ai-work-system|codex-external-repos)\b"),
+    ),
+    (
+        "storage address",
+        re.compile(r"\b(?:s3|gs|az|file|https?)://[^\s]+", re.I),
     ),
 )
 
@@ -189,6 +213,232 @@ def _load_json(
     except json.JSONDecodeError as error:
         errors.append(f"invalid {label} JSON: line {error.lineno}")
         return None
+
+
+def _canonical_json_bytes(value: Any) -> bytes:
+    return (
+        json.dumps(
+            value,
+            sort_keys=True,
+            ensure_ascii=False,
+            allow_nan=False,
+            separators=(",", ":"),
+        )
+        + "\n"
+    ).encode("utf-8")
+
+
+def _load_canonical_json(
+    path: Path,
+    label: str,
+    errors: list[str],
+    *,
+    symlink_boundary: Path,
+) -> Any | None:
+    if path.is_symlink() or _has_symlink_component(path, symlink_boundary):
+        errors.append(f"symlinked fixture file is not allowed: {label}")
+        return None
+    try:
+        raw = path.read_bytes()
+    except FileNotFoundError:
+        errors.append(f"missing {label}: {path.name}")
+        return None
+    except OSError as error:
+        errors.append(f"cannot read {label}: {path.name}: {type(error).__name__}")
+        return None
+    try:
+        text = raw.decode("utf-8")
+    except UnicodeError:
+        errors.append(f"cannot read {label} as UTF-8: {path.name}")
+        return None
+    try:
+        value = json.loads(text)
+    except json.JSONDecodeError as error:
+        errors.append(f"invalid {label} JSON: line {error.lineno}")
+        return None
+    try:
+        canonical = _canonical_json_bytes(value)
+    except (TypeError, ValueError):
+        errors.append(f"invalid {label} JSON value")
+        return value
+    if raw != canonical:
+        errors.append(f"{label} must use canonical JSON with one LF")
+    return value
+
+
+def _contains_answer_like_field(value: Any) -> bool:
+    if isinstance(value, dict):
+        for key, item in value.items():
+            normalized = re.sub(r"[^a-z]", "", key.casefold()) if isinstance(key, str) else ""
+            if (
+                normalized in {"answer", "answers", "answerkey", "correctchoice", "explanation"}
+                or normalized.startswith("correctanswer")
+                or normalized in {"correct", "iscorrect", "solution", "rationale"}
+                or "answer" in normalized
+            ):
+                return True
+            if _contains_answer_like_field(item):
+                return True
+    elif isinstance(value, list):
+        return any(_contains_answer_like_field(item) for item in value)
+    return False
+
+
+def _public_pack_questions(pack: Any) -> list[dict[str, Any]] | None:
+    if not isinstance(pack, dict) or not isinstance(pack.get("questions"), list):
+        return None
+    public = []
+    for question in pack["questions"]:
+        if not isinstance(question, dict) or not isinstance(question.get("choices"), list):
+            return None
+        choices = []
+        for choice in question["choices"]:
+            if not isinstance(choice, dict):
+                return None
+            choices.append({"id": choice.get("id"), "label": choice.get("label")})
+        public.append(
+            {
+                "id": question.get("id"),
+                "prompt": question.get("prompt"),
+                "choices": choices,
+            }
+        )
+    return public
+
+
+def _expected_human_records(pack: Any) -> list[dict[str, Any]] | None:
+    if not isinstance(pack, dict) or not isinstance(pack.get("records"), list):
+        return None
+    records = []
+    for record in pack["records"]:
+        if not isinstance(record, dict):
+            return None
+        records.append({field: record.get(field) for field in HUMAN_FACT_FIELDS})
+    return sorted(records, key=lambda record: record.get("id", ""))
+
+
+def _validate_human_pack_sources(
+    pack: Any, pack_id: str, errors: list[str]
+) -> None:
+    if not isinstance(pack, dict) or not isinstance(pack.get("records"), list):
+        errors.append(f"human fixture {pack_id} records must be an array")
+        return
+    for index, record in enumerate(pack["records"]):
+        if not isinstance(record, dict):
+            continue
+        record_id = record.get("id")
+        source = record.get("source")
+        expected = (
+            f"synthetic/{pack_id}/{record_id.casefold()}.md"
+            if isinstance(record_id, str)
+            else None
+        )
+        windows_path = PureWindowsPath(source) if isinstance(source, str) else None
+        if (
+            not isinstance(source, str)
+            or source != expected
+            or "\\" in source
+            or PurePosixPath(source).is_absolute()
+            or (windows_path is not None and (windows_path.drive or windows_path.anchor))
+            or any(part in {"", ".", ".."} for part in source.split("/"))
+            or _has_control_characters(source)
+        ):
+            errors.append(
+                f"human fixture {pack_id} record[{index}] must use its frozen synthetic source"
+            )
+
+
+def validate_human_view(
+    path: Path,
+    pack_path: Path,
+    *,
+    view_type: str,
+    pack_id: str,
+) -> list[str]:
+    """Independently validate one generated human view against its source pack."""
+    errors: list[str] = []
+    label = "generated state table" if view_type == "state-table" else "generated visual map"
+    view = _load_canonical_json(
+        path, label, errors, symlink_boundary=path.parent
+    )
+    pack = _load_json(
+        pack_path,
+        f"human fixture {pack_id}",
+        errors,
+        symlink_boundary=pack_path.parent,
+    )
+    if view is None or pack is None:
+        return errors
+    _validate_human_pack_sources(pack, pack_id, errors)
+    short_label = "state table" if view_type == "state-table" else "visual map"
+    if not isinstance(view, dict):
+        return [*errors, f"{short_label} must be a JSON object"]
+    if set(view) != HUMAN_VIEW_FIELDS:
+        errors.append(f"{short_label} top-level fields must match contract")
+    if type(view.get("schema_version")) is not int or view.get("schema_version") != 1:
+        errors.append(f"{short_label} schema_version must be integer 1")
+    if view.get("view_type") != view_type:
+        errors.append(f"{short_label} view_type must be {view_type}")
+    if view.get("pack_id") != pack_id or not isinstance(view.get("pack_id"), str):
+        errors.append(f"{short_label} pack_id must be {pack_id}")
+    if not isinstance(pack, dict) or pack.get("pack_id") != pack_id:
+        errors.append(f"human fixture must have pack_id {pack_id}")
+
+    questions = view.get("questions")
+    expected_questions = _public_pack_questions(pack)
+    if not isinstance(questions, list):
+        errors.append(f"{short_label} questions must be an array")
+    else:
+        for index, question in enumerate(questions):
+            if not isinstance(question, dict) or set(question) != PUBLIC_QUESTION_FIELDS:
+                errors.append(f"{short_label} question fields must match contract: index {index}")
+                continue
+            choices = question.get("choices")
+            if not isinstance(choices, list):
+                errors.append(f"{short_label} choices must be an array: index {index}")
+                continue
+            for choice_index, choice in enumerate(choices):
+                if not isinstance(choice, dict) or set(choice) != PUBLIC_CHOICE_FIELDS:
+                    errors.append(
+                        f"{short_label} choice fields must match contract: "
+                        f"question {index} choice {choice_index}"
+                    )
+        if questions != expected_questions:
+            errors.append(f"{short_label} questions do not match human pack")
+    if _contains_answer_like_field(view):
+        errors.append(f"{short_label} contains an answer-like field")
+
+    records = view.get("records")
+    expected_records = _expected_human_records(pack)
+    allowed_fields = HUMAN_FACT_FIELDS if view_type == "state-table" else HUMAN_MAP_FIELDS
+    comparable_records = []
+    if not isinstance(records, list):
+        errors.append(f"{short_label} records must be an array")
+    else:
+        for index, record in enumerate(records):
+            if not isinstance(record, dict):
+                errors.append(f"{short_label} record[{index}] must be an object")
+                continue
+            if set(record) != allowed_fields:
+                errors.append(f"{short_label} record fields must match contract: index {index}")
+            comparable_records.append(
+                {field: record.get(field) for field in HUMAN_FACT_FIELDS}
+            )
+            if view_type == "visual-map":
+                status = record.get("status")
+                expected_presentation = MAP_PRESENTATION.get(status)
+                if not isinstance(status, str):
+                    errors.append(f"visual map status must remain text: index {index}")
+                if (
+                    expected_presentation is None
+                    or (record.get("group"), record.get("tone")) != expected_presentation
+                    or record.get("edge_direction")
+                    != ("outbound" if record.get("relations") else "none")
+                ):
+                    errors.append(f"visual map presentation fields are invalid: index {index}")
+        if comparable_records != expected_records:
+            errors.append(f"{short_label} facts do not match human pack")
+    return errors
 
 
 def _load_fixture_manifest(
@@ -852,6 +1102,10 @@ def validate(
     generated_root = fixture_root / "generated"
     flat_index = generated_root / "flat-index.md"
     projection = generated_root / "state-projection.json"
+    state_table = generated_root / "state-table.json"
+    visual_map = generated_root / "visual-map.json"
+    pack_a_path = root / "human-fixtures" / "pack-a.json"
+    pack_b_path = root / "human-fixtures" / "pack-b.json"
     if require_generated:
         if not flat_index.exists() and not flat_index.is_symlink():
             errors.append("missing generated flat index: generated/flat-index.md")
@@ -863,8 +1117,37 @@ def validate(
             )
         else:
             errors.extend(validate_state_projection(projection, manifest, record_bodies))
+        if not state_table.exists() and not state_table.is_symlink():
+            errors.append("missing generated state table: generated/state-table.json")
+        else:
+            errors.extend(
+                validate_human_view(
+                    state_table,
+                    pack_a_path,
+                    view_type="state-table",
+                    pack_id="pack-a",
+                )
+            )
+        if not visual_map.exists() and not visual_map.is_symlink():
+            errors.append("missing generated visual map: generated/visual-map.json")
+        else:
+            errors.extend(
+                validate_human_view(
+                    visual_map,
+                    pack_b_path,
+                    view_type="visual-map",
+                    pack_id="pack-b",
+                )
+            )
 
-    privacy_paths = [manifest_path, protocol_lock_path, answers_path, rubric_path]
+    privacy_paths = [
+        manifest_path,
+        protocol_lock_path,
+        answers_path,
+        rubric_path,
+        pack_a_path,
+        pack_b_path,
+    ]
     privacy_paths.extend(actual_records)
     privacy_paths.extend(condition_paths)
     privacy_paths.extend(prompt_paths)
@@ -875,8 +1158,17 @@ def validate(
     return errors
 
 
-def main() -> int:
-    errors = validate(ROOT)
+def main(argv: list[str] | None = None) -> int:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--root", type=Path, default=ROOT)
+    parser.add_argument("--fixture-set", default="pilot-01")
+    parser.add_argument("--require-generated", action="store_true")
+    arguments = parser.parse_args(argv)
+    errors = validate(
+        arguments.root,
+        fixture_set=arguments.fixture_set,
+        require_generated=arguments.require_generated,
+    )
     if errors:
         for error in errors:
             print(f"ERROR {error}")
