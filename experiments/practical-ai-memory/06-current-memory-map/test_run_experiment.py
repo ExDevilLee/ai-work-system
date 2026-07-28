@@ -284,8 +284,8 @@ class CodexExecutableTest(unittest.TestCase):
         )
 
         self.assertIn("features.plugins=false", command)
-        self.assertIn("--ignore-user-config", command)
         self.assertIn("--ignore-rules", command)
+        self.assertIn("mcp_servers={}", command)
         self.assertEqual(command[-1], "-")
 
 

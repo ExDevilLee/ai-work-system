@@ -954,7 +954,6 @@ def build_codex_command(
         "-C",
         str(workspace),
         "--skip-git-repo-check",
-        "--ignore-user-config",
         "--ignore-rules",
         "--sandbox",
         "read-only",
@@ -962,6 +961,8 @@ def build_codex_command(
         "--json",
         "--config",
         "features.plugins=false",
+        "--config",
+        "mcp_servers={}",
         "--output-last-message",
         str(final_path),
     ]
@@ -1158,7 +1159,7 @@ def main() -> int:
         "sandbox": "read-only",
         "ephemeral": True,
         "plugins_enabled": False,
-        "command_execution_policy": "codex-isolated-config-and-rules",
+        "command_execution_policy": "codex-no-mcp-and-no-rules",
         "runtime_tool_access_calls": runtime_access_calls,
         "protocol_environment_isolated": runtime_access_calls == 0,
         "exit_code": result.returncode,
@@ -1183,7 +1184,7 @@ def main() -> int:
         )
         + mcp_workspace_bytes,
         "resident_instruction_bytes": resident_instruction_bytes(fixture),
-        "command_shape": "codex exec -C <isolated-workspace> --skip-git-repo-check --ignore-user-config --ignore-rules --sandbox read-only --ephemeral --json --config features.plugins=false --output-last-message <file> [--model <model>] [--config model_reasoning_effort=<effort>] -; prompt transport: UTF-8 stdin",
+        "command_shape": "codex exec -C <isolated-workspace> --skip-git-repo-check --ignore-rules --sandbox read-only --ephemeral --json --config features.plugins=false --config mcp_servers={} --output-last-message <file> [--model <model>] [--config model_reasoning_effort=<effort>] -; prompt transport: UTF-8 stdin",
     }
     metadata["project_context_bytes_reliable"] = metadata[
         "workspace_output_bytes_reliable"

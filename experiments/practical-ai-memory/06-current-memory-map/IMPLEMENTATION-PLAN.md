@@ -344,9 +344,9 @@ codex exec -C "$WORKSPACE" --sandbox read-only --ephemeral --json
 
 metadata 必须记录模型、推理强度、Codex CLI、平台、Prompt/fixture 哈希、插件状态、运行时访问、MCP 分类、指标覆盖和输出可靠性，不得记录 provider。
 
-macOS Pilot 必须忽略用户级 Codex 配置和执行规则，只保留 CLI 认证、临时工作区、
-只读 sandbox 与关闭插件。这个隔离不依赖 `AGENTS.md` 中的自然语言约定；任何
-运行时越界访问或无法完整分类计量的工具调用都按失败运行隔离，不能被恢复调度跳过。
+macOS Pilot 必须禁用全部 MCP 并忽略用户级 Codex 执行规则，只保留 CLI 必需连接配置、
+临时工作区、只读 sandbox 与关闭插件。这个隔离不依赖 `AGENTS.md` 中的自然语言约定；
+任何运行时越界访问或无法完整分类计量的工具调用都按失败运行隔离，不能被恢复调度跳过。
 
 - [ ] **Step 4: 实现矩阵调度和恢复门禁**
 
