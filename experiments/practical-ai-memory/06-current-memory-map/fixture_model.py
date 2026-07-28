@@ -6,14 +6,24 @@ from typing import Any
 VALID_STATUSES = frozenset(
     {"active", "superseded", "conflict", "pending-validation"}
 )
+SUPPORTED_SCHEMA_VERSION = 1
 
 _VALID_SCOPES = frozenset({"global", "project", "macos", "win11"})
 _VALID_RELATIONS = frozenset({"supersedes", "conflicts-with"})
 
 
-def _is_absolute_source(source: str) -> bool:
+def _is_canonical_source(source: str) -> bool:
     windows_path = PureWindowsPath(source)
-    return PurePosixPath(source).is_absolute() or bool(windows_path.root)
+    components = source.split("/")
+    return (
+        "\\" not in source
+        and not PurePosixPath(source).is_absolute()
+        and not windows_path.drive
+        and not windows_path.anchor
+        and len(components) > 1
+        and components[0] == "records"
+        and all(component not in {"", ".", ".."} for component in components)
+    )
 
 
 def validate_manifest(manifest: dict) -> list[str]:
@@ -21,9 +31,19 @@ def validate_manifest(manifest: dict) -> list[str]:
     if not isinstance(manifest, dict):
         return ["manifest must be an object"]
 
+    schema_version = manifest.get("schema_version")
+    if (
+        type(schema_version) is not int
+        or schema_version != SUPPORTED_SCHEMA_VERSION
+    ):
+        errors.append(
+            f"schema_version must be integer {SUPPORTED_SCHEMA_VERSION}"
+        )
+
     records = manifest.get("records")
     if not isinstance(records, list):
-        return ["manifest records must be a list"]
+        errors.append("manifest records must be a list")
+        return errors
 
     seen_ids: set[str] = set()
     known_ids: set[str] = set()
@@ -52,8 +72,11 @@ def validate_manifest(manifest: dict) -> list[str]:
         source = record.get("source")
         if not isinstance(source, str) or not source.strip():
             errors.append(f"record[{index}] must have a non-empty source")
-        elif _is_absolute_source(source):
-            errors.append(f"record[{index}] must use a relative source path")
+        elif not _is_canonical_source(source):
+            errors.append(
+                f"record[{index}] must use a canonical POSIX-relative source "
+                "under records/"
+            )
 
     for index, record in enumerate(records):
         if not isinstance(record, dict) or "relations" not in record:
@@ -113,6 +136,7 @@ def canonical_json(value: Any) -> bytes:
         value,
         sort_keys=True,
         ensure_ascii=False,
+        allow_nan=False,
         separators=(",", ":"),
     )
     return (text + "\n").encode("utf-8")

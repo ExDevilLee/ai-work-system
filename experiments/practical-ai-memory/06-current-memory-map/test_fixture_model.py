@@ -4,6 +4,7 @@ import unittest
 from pathlib import Path
 
 from fixture_model import (
+    SUPPORTED_SCHEMA_VERSION,
     VALID_STATUSES,
     canonical_json,
     fact_set,
@@ -67,6 +68,7 @@ class FixtureModelTest(unittest.TestCase):
     def test_valid_manifest_covers_all_statuses_and_scope_boundary(self) -> None:
         model = load_manifest(self.write_manifest(valid_manifest()))
 
+        self.assertEqual(SUPPORTED_SCHEMA_VERSION, 1)
         self.assertEqual(
             VALID_STATUSES,
             frozenset(
@@ -90,12 +92,21 @@ class FixtureModelTest(unittest.TestCase):
 
                 self.assertTrue(any("non-empty source" in error for error in errors))
 
-    def test_absolute_source_is_rejected_for_posix_and_windows(self) -> None:
+    def test_source_must_be_canonical_posix_relative_under_records(self) -> None:
         for source in (
             "/private/example.md",
             r"C:\Users\Example\record.md",
+            r"C:outside.md",
             r"\records\record.md",
             r"\\server\share\record.md",
+            r"records\record.md",
+            "../outside.md",
+            "records/../../outside.md",
+            "records//record.md",
+            "records/./record.md",
+            "records/../record.md",
+            "record.md",
+            "records",
         ):
             with self.subTest(source=source):
                 manifest = valid_manifest()
@@ -103,7 +114,38 @@ class FixtureModelTest(unittest.TestCase):
 
                 errors = validate_manifest(manifest)
 
-                self.assertTrue(any("relative source" in error for error in errors))
+                self.assertTrue(
+                    any("canonical POSIX-relative source" in error for error in errors)
+                )
+                with self.assertRaisesRegex(
+                    ValueError, "canonical POSIX-relative source"
+                ):
+                    load_manifest(self.write_manifest(manifest))
+
+    def test_schema_version_must_be_supported_integer(self) -> None:
+        invalid_versions = (
+            ("missing", None),
+            ("string", "1"),
+            ("boolean", True),
+            ("unsupported", 2),
+        )
+        for label, version in invalid_versions:
+            with self.subTest(label=label):
+                manifest = valid_manifest()
+                if label == "missing":
+                    del manifest["schema_version"]
+                else:
+                    manifest["schema_version"] = version
+
+                errors = validate_manifest(manifest)
+
+                self.assertTrue(
+                    any("schema_version must be integer 1" in error for error in errors)
+                )
+                with self.assertRaisesRegex(
+                    ValueError, "schema_version must be integer 1"
+                ):
+                    load_manifest(self.write_manifest(manifest))
 
     def test_duplicate_ids_are_rejected(self) -> None:
         manifest = valid_manifest()
@@ -216,6 +258,12 @@ class FixtureModelTest(unittest.TestCase):
     def test_canonical_json_rejects_non_serializable_objects(self) -> None:
         with self.assertRaises(TypeError):
             canonical_json({"value": object()})
+
+    def test_canonical_json_rejects_non_finite_numbers(self) -> None:
+        for value in (float("nan"), float("inf"), float("-inf")):
+            with self.subTest(value=value):
+                with self.assertRaises(ValueError):
+                    canonical_json({"value": value})
 
 
 if __name__ == "__main__":
