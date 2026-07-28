@@ -16,37 +16,45 @@
     {
       "id": "AD-101",
       "task_id": "active-decision",
-      "title": "Publication gate decision",
+      "title": "Lattice Note AD-101",
+      "summary": "Publication gate note A",
+      "updated_at": "2031-04-08",
       "status": "active",
       "scope": "project",
-      "source": "records/active-decision-approved.md",
+      "source": "records/ad-101.md",
       "relations": []
     },
     {
       "id": "AD-102",
       "task_id": "active-decision",
-      "title": "Automation gate discussion",
+      "title": "Lattice Note AD-102",
+      "summary": "Publication gate note B",
+      "updated_at": "2031-04-19",
       "status": "pending-validation",
       "scope": "project",
-      "source": "records/active-decision-discussion.md",
+      "source": "records/ad-102.md",
       "relations": []
     },
     {
       "id": "SR-201",
       "task_id": "superseded-rule",
-      "title": "Fourteen-day bundle retention",
+      "title": "Amber Note SR-201",
+      "summary": "Bundle retention note A",
+      "updated_at": "2031-03-14",
       "status": "superseded",
       "scope": "project",
-      "source": "records/superseded-rule-old.md",
+      "source": "records/sr-201.md",
       "relations": []
     },
     {
       "id": "SR-202",
       "task_id": "superseded-rule",
-      "title": "Thirty-day bundle retention",
+      "title": "Amber Note SR-202",
+      "summary": "Bundle retention note B",
+      "updated_at": "2031-05-02",
       "status": "active",
       "scope": "project",
-      "source": "records/superseded-rule-current.md",
+      "source": "records/sr-202.md",
       "relations": [
         {
           "type": "supersedes",
@@ -57,10 +65,12 @@
     {
       "id": "UC-301",
       "task_id": "unresolved-conflict",
-      "title": "Twenty-minute cache observation",
+      "title": "Cedar Note UC-301",
+      "summary": "Cache interval note A",
+      "updated_at": "2031-05-17",
       "status": "conflict",
       "scope": "project",
-      "source": "records/unresolved-conflict-fast.md",
+      "source": "records/uc-301.md",
       "relations": [
         {
           "type": "conflicts-with",
@@ -71,10 +81,12 @@
     {
       "id": "UC-302",
       "task_id": "unresolved-conflict",
-      "title": "Forty-five-minute cache observation",
+      "title": "Cedar Note UC-302",
+      "summary": "Cache interval note B",
+      "updated_at": "2031-05-18",
       "status": "conflict",
       "scope": "project",
-      "source": "records/unresolved-conflict-slow.md",
+      "source": "records/uc-302.md",
       "relations": [
         {
           "type": "conflicts-with",
@@ -85,37 +97,45 @@
     {
       "id": "SB-401",
       "task_id": "scope-boundary",
-      "title": "Quartz preview rule",
+      "title": "Harbor Note SB-401",
+      "summary": "Preview mode note A",
+      "updated_at": "2031-05-25",
       "status": "active",
       "scope": "macos",
-      "source": "records/scope-boundary-macos.md",
+      "source": "records/sb-401.md",
       "relations": []
     },
     {
       "id": "SB-402",
       "task_id": "scope-boundary",
-      "title": "Direct preview boundary",
+      "title": "Harbor Note SB-402",
+      "summary": "Preview mode note B",
+      "updated_at": "2031-05-25",
       "status": "active",
       "scope": "win11",
-      "source": "records/scope-boundary-win11.md",
+      "source": "records/sb-402.md",
       "relations": []
     },
     {
       "id": "PO-501",
       "task_id": "pending-observation",
-      "title": "Single-retry stability rule",
+      "title": "Moss Note PO-501",
+      "summary": "Transfer retry note A",
+      "updated_at": "2031-06-01",
       "status": "active",
       "scope": "project",
-      "source": "records/pending-observation-stable.md",
+      "source": "records/po-501.md",
       "relations": []
     },
     {
       "id": "PO-502",
       "task_id": "pending-observation",
-      "title": "Third-retry isolated observation",
+      "title": "Moss Note PO-502",
+      "summary": "Transfer retry note B",
+      "updated_at": "2031-06-11",
       "status": "pending-validation",
       "scope": "project",
-      "source": "records/pending-observation-one-off.md",
+      "source": "records/po-502.md",
       "relations": []
     }
   ]

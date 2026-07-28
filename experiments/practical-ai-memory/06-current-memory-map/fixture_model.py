@@ -12,7 +12,11 @@ _VALID_SCOPES = frozenset({"global", "project", "macos", "win11"})
 _VALID_RELATIONS = frozenset({"supersedes", "conflicts-with"})
 
 
-def _is_canonical_source(source: str) -> bool:
+def is_canonical_source(source: str) -> bool:
+    if not isinstance(source, str) or any(
+        ord(character) < 32 or ord(character) == 127 for character in source
+    ):
+        return False
     windows_path = PureWindowsPath(source)
     components = source.split("/")
     return (
@@ -22,6 +26,7 @@ def _is_canonical_source(source: str) -> bool:
         and not windows_path.anchor
         and len(components) > 1
         and components[0] == "records"
+        and PurePosixPath(source).suffix == ".md"
         and all(component not in {"", ".", ".."} for component in components)
     )
 
@@ -72,7 +77,7 @@ def validate_manifest(manifest: dict) -> list[str]:
         source = record.get("source")
         if not isinstance(source, str) or not source.strip():
             errors.append(f"record[{index}] must have a non-empty source")
-        elif not _is_canonical_source(source):
+        elif not is_canonical_source(source):
             errors.append(
                 f"record[{index}] must use a canonical POSIX-relative source "
                 "under records/"

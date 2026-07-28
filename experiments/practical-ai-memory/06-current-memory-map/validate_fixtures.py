@@ -4,12 +4,14 @@
 from __future__ import annotations
 
 import json
+import os
 import re
+import unicodedata
 from collections import Counter
-from pathlib import Path, PurePosixPath, PureWindowsPath
+from pathlib import Path
 from typing import Any, Iterable
 
-from fixture_model import VALID_STATUSES, load_manifest
+from fixture_model import VALID_STATUSES, is_canonical_source, load_manifest
 
 
 ROOT = Path(__file__).resolve().parent
@@ -31,6 +33,34 @@ CRITERION_IDS = frozenset(
         "correct-source-citation",
     }
 )
+ANSWER_KEYS = frozenset(
+    {"fact_state", "current_action", "boundary", "prohibited", "expected_sources"}
+)
+ANSWER_STRING_KEYS = ("fact_state", "current_action", "boundary", "prohibited")
+PROJECTION_RECORD_FIELDS = frozenset(
+    {"id", "status", "scope", "source", "relations", "action_boundary"}
+)
+LIFECYCLE_WORDS = (
+    "active",
+    "approved",
+    "current",
+    "historical",
+    "old",
+    "replacement",
+    "replaced",
+    "stable",
+    "one-off",
+    "superseded",
+    "supersedes",
+    "conflict",
+    "conflicts-with",
+    "pending",
+    "unapproved",
+    "unresolved",
+)
+FLAT_INDEX_HEADING = "# Flat Record Index"
+FLAT_INDEX_HEADER = "| Title | Source | Summary | Updated At |"
+FLAT_INDEX_SEPARATOR = "| --- | --- | --- | --- |"
 
 _PRIVATE_PATTERNS = (
     ("POSIX user path", re.compile(r"/(?:Users|home)/[^/\s]+/")),
@@ -63,41 +93,79 @@ _PRIVATE_PATTERNS = (
 )
 
 
-def _read_text(path: Path, label: str, errors: list[str]) -> str | None:
+def _has_control_characters(value: str) -> bool:
+    return any(ord(character) < 32 or ord(character) == 127 for character in value)
+
+
+def _has_symlink_component(path: Path, boundary: Path) -> bool:
     try:
+        relative = path.relative_to(boundary)
+    except ValueError:
+        return True
+    current = boundary
+    if current.is_symlink():
+        return True
+    for part in relative.parts:
+        current = current / part
+        if current.is_symlink():
+            return True
+    return False
+
+
+def _read_text(
+    path: Path,
+    label: str,
+    errors: list[str],
+    *,
+    symlink_boundary: Path | None = None,
+) -> str | None:
+    try:
+        if path.is_symlink() or (
+            symlink_boundary is not None
+            and _has_symlink_component(path, symlink_boundary)
+        ):
+            errors.append(f"symlinked fixture file is not allowed: {label}")
+            return None
         return path.read_text(encoding="utf-8")
     except FileNotFoundError:
         errors.append(f"missing {label}: {path.name}")
-    except (OSError, UnicodeError) as error:
-        errors.append(f"cannot read {label} as UTF-8: {path.name}: {error}")
+    except UnicodeError:
+        errors.append(f"cannot read {label} as UTF-8: {path.name}")
+    except (OSError, ValueError) as error:
+        errors.append(f"cannot read {label}: {path.name}: {type(error).__name__}")
     return None
 
 
-def _load_json(path: Path, label: str, errors: list[str]) -> Any | None:
-    text = _read_text(path, label, errors)
+def _load_json(
+    path: Path,
+    label: str,
+    errors: list[str],
+    *,
+    symlink_boundary: Path | None = None,
+) -> Any | None:
+    text = _read_text(
+        path, label, errors, symlink_boundary=symlink_boundary
+    )
     if text is None:
         return None
     try:
         return json.loads(text)
     except json.JSONDecodeError as error:
-        errors.append(f"invalid {label} JSON: {error}")
+        errors.append(f"invalid {label} JSON: line {error.lineno}")
         return None
 
 
-def _is_relative_record_source(source: object) -> bool:
-    if not isinstance(source, str):
-        return False
-    path = PurePosixPath(source)
-    windows_path = PureWindowsPath(source)
-    return (
-        "\\" not in source
-        and not path.is_absolute()
-        and not windows_path.drive
-        and len(path.parts) > 1
-        and path.parts[0] == "records"
-        and path.suffix == ".md"
-        and all(part not in {"", ".", ".."} for part in path.parts)
-    )
+def _load_fixture_manifest(
+    path: Path, fixture_root: Path, errors: list[str]
+) -> dict[str, Any]:
+    if _has_symlink_component(path, fixture_root):
+        errors.append("symlinked fixture file is not allowed: manifest")
+        return {}
+    try:
+        return load_manifest(path)
+    except ValueError as error:
+        errors.append(str(error))
+    return {}
 
 
 def _all_strings(value: Any) -> Iterable[str]:
@@ -113,28 +181,179 @@ def _all_strings(value: Any) -> Iterable[str]:
             yield from _all_strings(item)
 
 
-def validate_flat_index(path: Path) -> list[str]:
-    """Reject answer-bearing lifecycle fields in the generated flat index."""
+def _normalize_text(value: str) -> str:
+    normalized = unicodedata.normalize("NFKC", value).casefold()
+    return " ".join(normalized.split())
+
+
+def _contains_lifecycle_vocabulary(value: str) -> bool:
+    normalized = _normalize_text(value)
+    for word in LIFECYCLE_WORDS:
+        pattern = re.escape(word).replace(r"\-", r"[-_ ]")
+        if re.search(rf"(?<![a-z]){pattern}(?![a-z])", normalized):
+            return True
+    return False
+
+
+def _contains_common_utf8_window(first: str, second: str, size: int = 32) -> bool:
+    first_bytes = _normalize_text(first).encode("utf-8")
+    second_bytes = _normalize_text(second).encode("utf-8")
+    shorter, longer = sorted((first_bytes, second_bytes), key=len)
+    if len(shorter) < size:
+        return False
+    return any(
+        shorter[index : index + size] in longer
+        for index in range(len(shorter) - size + 1)
+    )
+
+
+def _complete_paragraphs(body: str) -> tuple[str, ...]:
+    paragraphs = []
+    for paragraph in re.split(r"\n\s*\n", body):
+        normalized = _normalize_text(paragraph)
+        if normalized:
+            paragraphs.append(normalized)
+    return tuple(paragraphs)
+
+
+def _flat_index_text(manifest: dict[str, Any]) -> str | None:
+    records = manifest.get("records")
+    if not isinstance(records, list):
+        return None
+    rows = [FLAT_INDEX_HEADING, "", FLAT_INDEX_HEADER, FLAT_INDEX_SEPARATOR]
+    sortable_records = []
+    for record in records:
+        if not isinstance(record, dict):
+            return None
+        values = tuple(
+            record.get(field) for field in ("id", "title", "source", "summary", "updated_at")
+        )
+        if not all(isinstance(value, str) for value in values):
+            return None
+        sortable_records.append(record)
+    for record in sorted(sortable_records, key=lambda item: item["id"]):
+        rows.append(
+            f"| {record['title']} | `{record['source']}` | "
+            f"{record['summary']} | {record['updated_at']} |"
+        )
+    return "\n".join(rows) + "\n"
+
+
+def validate_flat_index(
+    path: Path, manifest: dict[str, Any] | None = None
+) -> list[str]:
+    """Validate the deterministic, answer-neutral flat index contract.
+
+    Required format is a single ``# Flat Record Index`` heading followed by a
+    four-column Markdown table: Title, Source, Summary, Updated At. Rows are
+    sorted by record ID and contain only manifest navigation fields.
+    """
     errors: list[str] = []
-    text = _read_text(path, "generated flat index", errors)
+    text = _read_text(path, "generated flat index", errors, symlink_boundary=path.parent)
     if text is None:
         return errors
     frozen_terms = tuple(VALID_STATUSES) + RELATION_KEYS
-    if any(re.search(rf"(?<![\w-]){re.escape(term)}(?![\w-])", text, re.I) for term in frozen_terms):
+    if any(
+        re.search(rf"(?<![\w-]){re.escape(term)}(?![\w-])", text, re.I)
+        for term in frozen_terms
+    ):
         errors.append("flat index leaks status")
+    if "action_boundary" in text.casefold() or "action boundary" in text.casefold():
+        errors.append("flat index leaks action boundary")
+    if _contains_lifecycle_vocabulary(text):
+        errors.append("flat index leaks answer-bearing lifecycle vocabulary")
+    if manifest is not None:
+        expected = _flat_index_text(manifest)
+        if expected is None or text != expected:
+            errors.append("flat index does not match required format")
     return errors
 
 
-def validate_state_projection(path: Path, record_bodies: Iterable[str]) -> list[str]:
-    """Reject generated projections that copy a complete source body."""
+def validate_state_projection(
+    path: Path,
+    manifest: dict[str, Any],
+    record_bodies: Iterable[str],
+) -> list[str]:
+    """Validate projection schema, manifest equivalence, and body separation."""
     errors: list[str] = []
-    projection = _load_json(path, "generated state projection", errors)
+    projection = _load_json(
+        path,
+        "generated state projection",
+        errors,
+        symlink_boundary=path.parent,
+    )
     if projection is None:
         return errors
-    projection_strings = tuple(_all_strings(projection))
+    if not isinstance(projection, dict):
+        return [*errors, "state projection must be a JSON object"]
+    if set(projection) != {"schema_version", "records"}:
+        errors.append("state projection must contain only schema_version and records")
+    if projection.get("schema_version") != 1 or type(projection.get("schema_version")) is not int:
+        errors.append("state projection schema_version must be integer 1")
+    projection_records = projection.get("records")
+    if not isinstance(projection_records, list):
+        errors.append("state projection records must be an array")
+        return errors
+
+    manifest_records = manifest.get("records", [])
+    manifest_by_id = {
+        record["id"]: record
+        for record in manifest_records
+        if isinstance(record, dict) and isinstance(record.get("id"), str)
+    }
+    projection_by_id: dict[str, dict[str, Any]] = {}
+    for index, record in enumerate(projection_records):
+        if not isinstance(record, dict):
+            errors.append(f"projection record[{index}] must be an object")
+            continue
+        if set(record) != PROJECTION_RECORD_FIELDS:
+            errors.append(f"projection record fields must match contract: index {index}")
+        record_id = record.get("id")
+        if not isinstance(record_id, str) or not record_id or record_id in projection_by_id:
+            errors.append(f"projection record ID is missing or duplicated: index {index}")
+        else:
+            projection_by_id[record_id] = record
+        action_boundary = record.get("action_boundary")
+        if not isinstance(action_boundary, str) or not action_boundary.strip():
+            errors.append(f"projection action_boundary must be nonempty: index {index}")
+
+    if set(projection_by_id) != set(manifest_by_id) or len(projection_records) != len(manifest_by_id):
+        errors.append("projection records do not match manifest")
+
+    facts_match = set(projection_by_id) == set(manifest_by_id) and all(
+        all(
+            projection_by_id[record_id].get(field)
+            == manifest_by_id[record_id].get(field)
+            for field in ("status", "scope", "source")
+        )
+        for record_id in set(projection_by_id) & set(manifest_by_id)
+    )
+    if not facts_match:
+        errors.append("projection facts do not match manifest")
+
+    for record_id in set(projection_by_id) & set(manifest_by_id):
+        if projection_by_id[record_id].get("relations") != manifest_by_id[record_id].get(
+            "relations", []
+        ):
+            errors.append("projection relations do not match manifest")
+            break
+
+    projection_strings = tuple(_all_strings(projection_records))
+    normalized_projection_strings = tuple(
+        _normalize_text(value) for value in projection_strings
+    )
     for body in record_bodies:
-        normalized = body.strip()
-        if normalized and any(normalized in value for value in projection_strings):
+        paragraphs = _complete_paragraphs(body)
+        copied_paragraph = any(
+            paragraph in projection_value
+            for paragraph in paragraphs
+            for projection_value in normalized_projection_strings
+        )
+        copied_window = any(
+            _contains_common_utf8_window(body, projection_value)
+            for projection_value in projection_strings
+        )
+        if copied_paragraph or copied_window:
             errors.append("projection copies body")
             break
     return errors
@@ -145,12 +364,10 @@ def _expected_answer_phrases(answers: dict[str, Any]) -> set[str]:
     for answer in answers.values():
         if not isinstance(answer, dict):
             continue
-        for key, value in answer.items():
-            if key == "expected_sources":
-                continue
-            for phrase in _all_strings(value):
-                if len(phrase) >= 12 and any(character.isspace() for character in phrase):
-                    phrases.add(phrase.casefold())
+        for key in ANSWER_STRING_KEYS:
+            phrase = answer.get(key)
+            if isinstance(phrase, str) and len(phrase) >= 12:
+                phrases.add(phrase.casefold())
     return phrases
 
 
@@ -159,7 +376,7 @@ def _validate_prompts(
     answers: dict[str, Any],
     rubric_tasks: dict[str, Any],
     errors: list[str],
-) -> None:
+) -> list[Path]:
     expected_phrases = _expected_answer_phrases(answers)
     rubric_terms: set[str] = set()
     for task_rubric in rubric_tasks.values():
@@ -177,13 +394,14 @@ def _validate_prompts(
                     rubric_terms.add(value.casefold())
 
     prompt_dir = root / "prompts"
-    actual_prompts = {path.stem for path in prompt_dir.glob("*.md")}
+    prompt_paths = list(prompt_dir.glob("*.md")) if prompt_dir.is_dir() else []
+    actual_prompts = {path.stem for path in prompt_paths}
     if actual_prompts != set(TASK_IDS):
         errors.append("prompts must cover exactly the five frozen tasks")
 
     for task_id in TASK_IDS:
         path = prompt_dir / f"{task_id}.md"
-        text = _read_text(path, f"prompt for {task_id}", errors)
+        text = _read_text(path, f"prompt for {task_id}", errors, symlink_boundary=prompt_dir)
         if text is None:
             continue
         lowered = text.casefold()
@@ -205,11 +423,11 @@ def _validate_prompts(
             errors.append(f"prompt leaks expected answer term: {task_id}")
         if any(term in lowered for term in rubric_terms):
             errors.append(f"prompt leaks rubric ID or wording: {task_id}")
-        numbered_questions = re.findall(r"(?m)^\s*\d+\.\s+", text)
-        if not numbered_questions:
+        if not re.findall(r"(?m)^\s*\d+\.\s+", text):
             errors.append(f"prompt must ask numbered questions: {task_id}")
         if "relative" not in lowered or "source" not in lowered or "actually" not in lowered:
             errors.append(f"prompt must require relative sources actually used: {task_id}")
+    return prompt_paths
 
 
 def _validate_answers(
@@ -229,18 +447,30 @@ def _validate_answers(
         if not isinstance(answer, dict):
             errors.append(f"expected answer must be an object: {task_id}")
             continue
+        if set(answer) != ANSWER_KEYS:
+            errors.append(f"expected answer must use exact answer keys: {task_id}")
+        for key in ANSWER_STRING_KEYS:
+            value = answer.get(key)
+            if not isinstance(value, str) or not value.strip():
+                errors.append(f"expected answer field must be a nonempty string: {task_id}: {key}")
         sources = answer.get("expected_sources")
-        if not isinstance(sources, list) or not sources:
-            errors.append(f"expected sources must be a non-empty list: {task_id}")
+        if not isinstance(sources, list):
+            errors.append(f"expected sources must be a list: {task_id}")
             continue
+        strings_only = all(isinstance(source, str) for source in sources)
+        if (
+            not strings_only
+            or len(sources) != 2
+            or len(set(sources)) != 2
+            or set(sources) != task_sources.get(task_id, set())
+        ):
+            errors.append(f"expected sources must be exactly the two task sources: {task_id}")
         for source in sources:
-            if not _is_relative_record_source(source):
+            if not isinstance(source, str) or not is_canonical_source(source):
                 errors.append(f"invalid relative expected source: {task_id}")
                 continue
             if source not in manifest_sources or not (fixture_root / source).is_file():
                 errors.append(f"expected source does not exist: {task_id}: {source}")
-            elif source not in task_sources.get(task_id, set()):
-                errors.append(f"expected source belongs to another task: {task_id}: {source}")
     return answers
 
 
@@ -274,48 +504,86 @@ def _validate_rubric(rubric: Any, errors: list[str]) -> dict[str, Any]:
                 errors.append(f"rubric criterion must have an ID: {task_id}")
             else:
                 criterion_ids.append(criterion_id)
-            if criterion.get("points") != 1 or type(criterion.get("points")) is not int:
+            points = criterion.get("points")
+            if points != 1 or type(points) is not int:
                 errors.append(f"rubric criteria must be worth one point: {task_id}")
             else:
                 points_total += 1
-            if not isinstance(criterion.get("description"), str) or not criterion["description"].strip():
+            description = criterion.get("description")
+            if not isinstance(description, str) or not description.strip():
                 errors.append(f"rubric criterion must have wording: {task_id}")
         if len(set(criterion_ids)) != len(criterion_ids):
             errors.append(f"rubric criterion IDs must be unique: {task_id}")
         if set(criterion_ids) != CRITERION_IDS:
-            errors.append(
-                f"rubric must use the five frozen criterion IDs: {task_id}"
-            )
+            errors.append(f"rubric must use the five frozen criterion IDs: {task_id}")
         if task_rubric.get("max_score") != 5 or points_total != 5:
             errors.append(f"rubric max_score must equal five points: {task_id}")
         task_score_total += points_total
 
-    totals_valid = (
-        rubric.get("per_task_max_score") == 5
-        and rubric.get("single_round_max_score") == 25
-        and rubric.get("formal_repeats") == 3
-        and rubric.get("formal_max_score") == 75
-        and task_score_total == 25
-        and rubric.get("single_round_max_score") == task_score_total
-        and rubric.get("formal_max_score")
-        == rubric.get("single_round_max_score", 0) * rubric.get("formal_repeats", 0)
+    totals = (
+        rubric.get("per_task_max_score"),
+        rubric.get("single_round_max_score"),
+        rubric.get("formal_repeats"),
+        rubric.get("formal_max_score"),
     )
+    totals_valid = all(type(value) is int for value in totals)
+    if totals_valid:
+        per_task, single_round, repeats, formal = totals
+        totals_valid = (
+            per_task == 5
+            and single_round == 25
+            and repeats == 3
+            and formal == 75
+            and task_score_total == 25
+            and single_round == task_score_total
+            and formal == single_round * repeats
+        )
     if not totals_valid:
         errors.append("rubric totals are inconsistent")
     return task_rubrics
 
 
-def _scan_private_markers(paths: Iterable[Path], root: Path, errors: list[str]) -> None:
+def _scan_private_markers(
+    paths: Iterable[Path], root: Path, errors: list[str]
+) -> None:
     for path in sorted(set(paths), key=lambda item: item.as_posix()):
-        if not path.is_file():
+        if not path.is_file() and not path.is_symlink():
             continue
-        text = _read_text(path, "privacy-scanned fixture file", errors)
+        text = _read_text(path, "privacy-scanned fixture file", errors, symlink_boundary=root)
         if text is None:
             continue
         for label, pattern in _PRIVATE_PATTERNS:
             if pattern.search(text):
-                relative = path.relative_to(root).as_posix()
+                try:
+                    relative = path.relative_to(root).as_posix()
+                except ValueError:
+                    relative = path.name
                 errors.append(f"private-data marker ({label}): {relative}")
+
+
+def _validate_frozen_ids(
+    value: Any,
+    expected: tuple[str, ...],
+    label: str,
+    errors: list[str],
+) -> None:
+    if not isinstance(value, list):
+        errors.append(f"manifest must contain exactly {len(expected)} {label} IDs")
+        return
+    if not all(isinstance(item, str) for item in value):
+        errors.append(f"manifest {label} IDs must be strings")
+        return
+    if len(value) != len(expected) or set(value) != set(expected):
+        errors.append(f"manifest must contain exactly {len(expected)} {label} IDs")
+
+
+def _resolved_within(path: Path, boundary: Path) -> bool:
+    try:
+        return os.path.commonpath((str(path.resolve()), str(boundary.resolve()))) == str(
+            boundary.resolve()
+        )
+    except (OSError, ValueError):
+        return False
 
 
 def validate(
@@ -327,20 +595,12 @@ def validate(
     root = Path(root)
     fixture_root = root / "fixtures" / fixture_set
     manifest_path = fixture_root / "manifest.json"
-    try:
-        manifest = load_manifest(manifest_path)
-    except ValueError as error:
-        errors.append(str(error))
-        manifest = {}
+    manifest = _load_fixture_manifest(manifest_path, fixture_root, errors)
 
-    condition_ids = manifest.get("condition_ids") if isinstance(manifest, dict) else None
-    task_ids = manifest.get("task_ids") if isinstance(manifest, dict) else None
-    if not isinstance(condition_ids, list) or set(condition_ids) != set(CONDITION_IDS) or len(condition_ids) != 3:
-        errors.append("manifest must contain exactly 3 condition IDs")
-    if not isinstance(task_ids, list) or set(task_ids) != set(TASK_IDS) or len(task_ids) != 5:
-        errors.append("manifest must contain exactly 5 task IDs")
+    _validate_frozen_ids(manifest.get("condition_ids"), CONDITION_IDS, "condition", errors)
+    _validate_frozen_ids(manifest.get("task_ids"), TASK_IDS, "task", errors)
 
-    records = manifest.get("records", []) if isinstance(manifest, dict) else []
+    records = manifest.get("records", [])
     if not isinstance(records, list) or len(records) != 10:
         errors.append("manifest must contain exactly 10 records")
         records = records if isinstance(records, list) else []
@@ -350,6 +610,10 @@ def validate(
     source_counts: Counter[str] = Counter()
     record_bodies: list[str] = []
     record_tasks: dict[str, str] = {}
+    records_dir = fixture_root / "records"
+    if records_dir.is_symlink():
+        errors.append("symlinked fixture directory is not allowed: records")
+
     for record in records:
         if not isinstance(record, dict):
             continue
@@ -360,17 +624,53 @@ def validate(
             errors.append(f"record has missing or invalid task ID: {record_id}")
         elif isinstance(record_id, str):
             record_tasks[record_id] = task_id
-        if not _is_relative_record_source(source):
+        if not is_canonical_source(source):
             errors.append(f"record has invalid Markdown source: {record_id}")
             continue
+
         source_counts[source] += 1
         manifest_sources.add(source)
         if isinstance(task_id, str) and task_id in task_sources:
             task_sources[task_id].add(source)
+
         source_path = fixture_root / source
-        body = _read_text(source_path, f"record source for {record_id}", errors)
+        if _has_symlink_component(source_path, records_dir):
+            errors.append(f"symlinked fixture file is not allowed: record {record_id}")
+            continue
+        if not _resolved_within(source_path, records_dir):
+            errors.append(f"record source resolves outside records directory: {record_id}")
+            continue
+        body = _read_text(
+            source_path,
+            f"record source for {record_id}",
+            errors,
+            symlink_boundary=records_dir,
+        )
         if body is not None:
             record_bodies.append(body)
+
+        title = record.get("title")
+        summary = record.get("summary")
+        updated_at = record.get("updated_at")
+        navigation_values = (title, summary, updated_at)
+        if not all(
+            isinstance(value, str)
+            and value.strip()
+            and not _has_control_characters(value)
+            and "|" not in value
+            for value in navigation_values
+        ):
+            errors.append(f"record must have safe title, summary, and updated_at: {record_id}")
+        if not isinstance(updated_at, str) or not re.fullmatch(r"\d{4}-\d{2}-\d{2}", updated_at):
+            errors.append(f"record updated_at must use YYYY-MM-DD: {record_id}")
+        filename = Path(source).stem
+        if any(
+            isinstance(value, str) and _contains_lifecycle_vocabulary(value)
+            for value in (filename, title, summary)
+        ):
+            errors.append(
+                f"record metadata contains answer-bearing lifecycle vocabulary: {record_id}"
+            )
 
     for source, count in source_counts.items():
         if count != 1:
@@ -392,8 +692,11 @@ def validate(
             if target_task is not None and target_task != source_task:
                 errors.append(f"relation crosses task boundary: {record.get('id')}")
 
-    records_dir = fixture_root / "records"
-    actual_records = set(records_dir.rglob("*.md")) if records_dir.is_dir() else set()
+    actual_records = (
+        {path for path in records_dir.rglob("*.md") if path.is_file() or path.is_symlink()}
+        if records_dir.is_dir()
+        else set()
+    )
     if len(actual_records) != 10:
         errors.append("fixture must contain exactly 10 Markdown records")
     expected_record_paths = {fixture_root / source for source in manifest_sources}
@@ -401,13 +704,27 @@ def validate(
         errors.append("manifest sources and Markdown records must match exactly")
 
     conditions_root = fixture_root / "conditions"
-    actual_conditions = {path.name for path in conditions_root.iterdir() if path.is_dir()} if conditions_root.is_dir() else set()
+    actual_conditions = (
+        {path.name for path in conditions_root.iterdir() if path.is_dir()}
+        if conditions_root.is_dir()
+        else set()
+    )
     if actual_conditions != set(CONDITION_IDS):
         errors.append("fixture must contain exactly the three frozen condition directories")
+    condition_paths: list[Path] = []
     for condition_id in CONDITION_IDS:
         condition_root = conditions_root / condition_id
         agents_path = condition_root / "AGENTS.md"
-        _read_text(agents_path, f"condition instructions for {condition_id}", errors)
+        condition_paths.append(agents_path)
+        if condition_root.is_symlink():
+            errors.append(f"symlinked fixture directory is not allowed: {condition_id}")
+            continue
+        agents_text = _read_text(
+            agents_path,
+            f"condition instructions for {condition_id}",
+            errors,
+            symlink_boundary=conditions_root,
+        )
         if condition_root.is_dir():
             for path in condition_root.rglob("*"):
                 if not path.is_file() or path == agents_path:
@@ -416,39 +733,47 @@ def validate(
                     errors.append(f"generated artifact exists under condition directory: {condition_id}")
                 else:
                     errors.append(f"condition directory contains copied records: {condition_id}")
-            agents_text = agents_path.read_text(encoding="utf-8") if agents_path.is_file() else ""
-            if any(body.strip() and body.strip() in agents_text for body in record_bodies):
-                errors.append(f"condition directory contains copied records: {condition_id}")
+        if agents_text is not None and any(
+            body.strip() and body.strip() in agents_text for body in record_bodies
+        ):
+            errors.append(f"condition directory contains copied records: {condition_id}")
 
-    answers_raw = _load_json(root / "expected" / "answers.json", "expected answers", errors)
+    answers_path = root / "expected" / "answers.json"
+    rubric_path = root / "expected" / "rubric.json"
+    answers_raw = _load_json(
+        answers_path, "expected answers", errors, symlink_boundary=root / "expected"
+    )
     answers = _validate_answers(
         answers_raw, fixture_root, manifest_sources, task_sources, errors
     )
-    rubric_raw = _load_json(root / "expected" / "rubric.json", "rubric", errors)
+    rubric_raw = _load_json(
+        rubric_path, "rubric", errors, symlink_boundary=root / "expected"
+    )
     rubric_tasks = _validate_rubric(rubric_raw, errors)
-    _validate_prompts(root, answers, rubric_tasks, errors)
+    prompt_paths = _validate_prompts(root, answers, rubric_tasks, errors)
 
-    privacy_paths = [manifest_path]
-    privacy_paths.extend(actual_records)
-    privacy_paths.extend(conditions_root.rglob("*.md") if conditions_root.is_dir() else [])
-    privacy_paths.extend((root / "prompts").glob("*.md"))
-    privacy_paths.extend((root / "expected").glob("*.json"))
-    _scan_private_markers(privacy_paths, root, errors)
-
+    generated_root = fixture_root / "generated"
+    flat_index = generated_root / "flat-index.md"
+    projection = generated_root / "state-projection.json"
     if require_generated:
-        generated_root = fixture_root / "generated"
-        flat_index = generated_root / "flat-index.md"
-        projection = generated_root / "state-projection.json"
-        if not flat_index.is_file():
+        if not flat_index.exists() and not flat_index.is_symlink():
             errors.append("missing generated flat index: generated/flat-index.md")
         else:
-            errors.extend(validate_flat_index(flat_index))
-        if not projection.is_file():
+            errors.extend(validate_flat_index(flat_index, manifest))
+        if not projection.exists() and not projection.is_symlink():
             errors.append(
                 "missing generated state projection: generated/state-projection.json"
             )
         else:
-            errors.extend(validate_state_projection(projection, record_bodies))
+            errors.extend(validate_state_projection(projection, manifest, record_bodies))
+
+    privacy_paths = [manifest_path, answers_path, rubric_path]
+    privacy_paths.extend(actual_records)
+    privacy_paths.extend(condition_paths)
+    privacy_paths.extend(prompt_paths)
+    if generated_root.is_dir():
+        privacy_paths.extend(generated_root.rglob("*"))
+    _scan_private_markers(privacy_paths, root, errors)
 
     return errors
 

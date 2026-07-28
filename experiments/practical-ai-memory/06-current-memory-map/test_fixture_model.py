@@ -8,6 +8,7 @@ from fixture_model import (
     VALID_STATUSES,
     canonical_json,
     fact_set,
+    is_canonical_source,
     load_manifest,
     validate_manifest,
 )
@@ -107,6 +108,7 @@ class FixtureModelTest(unittest.TestCase):
             "records/../record.md",
             "record.md",
             "records",
+            "records/note.txt",
         ):
             with self.subTest(source=source):
                 manifest = valid_manifest()
@@ -121,6 +123,26 @@ class FixtureModelTest(unittest.TestCase):
                     ValueError, "canonical POSIX-relative source"
                 ):
                     load_manifest(self.write_manifest(manifest))
+
+    def test_canonical_source_helper_rejects_control_characters(self) -> None:
+        self.assertTrue(is_canonical_source("records/decisions/note.md"))
+        for source in (
+            "records/note\x00.md",
+            "records/note\n.md",
+            "records/note\r.md",
+            "records/note\t.md",
+            "records/note\x7f.md",
+        ):
+            with self.subTest(source=repr(source)):
+                self.assertFalse(is_canonical_source(source))
+
+                manifest = valid_manifest()
+                manifest["records"][0]["source"] = source
+                errors = validate_manifest(manifest)
+
+                self.assertTrue(
+                    any("canonical POSIX-relative source" in error for error in errors)
+                )
 
     def test_schema_version_must_be_supported_integer(self) -> None:
         invalid_versions = (
