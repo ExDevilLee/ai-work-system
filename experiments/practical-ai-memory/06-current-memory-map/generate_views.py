@@ -421,6 +421,10 @@ def _validate_pack_pair(pack_a: dict[str, object], pack_b: dict[str, object]) ->
         )
 
     errors = []
+    if pack_a.get("pack_id") != "pack-a":
+        errors.append("first human pack must have pack_id 'pack-a'")
+    if pack_b.get("pack_id") != "pack-b":
+        errors.append("second human pack must have pack_id 'pack-b'")
     if record_shape(pack_a) != record_shape(pack_b):
         errors.append("human packs must have equal scope and relation shapes")
 

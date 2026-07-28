@@ -246,6 +246,44 @@ class GenerateViewsTest(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "invalid human pack"):
             build_state_table(malformed)
 
+    def assert_pack_binding_failure_preserves_generated(
+        self, pack_a_id: str, pack_b_id: str, message: str
+    ) -> None:
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            root = Path(temporary_directory)
+            shutil.copytree(ROOT / "fixtures", root / "fixtures")
+            shutil.copytree(ROOT / "human-fixtures", root / "human-fixtures")
+            generated = root / "fixtures" / "pilot-01" / "generated"
+            before = {name: (generated / name).read_bytes() for name in GENERATED_NAMES}
+
+            for filename, pack_id in (("pack-a.json", pack_a_id), ("pack-b.json", pack_b_id)):
+                path = root / "human-fixtures" / filename
+                pack = json.loads(path.read_text(encoding="utf-8"))
+                pack["pack_id"] = pack_id
+                path.write_bytes(canonical_json(pack))
+
+            with self.assertRaisesRegex(ValueError, message):
+                generate_all(root)
+
+            after = {name: (generated / name).read_bytes() for name in GENERATED_NAMES}
+            self.assertEqual(after, before)
+            self.assertEqual(list(root.rglob("*.tmp")), [])
+
+    def test_swapped_pack_ids_fail_without_modifying_generated_files(self) -> None:
+        self.assert_pack_binding_failure_preserves_generated(
+            "pack-b", "pack-a", "first human pack.*pack-a"
+        )
+
+    def test_duplicate_pack_ids_fail_without_modifying_generated_files(self) -> None:
+        self.assert_pack_binding_failure_preserves_generated(
+            "pack-a", "pack-a", "second human pack.*pack-b"
+        )
+
+    def test_wrong_pack_id_fails_without_modifying_generated_files(self) -> None:
+        self.assert_pack_binding_failure_preserves_generated(
+            "wrong-pack", "pack-b", "human pack_id"
+        )
+
     def test_real_generator_rerun_leaves_committed_artifacts_unchanged(self) -> None:
         generated = ROOT / "fixtures" / "pilot-01" / "generated"
         before = {name: (generated / name).read_bytes() for name in GENERATED_NAMES}
