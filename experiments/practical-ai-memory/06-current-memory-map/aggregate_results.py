@@ -5,15 +5,18 @@ from __future__ import annotations
 
 import argparse
 import csv
+import hashlib
 import io
 import json
 import math
 import os
 import re
+import secrets
 import stat
 import statistics
 import tempfile
 from collections import defaultdict
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Iterable, Optional
 
@@ -420,7 +423,141 @@ def _fsync_directory(path: Path) -> None:
         os.close(descriptor)
 
 
-def _write_fsynced_staging(directory: Path, prefix: str, payload: bytes) -> Path:
+@dataclass(frozen=True)
+class FileIdentity:
+    device: int
+    inode: int
+
+
+@dataclass(frozen=True)
+class PublicationLock:
+    path: Path
+    owner_token: str
+    identity: FileIdentity
+
+
+def _regular_identity(path: Path) -> Optional[FileIdentity]:
+    try:
+        status = path.lstat()
+    except FileNotFoundError:
+        return None
+    if not stat.S_ISREG(status.st_mode):
+        raise ValueError("transaction path is not a regular file")
+    return FileIdentity(status.st_dev, status.st_ino)
+
+
+def _identity_matches(path: Path, identity: FileIdentity) -> bool:
+    try:
+        return _regular_identity(path) == identity
+    except ValueError:
+        return False
+
+
+def _unlink_owned(path: Path, identity: FileIdentity) -> bool:
+    if not _identity_matches(path, identity):
+        return False
+    path.unlink()
+    return True
+
+
+def _lock_path(csv_path: Path, json_path: Path) -> Path:
+    pair = f"{csv_path.name}\0{json_path.name}".encode("utf-8")
+    suffix = hashlib.sha256(pair).hexdigest()[:20]
+    return csv_path.parent / f".aggregate-lock-{suffix}.lock"
+
+
+def acquire_publication_lock(csv_path: Path, json_path: Path) -> PublicationLock:
+    if csv_path.parent != json_path.parent:
+        raise RuntimeError("aggregate lock requires one output directory")
+    directory = csv_path.parent
+    lock_path = _lock_path(csv_path, json_path)
+    owner_token = secrets.token_hex(16)
+    flags = os.O_WRONLY | os.O_CREAT | os.O_EXCL | getattr(os, "O_NOFOLLOW", 0)
+    descriptor = -1
+    identity: Optional[FileIdentity] = None
+    try:
+        descriptor = os.open(lock_path, flags, 0o600)
+        opened = os.fstat(descriptor)
+        if not stat.S_ISREG(opened.st_mode):
+            raise ValueError("lock is not a regular file")
+        identity = FileIdentity(opened.st_dev, opened.st_ino)
+        payload = (owner_token + "\n").encode("ascii")
+        offset = 0
+        while offset < len(payload):
+            written = os.write(descriptor, payload[offset:])
+            if written <= 0:
+                raise OSError("short lock write")
+            offset += written
+        os.fsync(descriptor)
+        os.close(descriptor)
+        descriptor = -1
+        if not _identity_matches(lock_path, identity):
+            raise ValueError("lock identity changed")
+        _fsync_directory(directory)
+        return PublicationLock(lock_path, owner_token, identity)
+    except FileExistsError as error:
+        try:
+            existing = lock_path.lstat()
+        except OSError as inspect_error:
+            raise RuntimeError(
+                f"aggregate publication lock inspection failed: {type(inspect_error).__name__}"
+            ) from inspect_error
+        if not stat.S_ISREG(existing.st_mode):
+            raise RuntimeError("aggregate publication lock is unsafe") from error
+        raise RuntimeError("aggregate publication is already locked") from error
+    except (OSError, ValueError) as error:
+        if descriptor >= 0:
+            os.close(descriptor)
+        if identity is not None:
+            try:
+                _unlink_owned(lock_path, identity)
+                _fsync_directory(directory)
+            except OSError:
+                pass
+        raise RuntimeError(
+            f"aggregate publication lock failed: {type(error).__name__}"
+        ) from error
+
+
+def _verify_publication_lock(ownership: PublicationLock) -> None:
+    flags = os.O_RDONLY | getattr(os, "O_NOFOLLOW", 0)
+    descriptor = -1
+    try:
+        if not _identity_matches(ownership.path, ownership.identity):
+            raise ValueError("lock identity changed")
+        descriptor = os.open(ownership.path, flags)
+        opened = os.fstat(descriptor)
+        if FileIdentity(opened.st_dev, opened.st_ino) != ownership.identity:
+            raise ValueError("lock identity changed")
+        expected_payload = (ownership.owner_token + "\n").encode("ascii")
+        payload = os.read(descriptor, len(expected_payload) + 1)
+        os.close(descriptor)
+        descriptor = -1
+        if payload != expected_payload:
+            raise ValueError("lock owner changed")
+    except (OSError, ValueError) as error:
+        if descriptor >= 0:
+            os.close(descriptor)
+        raise RuntimeError(
+            f"aggregate publication lock ownership failed: {type(error).__name__}"
+        ) from error
+
+
+def release_publication_lock(ownership: PublicationLock) -> None:
+    try:
+        _verify_publication_lock(ownership)
+        if not _unlink_owned(ownership.path, ownership.identity):
+            raise ValueError("lock identity changed")
+        _fsync_directory(ownership.path.parent)
+    except (OSError, ValueError, RuntimeError) as error:
+        raise RuntimeError(
+            f"aggregate publication lock release failed: {type(error).__name__}"
+        ) from error
+
+
+def _write_fsynced_staging(
+    directory: Path, prefix: str, payload: bytes
+) -> tuple[Path, FileIdentity]:
     descriptor = -1
     staging: Optional[Path] = None
     try:
@@ -435,7 +572,10 @@ def _write_fsynced_staging(directory: Path, prefix: str, payload: bytes) -> Path
             os.fsync(handle.fileno())
         os.close(descriptor)
         descriptor = -1
-        return staging
+        identity = _regular_identity(staging)
+        if identity is None:
+            raise OSError("staging file disappeared")
+        return staging, identity
     except OSError:
         if descriptor >= 0:
             os.close(descriptor)
@@ -467,53 +607,107 @@ def _validate_public_target(path: Path) -> bool:
     return True
 
 
-def replace_aggregate_pair(
-    csv_path: Path, csv_payload: bytes, json_path: Path, json_payload: bytes
+def _replace_aggregate_pair_locked(
+    csv_path: Path,
+    csv_payload: bytes,
+    json_path: Path,
+    json_payload: bytes,
+    ownership: PublicationLock,
 ) -> None:
     directory = csv_path.parent
     if json_path.parent != directory:
         raise ValueError("aggregate outputs must share one directory")
+    if ownership.path != _lock_path(csv_path, json_path):
+        raise RuntimeError("aggregate publication lock does not match output pair")
     csv_staging: Optional[Path] = None
     json_staging: Optional[Path] = None
-    backups: dict[Path, Optional[Path]] = {csv_path: None, json_path: None}
-    original_exists: dict[Path, bool] = {}
+    staging_identities: dict[Path, FileIdentity] = {}
+    backups: dict[Path, Optional[tuple[Path, FileIdentity]]] = {
+        csv_path: None,
+        json_path: None,
+    }
+    original_identities: dict[Path, Optional[FileIdentity]] = {}
+    installed_identities: dict[Path, FileIdentity] = {}
     committed = False
     rollback_failed = False
     try:
+        _verify_publication_lock(ownership)
         for destination in (csv_path, json_path):
-            original_exists[destination] = _validate_public_target(destination)
-        csv_staging = _write_fsynced_staging(
+            _validate_public_target(destination)
+            original_identities[destination] = _regular_identity(destination)
+        csv_staging, csv_staging_identity = _write_fsynced_staging(
             directory, ".aggregate-csv-", csv_payload
         )
-        json_staging = _write_fsynced_staging(
+        staging_identities[csv_staging] = csv_staging_identity
+        json_staging, json_staging_identity = _write_fsynced_staging(
             directory, ".aggregate-json-", json_payload
         )
+        staging_identities[json_staging] = json_staging_identity
         for destination in (csv_path, json_path):
-            if _validate_public_target(destination) != original_exists[destination]:
+            _verify_publication_lock(ownership)
+            if _regular_identity(destination) != original_identities[destination]:
                 raise ValueError("public aggregate target changed during transaction")
-            if original_exists[destination]:
+            if original_identities[destination] is not None:
                 backup = _reserve_backup_path(directory, ".aggregate-old-")
                 os.replace(destination, backup)
-                backups[destination] = backup
+                backup_identity = _regular_identity(backup)
+                if backup_identity is not None:
+                    backups[destination] = (backup, backup_identity)
+                if backup_identity != original_identities[destination]:
+                    raise ValueError("aggregate backup identity changed")
+        _verify_publication_lock(ownership)
         os.replace(csv_staging, csv_path)
+        installed_identity = _regular_identity(csv_path)
+        if installed_identity != csv_staging_identity:
+            raise ValueError("installed CSV identity changed")
+        installed_identities[csv_path] = installed_identity
         csv_staging = None
+        _verify_publication_lock(ownership)
         os.replace(json_staging, json_path)
+        installed_identity = _regular_identity(json_path)
+        if installed_identity != json_staging_identity:
+            raise ValueError("installed JSON identity changed")
+        installed_identities[json_path] = installed_identity
         json_staging = None
         _fsync_directory(directory)
+        _verify_publication_lock(ownership)
         committed = True
+    except RuntimeError:
+        rollback_failed = True
+        raise
     except (OSError, ValueError) as error:
+        try:
+            _verify_publication_lock(ownership)
+        except RuntimeError as lock_error:
+            rollback_failed = True
+            raise RuntimeError("aggregate transaction lock ownership lost") from lock_error
         rollback_errors: list[str] = []
         for destination in (csv_path, json_path):
-            backup = backups[destination]
+            backup_entry = backups[destination]
             try:
-                if backup is not None and backup.exists():
+                installed_identity = installed_identities.get(destination)
+                current_identity = _regular_identity(destination)
+                if backup_entry is not None:
+                    backup, backup_identity = backup_entry
+                    if (
+                        current_identity is not None
+                        and current_identity != installed_identity
+                    ):
+                        raise OSError("foreign output appeared during rollback")
+                    if not _identity_matches(backup, backup_identity):
+                        raise OSError("backup identity changed")
                     os.replace(backup, destination)
                     backups[destination] = None
-                elif not original_exists.get(destination, False):
-                    try:
-                        destination.unlink()
-                    except FileNotFoundError:
-                        pass
+                elif original_identities[destination] is None and installed_identity is not None:
+                    if not _unlink_owned(destination, installed_identity):
+                        raise OSError("installed output identity changed")
+                elif original_identities[destination] is None:
+                    if current_identity is not None:
+                        raise OSError("foreign output appeared during rollback")
+                elif installed_identity is not None:
+                    raise OSError("original backup is unavailable")
+                elif current_identity != original_identities[destination]:
+                    raise OSError("original output identity changed")
             except OSError as rollback_error:
                 rollback_errors.append(type(rollback_error).__name__)
         try:
@@ -527,13 +721,21 @@ def replace_aggregate_pair(
             f"aggregate transaction failed: {type(error).__name__}"
         ) from error
     finally:
-        cleanup_paths = [csv_staging, json_staging]
+        cleanup_entries = [
+            (csv_staging, staging_identities.get(csv_staging) if csv_staging else None),
+            (
+                json_staging,
+                staging_identities.get(json_staging) if json_staging else None,
+            ),
+        ]
         if not rollback_failed:
-            cleanup_paths.extend((backups[csv_path], backups[json_path]))
-        for temporary_path in cleanup_paths:
-            if temporary_path is not None:
+            for backup_entry in (backups[csv_path], backups[json_path]):
+                if backup_entry is not None:
+                    cleanup_entries.append(backup_entry)
+        for temporary_path, temporary_identity in cleanup_entries:
+            if temporary_path is not None and temporary_identity is not None:
                 try:
-                    temporary_path.unlink()
+                    _unlink_owned(temporary_path, temporary_identity)
                 except OSError:
                     pass
         if committed:
@@ -541,6 +743,29 @@ def replace_aggregate_pair(
                 _fsync_directory(directory)
             except OSError:
                 pass
+
+
+def replace_aggregate_pair(
+    csv_path: Path, csv_payload: bytes, json_path: Path, json_payload: bytes
+) -> None:
+    ownership = acquire_publication_lock(csv_path, json_path)
+    transaction_error: Optional[BaseException] = None
+    try:
+        _replace_aggregate_pair_locked(
+            csv_path, csv_payload, json_path, json_payload, ownership
+        )
+    except BaseException as error:
+        transaction_error = error
+        raise
+    finally:
+        try:
+            release_publication_lock(ownership)
+        except RuntimeError as release_error:
+            if transaction_error is not None:
+                raise RuntimeError(
+                    "aggregate transaction and lock release failed"
+                ) from transaction_error
+            raise release_error
 
 
 def render_csv(rows: list[dict[str, object]]) -> bytes:

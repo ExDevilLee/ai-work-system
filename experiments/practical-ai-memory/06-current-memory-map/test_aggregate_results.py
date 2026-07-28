@@ -5,12 +5,21 @@ import io
 import json
 import os
 import shutil
+import subprocess
+import sys
 import tempfile
 import unittest
 from pathlib import Path
 from unittest.mock import patch
 
-from aggregate_results import aggregate_runs, summarize
+from aggregate_results import (
+    _lock_path,
+    _replace_aggregate_pair_locked,
+    acquire_publication_lock,
+    aggregate_runs,
+    release_publication_lock,
+    summarize,
+)
 from matrix_support import expected_run_contract
 from run_experiment import assemble_fixture
 
@@ -425,6 +434,97 @@ class AggregateResultsTest(unittest.TestCase):
                     if path.name.startswith(".aggregate-")
                 ]
                 self.assertEqual(leftovers, [])
+
+    def test_cross_process_lock_rejects_competitor_and_preserves_owner_pair(
+        self,
+    ) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            data = Path(temporary)
+            csv_path = data / "formal.csv"
+            json_path = data / "formal.json"
+            ownership = acquire_publication_lock(csv_path, json_path)
+            lock_payload = ownership.path.read_text(encoding="ascii")
+            self.assertEqual(lock_payload, ownership.owner_token + "\n")
+            self.assertEqual(len(ownership.owner_token), 32)
+            self.assertTrue(
+                all(
+                    character in "0123456789abcdef"
+                    for character in ownership.owner_token
+                )
+            )
+            contender = """
+import sys
+from pathlib import Path
+from aggregate_results import replace_aggregate_pair
+
+try:
+    replace_aggregate_pair(
+        Path(sys.argv[1]), b"contender-csv\\n", Path(sys.argv[2]), b"contender-json\\n"
+    )
+except RuntimeError as error:
+    raise SystemExit(23 if "already locked" in str(error) else 24)
+raise SystemExit(25)
+"""
+            try:
+                result = subprocess.run(
+                    [sys.executable, "-c", contender, str(csv_path), str(json_path)],
+                    cwd=SOURCE_ROOT,
+                    capture_output=True,
+                    text=True,
+                    encoding="utf-8",
+                    check=False,
+                )
+                self.assertEqual(result.returncode, 23, result.stderr)
+                _replace_aggregate_pair_locked(
+                    csv_path,
+                    b"owner-csv\n",
+                    json_path,
+                    b"owner-json\n",
+                    ownership,
+                )
+            finally:
+                release_publication_lock(ownership)
+
+            self.assertEqual(csv_path.read_bytes(), b"owner-csv\n")
+            self.assertEqual(json_path.read_bytes(), b"owner-json\n")
+            self.assertFalse(ownership.path.exists())
+
+    def test_stale_and_nonregular_locks_fail_closed(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            data = Path(temporary)
+            csv_path = data / "formal.csv"
+            json_path = data / "formal.json"
+            lock_path = _lock_path(csv_path, json_path)
+            lock_path.write_text("0" * 32 + "\n", encoding="ascii")
+            with self.assertRaisesRegex(RuntimeError, "already locked"):
+                acquire_publication_lock(csv_path, json_path)
+            self.assertEqual(lock_path.read_text(encoding="ascii"), "0" * 32 + "\n")
+
+            lock_path.unlink()
+            lock_path.mkdir()
+            with self.assertRaisesRegex(RuntimeError, "unsafe"):
+                acquire_publication_lock(csv_path, json_path)
+            self.assertTrue(lock_path.is_dir())
+
+            if os.name != "nt":
+                lock_path.rmdir()
+                target = data / "foreign-lock"
+                target.write_text("foreign\n", encoding="ascii")
+                lock_path.symlink_to(target)
+                with self.assertRaisesRegex(RuntimeError, "unsafe"):
+                    acquire_publication_lock(csv_path, json_path)
+                self.assertTrue(lock_path.is_symlink())
+
+    def test_release_does_not_delete_lock_after_owner_token_changes(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            data = Path(temporary)
+            csv_path = data / "formal.csv"
+            json_path = data / "formal.json"
+            ownership = acquire_publication_lock(csv_path, json_path)
+            ownership.path.write_text("1" * 32 + "\n", encoding="ascii")
+            with self.assertRaisesRegex(RuntimeError, "release failed"):
+                release_publication_lock(ownership)
+            self.assertTrue(ownership.path.is_file())
 
 
 if __name__ == "__main__":
