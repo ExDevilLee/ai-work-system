@@ -287,7 +287,14 @@ class ScoreRunTest(unittest.TestCase):
             score_path = run_dir / "score.json"
             score_path.write_bytes(b"old-score\n")
             args = self.args(run_dir) + ["--review-minutes", "0.25"]
-            with patch("score_run.os.replace", side_effect=OSError("injected")):
+            real_replace = os.replace
+
+            def fail_score_install(source, destination):
+                if Path(destination) == score_path:
+                    raise OSError("injected")
+                return real_replace(source, destination)
+
+            with patch("score_run.os.replace", side_effect=fail_score_install):
                 with self.assertRaisesRegex(SystemExit, "score write failed: OSError"):
                     self.invoke(root, args)
             self.assertEqual(score_path.read_bytes(), b"old-score\n")
