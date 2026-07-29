@@ -382,6 +382,28 @@ def command_output_bytes(item: object) -> int:
     return len(str(item.get("aggregated_output", "")).encode("utf-8"))
 
 
+def _has_unquoted_shell_operator(command: str) -> bool:
+    """Reject shell composition while allowing quoted ``rg`` pattern alternatives."""
+    quote: Optional[str] = None
+    escaped = False
+    for character in command:
+        if escaped:
+            escaped = False
+            continue
+        if character == "\\" and quote != "'":
+            escaped = True
+            continue
+        if character in {"'", '"'}:
+            if quote is None:
+                quote = character
+            elif quote == character:
+                quote = None
+            continue
+        if quote is None and character in {";", "&", "|"}:
+            return True
+    return quote is not None
+
+
 def _unwrap_read_only_shell(command: str) -> Optional[str]:
     try:
         tokens = shlex.split(command, posix=True)
@@ -389,7 +411,7 @@ def _unwrap_read_only_shell(command: str) -> Optional[str]:
         return None
     if len(tokens) != 3 or Path(tokens[0]).name.casefold() not in {"sh", "bash", "zsh"}:
         return None
-    if tokens[1] not in {"-c", "-lc"} or re.search(r"[;&|]", tokens[2]):
+    if tokens[1] not in {"-c", "-lc"} or _has_unquoted_shell_operator(tokens[2]):
         return None
     return tokens[2]
 
@@ -443,7 +465,7 @@ def command_audit_shape(item: object, workspace: Path) -> str:
     executable = Path(tokens[0]).name.casefold() if tokens else "empty"
     if executable in {"sh", "bash", "zsh"} and len(tokens) == 3:
         inner = tokens[2]
-        if re.search(r"(?:;|&&|\|\|)", inner):
+        if _has_unquoted_shell_operator(inner):
             executable = "shell-chain"
         else:
             try:

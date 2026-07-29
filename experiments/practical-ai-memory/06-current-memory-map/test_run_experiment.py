@@ -667,6 +667,29 @@ class WorkspaceMetricCoverageTest(unittest.TestCase):
             )
             self.assertEqual(command_audit_shape(chained, workspace), "shell-chain:external")
 
+    def test_zsh_wrapper_allows_quoted_rg_pattern_alternatives_only(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            workspace = Path(temporary_directory) / "workspace"
+            (workspace / "records").mkdir(parents=True)
+            quoted_pattern = {
+                "type": "command_execution",
+                "command": "/bin/zsh -lc 'rg -g \"*.md\" \"active|pending\" records'",
+            }
+            pipeline = {
+                "type": "command_execution",
+                "command": "/bin/zsh -lc 'rg pattern records | head -n 1'",
+            }
+
+            self.assertEqual(
+                classify_command_execution(quoted_pattern, workspace), "workspace"
+            )
+            self.assertEqual(
+                command_audit_shape(quoted_pattern, workspace),
+                "shell-wrapper-rg:workspace",
+            )
+            self.assertEqual(classify_command_execution(pipeline, workspace), "external")
+            self.assertEqual(command_audit_shape(pipeline, workspace), "shell-chain:external")
+
     def test_simple_cross_platform_relative_reads_are_workspace(self) -> None:
         with tempfile.TemporaryDirectory() as temporary_directory:
             workspace = Path(temporary_directory) / "workspace"
