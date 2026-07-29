@@ -1,19 +1,19 @@
 <!doctype html>
-<html lang="en">
+<html lang="zh-CN">
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Current Memory Map Trial</title>
+    <title>当前记忆地图实验</title>
     <link rel="stylesheet" href="/human/styles.css">
   </head>
   <body>
     <main class="shell">
       <header class="topbar">
         <div>
-          <p class="product-name">Current Memory Map</p>
-          <h1>Governance reading trial</h1>
+          <p class="product-name">当前记忆地图</p>
+          <h1>治理信息阅读实验</h1>
         </div>
-        <p id="status" class="status" aria-live="polite">Loading synthetic session</p>
+        <p id="status" class="status" aria-live="polite">正在加载合成实验场景</p>
       </header>
       <section id="trial" class="trial" hidden>
         <div class="progress-row">
@@ -25,21 +25,21 @@
           <h2 id="question-title"></h2>
           <form id="answers" class="answers"></form>
           <div class="question-actions">
-            <button id="detail-toggle" class="secondary" type="button" aria-expanded="false">Source details</button>
-            <button id="next" type="button" disabled>Next question</button>
+            <button id="detail-toggle" class="secondary" type="button" aria-expanded="false">查看来源详情</button>
+            <button id="next" type="button" disabled>下一题</button>
           </div>
           <aside id="detail" class="detail" hidden></aside>
         </section>
       </section>
       <section id="confidence" class="confidence" hidden>
-        <h2>Condition complete</h2>
-        <p>How confident are you in your answers?</p>
-        <div id="confidence-options" class="confidence-options" role="group" aria-label="Confidence"></div>
-        <button id="continue" type="button" disabled>Continue</button>
+        <h2>当前条件已完成</h2>
+        <p>你对本组答案的把握程度如何？</p>
+        <div id="confidence-options" class="confidence-options" role="group" aria-label="答案把握程度"></div>
+        <button id="continue" type="button" disabled>继续</button>
       </section>
       <section id="complete" class="complete" hidden>
-        <h2>Trial recorded</h2>
-        <p>Your private synthetic trial data was saved locally.</p>
+        <h2>实验记录已保存</h2>
+        <p>你的私有合成实验记录已保存在本机。</p>
       </section>
     </main>
     <script src="/human/app.js"></script>
