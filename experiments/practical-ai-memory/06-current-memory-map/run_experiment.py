@@ -15,6 +15,7 @@ import shutil
 import subprocess
 import tempfile
 import time
+import tomllib
 from collections import Counter
 from collections.abc import Iterable
 from datetime import datetime, timezone
@@ -953,6 +954,7 @@ def resolve_codex_executable() -> str:
 def run_utf8_command(
     command: Sequence[str], *, check: bool = False, input_text: Optional[str] = None,
     cwd: Optional[Path] = None,
+    env: Optional[dict[str, str]] = None,
 ) -> subprocess.CompletedProcess[str]:
     return subprocess.run(
         command,
@@ -962,12 +964,53 @@ def run_utf8_command(
         encoding="utf-8",
         input=input_text,
         cwd=cwd,
+        env=env,
     )
 
 
 def command_output(*args: str) -> str:
     result = run_utf8_command(args, check=True)
     return result.stdout.strip()
+
+
+def write_minimal_codex_home(home: Path) -> None:
+    """Create an ephemeral Codex home without MCP, plugins, rules, or history."""
+    source_home = Path.home() / ".codex"
+    config_path = source_home / "config.toml"
+    auth_path = source_home / "auth.json"
+    try:
+        config = tomllib.loads(config_path.read_text(encoding="utf-8"))
+        provider_name = config["model_provider"]
+        providers = config["model_providers"]
+        provider = providers[provider_name]
+    except (OSError, KeyError, TypeError, tomllib.TOMLDecodeError) as error:
+        raise RuntimeError("minimal Codex home source is unavailable") from error
+    allowed_fields = {"name", "wire_api", "base_url", "requires_openai_auth"}
+    if (
+        not isinstance(provider_name, str)
+        or not isinstance(provider, dict)
+        or set(provider) - allowed_fields
+        or not isinstance(provider.get("name"), str)
+        or not isinstance(provider.get("wire_api"), str)
+        or not isinstance(provider.get("base_url"), str)
+        or not isinstance(provider.get("requires_openai_auth"), bool)
+        or not auth_path.is_file()
+    ):
+        raise RuntimeError("minimal Codex home source is unsafe")
+    home.mkdir(mode=0o700)
+    quoted = json.dumps
+    lines = [
+        f"model_provider = {quoted(provider_name)}",
+        "disable_response_storage = true",
+        "[model_providers." + provider_name + "]",
+    ]
+    for field in ("name", "wire_api", "base_url", "requires_openai_auth"):
+        value = provider[field]
+        rendered = str(value).lower() if isinstance(value, bool) else quoted(value)
+        lines.append(f"{field} = {rendered}")
+    (home / "config.toml").write_text("\n".join(lines) + "\n", encoding="utf-8")
+    shutil.copyfile(auth_path, home / "auth.json")
+    os.chmod(home / "auth.json", 0o600)
 
 
 def build_codex_command(
@@ -1113,7 +1156,14 @@ def main() -> int:
 
     with tempfile.TemporaryDirectory(prefix=f"current-map-poc-{args.condition}-") as temp:
         workspace = Path(temp) / "workspace"
+        codex_home = Path(temp) / "codex-home"
         shutil.copytree(fixture, workspace)
+        try:
+            write_minimal_codex_home(codex_home)
+        except (OSError, RuntimeError) as error:
+            raise SystemExit(
+                f"minimal Codex home setup failed: {type(error).__name__}"
+            ) from error
         command = build_codex_command(
             codex_executable,
             workspace,
@@ -1124,7 +1174,12 @@ def main() -> int:
         prompt_text = prompt_path.read_text(encoding="utf-8")
 
         started = time.monotonic()
-        result = run_utf8_command(command, input_text=prompt_text, cwd=workspace)
+        result = run_utf8_command(
+            command,
+            input_text=prompt_text,
+            cwd=workspace,
+            env={**os.environ, "CODEX_HOME": str(codex_home)},
+        )
         elapsed_seconds = round(time.monotonic() - started, 3)
 
     (run_dir / "raw.jsonl").write_text(result.stdout, encoding="utf-8")
@@ -1192,7 +1247,7 @@ def main() -> int:
         "sandbox": "read-only",
         "ephemeral": True,
         "plugins_enabled": False,
-        "command_execution_policy": "codex-no-mcp-and-no-rules",
+        "command_execution_policy": "temporary-minimal-codex-home",
         "runtime_tool_access_calls": runtime_access_calls,
         "protocol_environment_isolated": runtime_access_calls == 0,
         "exit_code": result.returncode,

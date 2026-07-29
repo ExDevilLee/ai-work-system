@@ -34,6 +34,7 @@ from run_experiment import (
     run_utf8_command,
     tree_checksum,
     validate_path_identifier,
+    write_minimal_codex_home,
 )
 
 
@@ -179,8 +180,10 @@ class MetadataPrivacyTest(unittest.TestCase):
             def fake_codex_run(
                 command: list[str], *, check: bool = False, input_text: str | None = None,
                 cwd: Path | None = None,
+                env: dict[str, str] | None = None,
             ) -> CompletedProcess[str]:
                 self.assertIsNotNone(cwd)
+                self.assertIsNotNone(env)
                 output_path = Path(command[command.index("--output-last-message") + 1])
                 output_path.write_text("synthetic answer\n", encoding="utf-8")
                 stdout = "\n".join(
@@ -218,6 +221,7 @@ class MetadataPrivacyTest(unittest.TestCase):
                 patch("run_experiment.command_output", return_value="codex-cli test"),
                 patch("run_experiment.run_utf8_command", side_effect=fake_codex_run),
                 patch("run_experiment.platform.system", return_value="Linux"),
+                patch("run_experiment.write_minimal_codex_home"),
             ):
                 with redirect_stdout(io.StringIO()):
                     self.assertEqual(main(), 2)
@@ -290,6 +294,29 @@ class CodexExecutableTest(unittest.TestCase):
         self.assertIn("--ignore-rules", command)
         self.assertIn("mcp_servers={}", command)
         self.assertEqual(command[-1], "-")
+
+    def test_minimal_codex_home_copies_only_allowed_connection_fields(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            root = Path(temporary_directory)
+            source = root / ".codex"
+            source.mkdir()
+            (source / "auth.json").write_text("{}\n", encoding="utf-8")
+            (source / "config.toml").write_text(
+                "model_provider = \"test\"\n"
+                "[model_providers.test]\n"
+                "name = \"custom\"\nwire_api = \"responses\"\n"
+                "base_url = \"https://example.invalid\"\n"
+                "requires_openai_auth = false\n"
+                "[mcp_servers.unwanted]\ncommand = \"node\"\n",
+                encoding="utf-8",
+            )
+            with patch("run_experiment.Path.home", return_value=root):
+                home = root / "minimal"
+                write_minimal_codex_home(home)
+            text = (home / "config.toml").read_text(encoding="utf-8")
+            self.assertIn("model_provider", text)
+            self.assertNotIn("mcp_servers", text)
+            self.assertEqual((home / "auth.json").stat().st_mode & 0o777, 0o600)
 
 
 class Utf8CommandTest(unittest.TestCase):
