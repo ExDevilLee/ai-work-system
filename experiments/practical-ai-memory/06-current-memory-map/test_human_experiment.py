@@ -3,7 +3,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from human_experiment import HumanExperimentStore, SubmissionError
+from human_experiment import HumanExperimentStore, SubmissionError, validate_saved_result
 
 
 def complete_condition(condition, pack_id, questions):
@@ -58,6 +58,19 @@ class HumanExperimentStoreTests(unittest.TestCase):
 
         self.assertEqual(result["status"], "complete")
         self.assertTrue((Path(self.temp_dir.name) / f"{self.session['session_id']}.json").is_file())
+
+    def test_validates_saved_result_without_session_identity(self):
+        self.store.complete(self.valid_submission())
+        result_path = Path(self.temp_dir.name) / f"{self.session['session_id']}.json"
+
+        self.assertEqual(validate_saved_result(result_path, Path(self.temp_dir.name)), (2, 10))
+
+    def test_saved_result_validation_rejects_outside_path(self):
+        outside = Path(self.temp_dir.name).parent / "outside.json"
+        outside.write_text('{"conditions": []}', encoding="utf-8")
+
+        with self.assertRaises(SubmissionError):
+            validate_saved_result(outside, Path(self.temp_dir.name))
 
     def test_rejects_missing_timer_or_answers(self):
         payload = self.valid_submission()

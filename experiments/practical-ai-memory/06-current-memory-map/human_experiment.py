@@ -249,6 +249,41 @@ class HumanExperimentStore:
         }
 
 
+def validate_saved_result(
+    path: Path, results_dir: Path = DEFAULT_RESULTS_DIR
+) -> tuple[int, int]:
+    """Validate one private saved result without loading it into a live session."""
+    root = results_dir.resolve()
+    candidate = path.resolve()
+    if candidate.parent != root or candidate.suffix != ".json" or not candidate.is_file():
+        raise SubmissionError("result path is outside the private result directory")
+    try:
+        payload = json.loads(candidate.read_text(encoding="utf-8"))
+    except (OSError, UnicodeDecodeError, json.JSONDecodeError) as error:
+        raise SubmissionError("result file is unreadable") from error
+    if not isinstance(payload, dict):
+        raise SubmissionError("result must be a JSON object")
+    _reject_private_values(payload)
+    _require_exact_keys(payload, {"conditions"}, "result")
+
+    store = HumanExperimentStore(root)
+    raw_conditions = payload.get("conditions")
+    if not isinstance(raw_conditions, list):
+        raise SubmissionError("result conditions are invalid")
+    assignments = []
+    for item in raw_conditions:
+        if not isinstance(item, dict) or not isinstance(item.get("condition"), str):
+            raise SubmissionError("result condition is invalid")
+        pack_id = item.get("pack_id")
+        if not isinstance(pack_id, str) or pack_id not in store._packs:
+            raise SubmissionError("result pack is invalid")
+        assignments.append(
+            {"condition": item["condition"], "pack_id": pack_id, "pack": store._packs[pack_id]}
+        )
+    validated = store._validated_conditions({"conditions": raw_conditions}, {"conditions": assignments})
+    return len(validated), sum(item["total"] for item in validated)
+
+
 class HumanExperimentHandler(BaseHTTPRequestHandler):
     store: HumanExperimentStore
 
@@ -330,5 +365,13 @@ if __name__ == "__main__":
     parser.add_argument("--port", type=int, default=8765)
     parser.add_argument("--mode", choices=("formal", "browser-smoke"), default="formal")
     parser.add_argument("--results-dir", type=Path)
+    parser.add_argument("--validate-result", type=Path)
     args = parser.parse_args()
-    serve(args.port, args.results_dir, mode=args.mode)
+    if args.validate_result is not None:
+        try:
+            conditions, questions = validate_saved_result(args.validate_result)
+        except SubmissionError as error:
+            raise SystemExit(f"human result invalid: {error}") from error
+        print(f"human result valid: conditions={conditions}, questions={questions}")
+    else:
+        serve(args.port, args.results_dir, mode=args.mode)
