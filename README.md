@@ -91,7 +91,7 @@ English version: [README-EN.md](README-EN.md)
 
 ## 当前写作中
 
-- 《一条临时经验，什么时候值得成为长期记忆？》已进入 `review`，已补齐 macOS 与 Win11 各 45 次正式运行的跨平台结果；Win11 脱敏聚合已纳入 POC，等待人工复核后再推进到 `ready`。
+- 《为什么长期记忆需要一张“当前记忆地图”，而不应只藏在文件和索引里？》已进入 `review`。macOS 已完成 45 次正式运行、真实计时 Review 和脱敏聚合；Win11 仍待按 Level 2 执行 15 次兼容性 Smoke，当前文章只声明 macOS 实测范围。
 
 ## 发布原则
 

@@ -1,0 +1,63 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900" viewBox="0 0 1600 900" role="img" aria-labelledby="title desc">
+  <title id="title">从原始记录到当前行动的当前记忆地图</title>
+  <desc id="desc">原始记录保留证据，普通索引提供定位，当前记忆地图显式表达状态、范围、关系与来源指针，帮助判断哪些内容仍能指导当前行动。</desc>
+  <style>
+    .title { fill: #16202a; font: 700 42px sans-serif; }
+    .sub { fill: #485661; font: 24px sans-serif; }
+    .h { fill: #17212b; font: 700 28px sans-serif; }
+    .t { fill: #26333d; font: 21px sans-serif; }
+    .small { fill: #52616c; font: 18px sans-serif; }
+    .tag { fill: #ffffff; font: 700 18px sans-serif; }
+    .arrow { stroke: #6c7a85; stroke-width: 4; fill: none; marker-end: url(#arrow); }
+  </style>
+  <defs>
+    <marker id="arrow" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto">
+      <path d="M0,0 L12,6 L0,12 z" fill="#6c7a85" />
+    </marker>
+  </defs>
+  <rect width="1600" height="900" fill="#f7f9fa" />
+  <text x="80" y="82" class="title">当前记忆地图不是第二份资料库</text>
+  <text x="80" y="124" class="sub">它把当前可行动的状态、范围、关系和来源指针明确投影出来</text>
+
+  <rect x="80" y="210" width="360" height="510" rx="8" fill="#ffffff" stroke="#9aaab5" stroke-width="3" />
+  <text x="120" y="270" class="h">1. 原始记录</text>
+  <text x="120" y="318" class="t">决定、观察、规则、复验</text>
+  <text x="120" y="354" class="t">保留全文与历史依据</text>
+  <rect x="120" y="400" width="280" height="58" rx="6" fill="#dcecf5" />
+  <text x="144" y="438" class="t">历史规则：14 天保留</text>
+  <rect x="120" y="478" width="280" height="58" rx="6" fill="#dff0e6" />
+  <text x="144" y="516" class="t">新决定：30 天保留</text>
+  <rect x="120" y="556" width="280" height="58" rx="6" fill="#fff0ce" />
+  <text x="144" y="594" class="t">一次观察：第三次重试成功</text>
+  <text x="120" y="670" class="small">可以解释“为什么”，</text>
+  <text x="120" y="698" class="small">但不自动给出“现在该怎么做”。</text>
+
+  <path d="M460 465 L575 465" class="arrow" />
+
+  <rect x="595" y="210" width="400" height="510" rx="8" fill="#ffffff" stroke="#9aaab5" stroke-width="3" />
+  <text x="635" y="270" class="h">2. 当前记忆地图</text>
+  <text x="635" y="318" class="t">不复制正文，只投影行动边界</text>
+  <rect x="635" y="360" width="320" height="60" rx="6" fill="#319b69" />
+  <text x="660" y="398" class="tag">当前有效：30 天保留</text>
+  <rect x="635" y="440" width="320" height="60" rx="6" fill="#6c91b5" />
+  <text x="660" y="478" class="tag">已替代：14 天，仅供追溯</text>
+  <rect x="635" y="520" width="320" height="60" rx="6" fill="#d9922e" />
+  <text x="660" y="558" class="tag">待验证：不能晋升为规则</text>
+  <rect x="635" y="600" width="320" height="60" rx="6" fill="#ad4c55" />
+  <text x="660" y="638" class="tag">冲突：暂停并安排复验</text>
+  <text x="635" y="698" class="small">每项都回链原始来源与适用范围。</text>
+
+  <path d="M1015 465 L1130 465" class="arrow" />
+
+  <rect x="1150" y="210" width="370" height="510" rx="8" fill="#ffffff" stroke="#9aaab5" stroke-width="3" />
+  <text x="1190" y="270" class="h">3. 当前行动</text>
+  <text x="1190" y="318" class="t">先看状态，再回看依据</text>
+  <rect x="1190" y="385" width="290" height="84" rx="6" fill="#dff0e6" />
+  <text x="1220" y="421" class="t">执行：保留 30 天</text>
+  <text x="1220" y="451" class="small">范围匹配才生效</text>
+  <rect x="1190" y="500" width="290" height="84" rx="6" fill="#fff0ce" />
+  <text x="1220" y="536" class="t">暂停：冲突或待验证</text>
+  <text x="1220" y="566" class="small">回到证据并复验</text>
+  <rect x="1190" y="615" width="290" height="58" rx="6" fill="#e7ebee" />
+  <text x="1220" y="652" class="t">不让历史直接驱动行动</text>
+</svg>
