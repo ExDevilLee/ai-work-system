@@ -690,6 +690,20 @@ class WorkspaceMetricCoverageTest(unittest.TestCase):
             self.assertEqual(classify_command_execution(pipeline, workspace), "external")
             self.assertEqual(command_audit_shape(pipeline, workspace), "shell-chain:external")
 
+    def test_rg_listing_with_case_insensitive_filter_is_workspace(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            workspace = Path(temporary_directory) / "workspace"
+            (workspace / "records").mkdir(parents=True)
+            item = {
+                "type": "command_execution",
+                "command": "/bin/zsh -lc 'rg -l -i \"superseded\" records'",
+            }
+
+            self.assertEqual(classify_command_execution(item, workspace), "workspace")
+            self.assertEqual(
+                command_audit_shape(item, workspace), "shell-wrapper-rg:workspace"
+            )
+
     def test_simple_cross_platform_relative_reads_are_workspace(self) -> None:
         with tempfile.TemporaryDirectory() as temporary_directory:
             workspace = Path(temporary_directory) / "workspace"

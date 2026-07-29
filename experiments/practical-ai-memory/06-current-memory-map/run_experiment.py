@@ -259,7 +259,7 @@ def _rg_command_targets(tokens: Sequence[str]) -> Optional[tuple[str, ...]]:
     while index < len(tokens):
         token = tokens[index]
         lowered = token.casefold()
-        if lowered in {"--files", "--hidden", "--no-ignore", "-n", "-i"}:
+        if lowered in {"--files", "--hidden", "--no-ignore", "-n", "-i", "-l"}:
             index += 1
             continue
         if lowered in {"-g", "--glob"}:
