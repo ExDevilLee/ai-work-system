@@ -12,7 +12,9 @@ import unittest
 from pathlib import Path
 from unittest.mock import patch
 
+import aggregate_results as aggregate_results_module
 from aggregate_results import (
+    _write_fsynced_staging,
     _lock_path,
     _replace_aggregate_pair_locked,
     acquire_publication_lock,
@@ -157,6 +159,37 @@ class AggregateResultsTest(unittest.TestCase):
             summarize([1.0, 2.0, 5.0]),
             {"min": 1.0, "median": 2.0, "mean": 2.667, "max": 5.0},
         )
+
+    def test_staging_writer_skips_posix_operations_when_unsupported(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            directory = Path(temporary)
+            with (
+                patch.object(
+                    aggregate_results_module,
+                    "_supports_posix_file_modes",
+                    return_value=False,
+                ),
+                patch.object(
+                    aggregate_results_module.os, "fchmod", create=True
+                ) as fchmod,
+            ):
+                staging, _ = _write_fsynced_staging(directory, ".aggregate-", b"data\n")
+                aggregate_results_module._fsync_directory(directory)
+            self.assertEqual(staging.read_bytes(), b"data\n")
+            self.assertTrue(staging.is_file())
+            staging.unlink()
+            fchmod.assert_not_called()
+
+            with (
+                patch.object(
+                    aggregate_results_module,
+                    "_supports_posix_file_modes",
+                    return_value=False,
+                ),
+                patch.object(aggregate_results_module.os, "open") as open_directory,
+            ):
+                aggregate_results_module._fsync_directory(directory)
+            open_directory.assert_not_called()
 
     def test_creates_fifteen_groups_of_three(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:

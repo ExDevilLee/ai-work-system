@@ -641,13 +641,14 @@ class GenerateViewsTest(unittest.TestCase):
 
             generate_all(root)
 
-            self.assertEqual(
-                {
-                    name: stat.S_IMODE((generated / name).stat().st_mode)
-                    for name in GENERATED_NAMES
-                },
-                expected_modes,
-            )
+            actual_modes = {
+                name: stat.S_IMODE((generated / name).stat().st_mode)
+                for name in GENERATED_NAMES
+            }
+            if os.name != "nt":
+                self.assertEqual(actual_modes, expected_modes)
+            else:
+                self.assertTrue(all((generated / name).is_file() for name in GENERATED_NAMES))
 
             shutil.rmtree(generated)
             previous_umask = os.umask(0o077)
@@ -655,13 +656,29 @@ class GenerateViewsTest(unittest.TestCase):
                 generate_all(root)
             finally:
                 os.umask(previous_umask)
-            self.assertEqual(
-                {
-                    stat.S_IMODE((generated / name).stat().st_mode)
-                    for name in GENERATED_NAMES
-                },
-                {0o644},
-            )
+            actual_modes = {
+                stat.S_IMODE((generated / name).stat().st_mode)
+                for name in GENERATED_NAMES
+            }
+            if os.name != "nt":
+                self.assertEqual(actual_modes, {0o644})
+            else:
+                self.assertTrue(all((generated / name).is_file() for name in GENERATED_NAMES))
+
+    def test_staged_mode_skips_unenforceable_posix_mode(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            path = Path(temporary_directory) / "staged.json"
+            path.write_text("{}\n", encoding="utf-8")
+            with (
+                mock.patch.object(
+                    generate_views_module,
+                    "_supports_posix_file_modes",
+                    return_value=False,
+                ),
+                mock.patch.object(generate_views_module.os, "chmod") as chmod,
+            ):
+                generate_views_module._set_staged_mode(path, 0o600)
+            chmod.assert_not_called()
 
     def test_successful_rollback_sanitizes_original_failure(self) -> None:
         with tempfile.TemporaryDirectory() as temporary_directory:

@@ -11,7 +11,8 @@ from unittest.mock import patch
 
 from matrix_support import expected_run_contract
 from run_experiment import assemble_fixture
-from score_run import main
+import score_run as score_run_module
+from score_run import atomic_write_score, main
 
 
 SOURCE_ROOT = Path(__file__).resolve().parent
@@ -299,6 +300,36 @@ class ScoreRunTest(unittest.TestCase):
                     self.invoke(root, args)
             self.assertEqual(score_path.read_bytes(), b"old-score\n")
             self.assertEqual(list(run_dir.glob(".score-*")), [])
+
+    def test_atomic_score_write_skips_posix_operations_when_unsupported(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            run_dir = root / "runs" / "private" / "macos" / "formal-01-active-decision-source-only"
+            run_dir.mkdir(parents=True)
+            payload = b'{"score":1}\n'
+            with (
+                patch.object(score_run_module, "ROOT", root),
+                patch.object(
+                    score_run_module,
+                    "_supports_posix_file_modes",
+                    return_value=False,
+                ),
+                patch.object(score_run_module.os, "fchmod", create=True) as fchmod,
+            ):
+                atomic_write_score(run_dir, payload)
+            self.assertEqual((run_dir / "score.json").read_bytes(), payload)
+            fchmod.assert_not_called()
+
+            with (
+                patch.object(
+                    score_run_module,
+                    "_supports_posix_file_modes",
+                    return_value=False,
+                ),
+                patch.object(score_run_module.os, "open") as open_directory,
+            ):
+                score_run_module._fsync_directory(run_dir)
+            open_directory.assert_not_called()
 
 
 if __name__ == "__main__":

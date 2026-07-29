@@ -632,8 +632,14 @@ def _flush_staged_file(temporary) -> None:
     temporary.flush()
 
 
+def _supports_posix_file_modes() -> bool:
+    """Whether this platform can preserve POSIX permission bits."""
+    return os.name != "nt"
+
+
 def _set_staged_mode(path: Path, mode: int) -> None:
-    os.chmod(path, mode)
+    if _supports_posix_file_modes():
+        os.chmod(path, mode)
 
 
 def _fsync_staged_file(temporary) -> None:
@@ -695,7 +701,7 @@ def _restore_outputs(
                 temporary_path = Path(temporary.name)
                 temporary.write(original_bytes)
                 temporary.flush()
-                os.chmod(temporary_path, original_mode)
+                _set_staged_mode(temporary_path, original_mode)
                 os.fsync(temporary.fileno())
             os.replace(temporary_path, output)
             temporary_path = None

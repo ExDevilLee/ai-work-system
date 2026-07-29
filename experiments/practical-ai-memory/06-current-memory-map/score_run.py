@@ -141,7 +141,14 @@ def _validate_score_target(path: Path) -> None:
         raise SystemExit("score target validation failed: unsafe target")
 
 
+def _supports_posix_file_modes() -> bool:
+    """Whether this platform can enforce POSIX permission bits and directory fsync."""
+    return os.name != "nt"
+
+
 def _fsync_directory(path: Path) -> None:
+    if not _supports_posix_file_modes():
+        return
     flags = os.O_RDONLY | getattr(os, "O_DIRECTORY", 0)
     descriptor = os.open(path, flags)
     try:
@@ -160,7 +167,8 @@ def atomic_write_score(run_dir: Path, payload: bytes) -> None:
             prefix=".score-", suffix=".json.tmp", dir=run_dir
         )
         staging = Path(raw_staging)
-        os.fchmod(descriptor, 0o600)
+        if _supports_posix_file_modes():
+            os.fchmod(descriptor, 0o600)
         with os.fdopen(descriptor, "wb", closefd=False) as handle:
             handle.write(payload)
             handle.flush()

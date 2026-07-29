@@ -415,12 +415,19 @@ def _group_summary(group: list[dict[str, object]]) -> dict[str, object]:
 
 
 def _fsync_directory(path: Path) -> None:
+    if not _supports_posix_file_modes():
+        return
     flags = os.O_RDONLY | getattr(os, "O_DIRECTORY", 0)
     descriptor = os.open(path, flags)
     try:
         os.fsync(descriptor)
     finally:
         os.close(descriptor)
+
+
+def _supports_posix_file_modes() -> bool:
+    """Whether this platform can enforce POSIX permission bits and directory fsync."""
+    return os.name != "nt"
 
 
 @dataclass(frozen=True)
@@ -565,7 +572,8 @@ def _write_fsynced_staging(
             prefix=prefix, suffix=".tmp", dir=directory
         )
         staging = Path(raw_staging)
-        os.fchmod(descriptor, 0o644)
+        if _supports_posix_file_modes():
+            os.fchmod(descriptor, 0o644)
         with os.fdopen(descriptor, "wb", closefd=False) as handle:
             handle.write(payload)
             handle.flush()

@@ -995,6 +995,11 @@ def command_output(*args: str) -> str:
     return result.stdout.strip()
 
 
+def _supports_posix_file_modes() -> bool:
+    """Whether this platform can enforce POSIX permission bits."""
+    return os.name != "nt"
+
+
 def write_minimal_codex_home(home: Path) -> None:
     """Create an ephemeral Codex home without MCP, plugins, rules, or history."""
     source_home = Path.home() / ".codex"
@@ -1032,7 +1037,8 @@ def write_minimal_codex_home(home: Path) -> None:
         lines.append(f"{field} = {rendered}")
     (home / "config.toml").write_text("\n".join(lines) + "\n", encoding="utf-8")
     shutil.copyfile(auth_path, home / "auth.json")
-    os.chmod(home / "auth.json", 0o600)
+    if _supports_posix_file_modes():
+        os.chmod(home / "auth.json", 0o600)
 
 
 def build_codex_command(

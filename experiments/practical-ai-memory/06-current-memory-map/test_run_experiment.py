@@ -6,6 +6,7 @@ from __future__ import annotations
 import hashlib
 import io
 import json
+import os
 import sys
 import tempfile
 import unittest
@@ -316,7 +317,31 @@ class CodexExecutableTest(unittest.TestCase):
             text = (home / "config.toml").read_text(encoding="utf-8")
             self.assertIn("model_provider", text)
             self.assertNotIn("mcp_servers", text)
-            self.assertEqual((home / "auth.json").stat().st_mode & 0o777, 0o600)
+            self.assertTrue((home / "auth.json").is_file())
+            if os.name != "nt":
+                self.assertEqual((home / "auth.json").stat().st_mode & 0o777, 0o600)
+
+    def test_minimal_codex_home_skips_unenforceable_posix_mode(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            root = Path(temporary_directory)
+            source = root / ".codex"
+            source.mkdir()
+            (source / "auth.json").write_text("{}\n", encoding="utf-8")
+            (source / "config.toml").write_text(
+                "model_provider = \"test\"\n"
+                "[model_providers.test]\n"
+                "name = \"custom\"\nwire_api = \"responses\"\n"
+                "base_url = \"https://example.invalid\"\n"
+                "requires_openai_auth = false\n",
+                encoding="utf-8",
+            )
+            with (
+                patch("run_experiment.Path.home", return_value=root),
+                patch("run_experiment._supports_posix_file_modes", return_value=False),
+                patch("run_experiment.os.chmod") as chmod,
+            ):
+                write_minimal_codex_home(root / "minimal")
+            chmod.assert_not_called()
 
 
 class Utf8CommandTest(unittest.TestCase):
