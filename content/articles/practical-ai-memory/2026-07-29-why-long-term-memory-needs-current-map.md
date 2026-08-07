@@ -5,7 +5,7 @@ date: 2026-07-29
 status: review
 series: practical-ai-memory
 lang: zh
-summary: 通过 macOS 上 45 次正式 Agent 运行和一次单人探索性实验，验证当前记忆地图能否在不复制原始资料的前提下，显式表达状态、范围、关系和来源；实验没有证明地图让答案更准确或更快，但说明了它真正应该解决的治理问题。
+summary: 通过 macOS 上两个模型配置共 90 次正式 Agent 运行和一次单人探索性实验，验证当前记忆地图能否在不复制原始资料的前提下，显式表达状态、范围、关系和来源；实验没有证明地图让答案更准确或更快，但说明了它真正应该解决的治理问题；从本篇起验证策略改为 macOS 双模型对比（强力配置加快速配置）。
 tags:
   - AI Memory
   - Memory Governance
@@ -178,31 +178,31 @@ Agent 先通过投影识别候选状态，再回到来源文件核对事实。�
 
 这个设计延续了前几篇 POC 的原则：不是只看最终答案像不像，而是检查 Agent 有没有把观察当规则、把历史当当前、把局部当全局。
 
-## 6. 45 次正式运行：三种条件全部答对
+## 6. 90 次正式运行：两个模型、三种条件全部答对
 
-macOS 正式矩阵使用：
+为了让结论不只属于一个模型配置，本篇在 macOS 上用两个模型配置各跑了一次完整矩阵：
 
-- 平台：macOS。
-- 模型：`gpt-5.6-sol`。
-- 推理强度：`medium`。
-- Codex CLI：`0.145.0`。
-- 规模：5 个任务 × 3 个条件 × 3 次，共 45 次独立运行。
+- 强力配置：`gpt-5.6-sol`，推理强度 `medium`，Codex CLI `0.145.0`。
+- 快速配置：`deepseek-v4-flash`，推理强度 `max`，Codex CLI `0.146.1`。
 
-结果没有出现我原本可能期待的“地图组明显更准确”：
+两个配置使用同一套冻结夹具、提示和评分表，只改变模型与推理强度。这也是本系列验证策略的调整：从这一篇起，不再在 Win11 上重复完整矩阵，而是在 macOS 上用两个定位不同的模型配置互为对照——一个更强力、一个更快速，检验治理结论是否跨模型成立[6]。
 
-| 条件 | 运行数 | 正确性 | 协议异常 | 无依据断言 |
-| --- | ---: | ---: | ---: | ---: |
-| Source Only | 15 | 75/75 | 0 | 0 |
-| Flat Index | 15 | 75/75 | 0 | 0 |
-| State Projection | 15 | 75/75 | 0 | 0 |
+结果都没有出现我原本可能期待的“地图组明显更准确”：
 
-15 个任务/条件组合均为 `n=3`，每组都是 `15/15`。45 次运行的隔离环境、工作区指标覆盖和来源引用门禁也全部通过[3]。
+| 条件 | gpt-5.6-sol | deepseek-v4-flash |
+| --- | ---: | ---: |
+| Source Only | 75/75 | 75/75 |
+| Flat Index | 75/75 | 75/75 |
+| State Projection | 75/75 | 75/75 |
+| 合计 | 225/225（100%） | 225/225（100%） |
+
+每个配置都是 5 个任务 × 3 个条件 × 3 次、共 45 次；15 个任务/条件组合均为 `n=3`，每组都是 `15/15`。两个配置共 90 次运行的隔离环境、工作区指标覆盖和来源引用门禁也全部通过[3]。
 
 这组结果首先否定了一个过强结论：
 
-> 在这批规模很小、来源清晰的合成资料中，当前记忆地图没有证明自己必然提高回答正确率。
+> 在这批规模很小、来源清晰的合成资料中，当前记忆地图没有证明自己必然提高回答正确率；而且这个判断在强力配置和快速配置下都成立。
 
-原始记录已经明确写出批准、替代、冲突和范围，模型有足够能力从正文中恢复正确动作。普通索引也没有破坏这些信息。
+原始记录已经明确写出批准、替代、冲突和范围，两个模型都有足够能力从正文中恢复正确动作。普通索引也没有破坏这些信息。
 
 这不意味着地图没有价值，而是说明它的主要价值不能靠制造一个“75 分对 60 分”的故事来证明。
 
@@ -215,17 +215,28 @@ macOS 正式矩阵使用：
 
 ## 7. 为什么不把速度和读取量写成胜负
 
-三种条件都记录了耗时、工具调用和工作区输出字节，但本篇不使用这些数字给机制排名。
+两个模型配置在三种条件下都记录了耗时、工具调用和工作区输出字节，但本篇不使用这些数字给机制或模型排名。
 
-原因有三个：
+按条件合并的中位数（强力配置 gpt-5.6-sol / 快速配置 deepseek-v4-flash；两配置使用不同 Codex CLI 版本，只能作量级参考）：
+
+| 条件 | 配置 | 耗时（秒） | 上下文（B） | 工作区调用 | 输出（B） |
+| --- | --- | ---: | ---: | ---: | ---: |
+| Source Only | gpt-5.6-sol | 30.9 | 1,921 | 4 | 1,415 |
+| Source Only | deepseek-v4-flash | 23.7 | 5,466 | 6 | 4,960 |
+| Flat Index | gpt-5.6-sol | 29.2 | 2,147 | 3 | 1,591 |
+| Flat Index | deepseek-v4-flash | 18.2 | 2,772 | 4 | 2,216 |
+| State Projection | gpt-5.6-sol | 38.4 | 3,939 | 4 | 3,361 |
+| State Projection | deepseek-v4-flash | 24.0 | 4,341 | 6 | 3,763 |
+
+可以观察到的量级差异是：快速配置尽管推理强度设为 `max`，单次耗时仍更短（各条件 18–24 秒 vs 29–38 秒），但工作区调用更多；两个配置都是 State Projection 上下文最大。这些差异不能直接归因于模型本身，因为两个配置的 Codex CLI 版本不同。
+
+不排名的原因有三个：
 
 1. 每个任务/条件只有 3 次重复，样本太小。
 1. State Projection 需要先读投影再回读来源，导航步骤本身可能增加调用。
 1. 模型服务、缓存、工具选择和运行时波动都会影响耗时与 token。
 
-第一次 Agent Pilot 的描述值已经出现不同方向：State Projection 的耗时中位数低于 Flat Index，但工作区调用和输出字节更高。这些数字只能用于审计运行过程，不能推出“地图更快”“地图更省 token”或“索引更低效”。
-
-如果后续要比较效率，应扩大样本，固定工具策略，并把“读取投影的成本”和“减少人工判断的收益”分开测量，而不是只比较一次回答用了多少秒。
+这些数字只能用于审计运行过程，不能推出“地图更快”“地图更省 token”“索引更低效”或“哪个模型更好”。如果后续要比较效率，应扩大样本，固定工具策略，并把“读取投影的成本”和“减少人工判断的收益”分开测量，而不是只比较一次回答用了多少秒。
 
 ## 8. 单人探索提醒我：可视化不是天然升级
 
@@ -328,7 +339,7 @@ Human Gate 不需要审阅每一份原始资料，而应集中审阅“状态是
 
 ## 12. 当前数据能说明什么，不能说明什么
 
-macOS 的 45 次正式运行和一次单人探索支持以下阶段性判断：
+macOS 上两个模型配置共 90 次正式运行和一次单人探索支持以下阶段性判断：
 
 1. 当前状态可以从原始资料派生为状态、范围、关系和来源投影。
 1. 投影不需要复制全部正文，也能保留回到原始来源的路径。
@@ -342,11 +353,11 @@ macOS 的 45 次正式运行和一次单人探索支持以下阶段性判断：
 - 图形地图比 Markdown 表格更容易理解。
 - 所有项目都需要单独维护状态投影。
 - 当前方案能处理大规模知识图谱、多人并发编辑或复杂权限。
-- 当前结果可以推广到其他模型、工具版本和操作系统。
+- 结果可以推广到这两个配置以外的模型、工具版本和操作系统。
 
 MemGPT 等研究探索了分层存储、检索与上下文调度，以支持超出固定上下文窗口的持续任务[5]。它提供了有价值的背景，但不能替本 POC 证明当前地图在大规模系统中的通用效果。
 
-本篇正式结果目前只来自 macOS。Win11 后续按第二系列的 Level 2 策略执行 15 次兼容性 Smoke，覆盖五个任务和三个 Agent 条件[6]。即使 Smoke 通过，也只能支持运行器与机制的兼容性说明，不能写成一次完整的跨平台独立复现。
+本篇正式结果来自 macOS 上两个模型配置。从这一篇起，系列不再在 Win11 上重复完整矩阵，改为在 macOS 上用两个定位不同的模型配置互为对照[6]；两个配置都满分，只说明治理语义在小规模、来源清晰的合成任务上跨模型稳定，不能推广成一般结论。
 
 ## 13. 实验与复现
 
@@ -390,10 +401,10 @@ MemGPT 等研究探索了分层存储、检索与上下文调度，以支持超�
 
 [2] Fowler, M. (2005). *Event Sourcing*. <https://martinfowler.com/eaaDev/EventSourcing.html>
 
-[3] ExDevilLee. (2026). *当前记忆地图 POC：macOS 正式矩阵分析*. 项目一手实验记录。<https://github.com/ExDevilLee/ai-work-system/tree/main/experiments/practical-ai-memory/06-current-memory-map/analysis/formal-macos.md>
+[3] ExDevilLee. (2026). *当前记忆地图 POC：macOS 正式矩阵分析*. 项目一手实验记录，包含 `gpt-5.6-sol`（`analysis/formal-macos.md`）与 `deepseek-v4-flash`（`analysis/formal-macos-deepseek-v4-flash-max.md`）两份对照报告。<https://github.com/ExDevilLee/ai-work-system/tree/main/experiments/practical-ai-memory/06-current-memory-map/analysis>
 
 [4] ExDevilLee. (2026). *当前记忆地图 POC：人工探索性实验记录*. 项目一手实验记录。<https://github.com/ExDevilLee/ai-work-system/tree/main/experiments/practical-ai-memory/06-current-memory-map/analysis/human-trial.md>
 
 [5] Packer, C., Fang, V., Patil, S. G., Lin, K., Wooders, S., & Gonzalez, J. E. (2023). *MemGPT: Towards LLMs as Operating Systems*. arXiv. <https://arxiv.org/abs/2310.08560>
 
-[6] ExDevilLee. (2026). *第二系列跨平台 POC 验证策略*. 项目一手验证策略。<https://github.com/ExDevilLee/ai-work-system/tree/main/experiments/practical-ai-memory/CROSS-PLATFORM-VALIDATION-STRATEGY.md>
+[6] ExDevilLee. (2026). *第二系列 POC 验证策略：macOS 双模型对比*. 项目一手验证策略。<https://github.com/ExDevilLee/ai-work-system/tree/main/experiments/practical-ai-memory/CROSS-PLATFORM-VALIDATION-STRATEGY.md>

@@ -1,5 +1,8 @@
 runs/private/
 human-results/private/
 data/
+!data/
+!data/formal-macos-gpt-5.6-sol-medium.csv
+!data/formal-macos-gpt-5.6-sol-medium.json
 work/
 __pycache__/

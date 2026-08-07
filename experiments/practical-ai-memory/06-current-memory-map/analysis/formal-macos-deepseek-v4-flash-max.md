@@ -16,7 +16,7 @@
 
 基线说明：
 
-- 06 预置的 macOS gpt 报告（`analysis/formal-macos.md`，声称 `gpt-5.6-sol` 45 次全部 75/75）在仓库中没有对应 `runs/` 与 `data/` 支撑（提交 `0c276ef` 时仅有文档、无执行数据），无法作为可核验基线引用。本 deepseek 对照是 06 第一份可验证的正式执行数据；跨模型对比需等 gpt 数据恢复或重新生成后补充。
+- macOS gpt 基线：`data/formal-macos-gpt-5.6-sol-medium.{json,csv}`，45 次（5 任务 × 3 条件 × 3 次），`gpt-5.6-sol`，推理强度 `medium`，`codex-cli 0.145.0`。该数据此前仅存在于 POC worktree 工作目录、未提交主仓库；本会话已恢复入库。两个模型配置都得到 225/225，本报告聚焦 deepseek 配置的过程与协议细节，跨模型总分对照见文章第 6 节。
 
 ## 协议有效性
 
@@ -95,10 +95,10 @@
 ## 不能支持的结论
 
 1. 不能把 225/225 解读为"deepseek 在记忆类任务上无缺陷"：06 夹具仅 5 条记录、任务边界清晰，难度显著低于 03/04/05；同模型在 03 为 173/180、04/05 为 178/202，本满分只说明该场景在其能力范围内。
-2. 不能与 gpt 基线做任何定量对比：06 仓库中预置的 `analysis/formal-macos.md`（gpt-5.6-sol 45 次 75/75）没有 backing 数据，属于未核验声明；跨模型结论需等 gpt 正式执行数据恢复或重跑后补充。
+2. 不能据本满分声称 deepseek 优于 gpt：两个配置都 225/225，且使用不同 Codex CLI 版本（0.146.1 vs 0.145.0），过程指标只能作量级参考。
 3. 不能把索引形态的成本优势推广到更大规模：flat-index 的收益来自"索引条目直接定位记录"，夹具只有 5 条记录时索引本身很小；记录规模增长后索引的读取与维护成本需要单独测量。
 4. 模型对照只在 macOS 上进行，不能据此声称结论在 Win11 上成立。
 
 ## 当前判断
 
-截至 2026-08-07，06-current-memory-map 的 macOS deepseek-v4-flash(max) 对照已完成：45/45 协议有效，225/225（100%）。三个信息形态条件全部满分且三轮无波动；flat-index 在过程成本上最优。06 的第一份可验证正式数据已进入 `experiments/06-current-memory-map/data/`（`formal-macos-deepseek-v4-flash-max.{json,csv}`）。文章可以表述为：当前记忆地图的 06 场景下，模型对批准门禁、替代规则、未解决冲突、范围边界、未验证观察五类治理语义的识别全部正确；gpt 对照数据在仓库中无支撑，需恢复后补齐跨模型结论。
+截至 2026-08-07，06-current-memory-map 的 macOS 双模型对照已完成：deepseek-v4-flash(max) 45/45 协议有效、225/225（100%），gpt-5.6-sol(medium) 同样 225/225。三个信息形态条件全部满分且三轮无波动；flat-index 在过程成本上最优。两个配置的数据均已进入 `experiments/06-current-memory-map/data/`（`formal-macos-gpt-5.6-sol-medium.{json,csv}` 与 `formal-macos-deepseek-v4-flash-max.{json,csv}`）。文章可以表述为：当前记忆地图的 06 场景下，两个模型配置对批准门禁、替代规则、未解决冲突、范围边界、未验证观察五类治理语义的识别全部正确，跨模型稳定。
