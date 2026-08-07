@@ -259,14 +259,9 @@
           "uuid": "7-gU0IdgKL8IvJSXrQeOJ-TMP"
         }
       },
-      "content_sha256": "261a637c30f8f0b937670a73080f34f74eba7bc7cf874bcbd829dafba1044b2a",
+      "content_sha256": "f01242586aebd15c0cf9edba89561241bec2fd56176f715233bf452ae2581955",
       "note_id": "Pf0au855jIC-dzcssDCcI",
-      "publication_blocked": {
-        "content_sha256": "261a637c30f8f0b937670a73080f34f74eba7bc7cf874bcbd829dafba1044b2a",
-        "message": "MoWen MCP error: error: code = 403 reason = RISKY message = svc [NoteSvc.SetPrivacy]: note risky. metadata = map[] cause = <nil>",
-        "reason": "RISKY"
-      },
-      "published": false,
+      "published": true,
       "url": "https://note.mowen.cn/detail/Pf0au855jIC-dzcssDCcI"
     }
   },
@@ -281,7 +276,7 @@
       "url": "https://note.mowen.cn/detail/CGAIy3ZJS0VwC6wlH3je-"
     },
     "practical-ai-memory": {
-      "content_sha256": "20257552872538e954870f8d60ed7c233ed8b31bfe1d0bc1f2be9756774af23a",
+      "content_sha256": "363d23c410846c2746a33c2720a2bfe9f78f2d0f753118310305d093c318b124",
       "cover_sha256": "a094a84d9f46451ef40e5a1a5ba6df688cfc5bdd538003aeeaef4ae7803ebfb8",
       "cover_source_url": "https://gitee.com/ExDevilLee/ai-work-system/raw/main/content/articles/practical-ai-memory/images/01/three-layer-memory-system.png",
       "cover_uuid": "n_fKIeIyNXYrZr2Si3y_c-TMP",
