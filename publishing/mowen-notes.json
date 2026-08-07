@@ -263,6 +263,24 @@
       "note_id": "Pf0au855jIC-dzcssDCcI",
       "published": true,
       "url": "https://note.mowen.cn/detail/Pf0au855jIC-dzcssDCcI"
+    },
+    "content/articles/practical-ai-memory/2026-07-29-why-long-term-memory-needs-current-map.md": {
+      "assets": {
+        "images/06/current-memory-map.png": {
+          "sha256": "700a4ecc72af358622697beead05ac6bed071ad74bb91fa202ba5e5436a37638",
+          "source_url": "https://gitee.com/ExDevilLee/ai-work-system/raw/main/content/articles/practical-ai-memory/images/06/current-memory-map.png",
+          "uuid": "mFFqPZ5waIqiFKahlRhtT-TMP"
+        }
+      },
+      "content_sha256": "e1fb40f8083d3cc967cfd36fde4465e606b609ca6558b6c1cf946b48b9227078",
+      "note_id": "ddtCa5C54BHu_xbPvehrQ",
+      "publication_blocked": {
+        "content_sha256": "e1fb40f8083d3cc967cfd36fde4465e606b609ca6558b6c1cf946b48b9227078",
+        "message": "MoWen MCP error: error: code = 403 reason = RISKY message = svc [NoteSvc.SetPrivacy]: note risky. metadata = map[] cause = <nil>",
+        "reason": "RISKY"
+      },
+      "published": false,
+      "url": "https://note.mowen.cn/detail/ddtCa5C54BHu_xbPvehrQ"
     }
   },
   "directories": {
