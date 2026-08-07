@@ -2,7 +2,7 @@
 title: "为什么长期记忆需要一张“当前记忆地图”，而不应只藏在文件和索引里？"
 title_en: "Why Does Long-Term Memory Need a Current Memory Map Instead of Only Files and Indexes?"
 date: 2026-07-29
-status: review
+status: ready
 series: practical-ai-memory
 lang: zh
 summary: 通过 macOS 上两个模型配置共 90 次正式 Agent 运行，验证当前记忆地图能否在不复制原始资料的前提下，显式表达状态、范围、关系和来源；实验没有证明地图让答案更准确或更快，但说明了它真正应该解决的治理问题；从本篇起验证策略改为 macOS 双模型对比（强力配置加快速配置）。

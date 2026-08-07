@@ -76,7 +76,7 @@ From one-off AI chats to a long-term collaboration system with memory, workflows
 
 [MoWen series collection](https://note.mowen.cn/detail/CGAIy3ZJS0VwC6wlH3je-)
 
-### Practical AI Long-Term Memory (In Progress, 5 articles)
+### Practical AI Long-Term Memory (In Progress, 6 articles)
 
 Build a layered, searchable, governable, and recoverable AI long-term memory system through locally validated POCs.
 
@@ -85,6 +85,7 @@ Build a layered, searchable, governable, and recoverable AI long-term memory sys
 - [When Does a Temporary Experience Deserve to Become Long-Term Memory?](https://github.com/ExDevilLee/ai-work-system/wiki/18-%E4%B8%80%E6%9D%A1%E4%B8%B4%E6%97%B6%E7%BB%8F%E9%AA%8C%EF%BC%8C%E4%BB%80%E4%B9%88%E6%97%B6%E5%80%99%E5%80%BC%E5%BE%97%E6%88%90%E4%B8%BA%E9%95%BF%E6%9C%9F%E8%AE%B0%E5%BF%86%EF%BC%9F)
 - [Should Conflicting or Expired Long-Term Memory Be Replaced, Downgraded, or Deleted?](https://github.com/ExDevilLee/ai-work-system/wiki/19-%E9%95%BF%E6%9C%9F%E8%AE%B0%E5%BF%86%E5%8F%91%E7%94%9F%E5%86%B2%E7%AA%81%E6%88%96%E8%BF%87%E6%9C%9F%E6%97%B6%EF%BC%8C%E5%BA%94%E8%AF%A5%E6%9B%BF%E4%BB%A3%E3%80%81%E9%99%8D%E7%BA%A7%E8%BF%98%E6%98%AF%E5%88%A0%E9%99%A4%EF%BC%9F)
 - [Why Does Retrieving Information with RAG Not Yet Mean the System Has Long-Term Memory?](https://github.com/ExDevilLee/ai-work-system/wiki/20-RAG-%E8%83%BD%E6%8A%8A%E8%B5%84%E6%96%99%E6%89%BE%E5%9B%9E%E6%9D%A5%EF%BC%8C%E4%B8%BA%E4%BB%80%E4%B9%88%E8%BF%98%E4%B8%8D%E7%AD%89%E4%BA%8E%E7%B3%BB%E7%BB%9F%E5%BD%A2%E6%88%90%E4%BA%86%E9%95%BF%E6%9C%9F%E8%AE%B0%E5%BF%86%EF%BC%9F)
+- [Why Does Long-Term Memory Need a Current Memory Map Instead of Only Files and Indexes?](https://github.com/ExDevilLee/ai-work-system/wiki/21-%E4%B8%BA%E4%BB%80%E4%B9%88%E9%95%BF%E6%9C%9F%E8%AE%B0%E5%BF%86%E9%9C%80%E8%A6%81%E4%B8%80%E5%BC%A0%E2%80%9C%E5%BD%93%E5%89%8D%E8%AE%B0%E5%BF%86%E5%9C%B0%E5%9B%BE%E2%80%9D%EF%BC%8C%E8%80%8C%E4%B8%8D%E5%BA%94%E5%8F%AA%E8%97%8F%E5%9C%A8%E6%96%87%E4%BB%B6%E5%92%8C%E7%B4%A2%E5%BC%95%E9%87%8C%EF%BC%9F)
 
 [MoWen series collection](https://note.mowen.cn/detail/IH2-o1ke6IjnS1LnhX2fJ)
 
