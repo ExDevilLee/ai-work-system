@@ -1,0 +1,82 @@
+{
+  "schema_version": 1,
+  "as_of": "2026-08-10",
+  "domains": [
+    {"id": "release-readiness", "scope": "global"},
+    {"id": "data-retention", "scope": "project"},
+    {"id": "cache-policy", "scope": "project"},
+    {"id": "access-audit", "scope": "global"},
+    {"id": "incident-handling", "scope": "win11"}
+  ],
+  "records": [
+    {
+      "id": "RR-101",
+      "domain": "release-readiness",
+      "scope": "global",
+      "status": "active",
+      "owner": "owner-release",
+      "last_review": "2026-06-01",
+      "review_interval_days": 30,
+      "source": "records/RR-101.md",
+      "summary": "Release checklist requires manual approval before public delivery."
+    },
+    {
+      "id": "DR-201",
+      "domain": "data-retention",
+      "scope": "project",
+      "status": "superseded",
+      "owner": "owner-data",
+      "last_review": "2026-05-01",
+      "review_interval_days": 90,
+      "source": "records/DR-201.md",
+      "summary": "Historical fourteen-day retention rule.",
+      "superseded_by": "DR-202"
+    },
+    {
+      "id": "DR-202",
+      "domain": "data-retention",
+      "scope": "project",
+      "status": "active",
+      "owner": "owner-data",
+      "last_review": "2026-08-01",
+      "review_interval_days": 90,
+      "source": "records/DR-202.md",
+      "summary": "Current thirty-day retention rule."
+    },
+    {
+      "id": "CP-301",
+      "domain": "cache-policy",
+      "scope": "project",
+      "status": "conflict",
+      "owner": null,
+      "last_review": "2026-08-05",
+      "review_interval_days": 14,
+      "source": "records/CP-301.md",
+      "summary": "One workload suggests a twenty-minute cache interval.",
+      "conflicts_with": "CP-302"
+    },
+    {
+      "id": "CP-302",
+      "domain": "cache-policy",
+      "scope": "project",
+      "status": "conflict",
+      "owner": null,
+      "last_review": "2026-08-05",
+      "review_interval_days": 14,
+      "source": "records/CP-302.md",
+      "summary": "Another workload rejects the twenty-minute cache interval.",
+      "conflicts_with": "CP-301"
+    },
+    {
+      "id": "AA-401",
+      "domain": "access-audit",
+      "scope": "global",
+      "status": "pending-validation",
+      "owner": "owner-access",
+      "last_review": "2026-08-08",
+      "review_interval_days": 30,
+      "source": "records/AA-401.md",
+      "summary": "A single observation proposes automated audit sampling."
+    }
+  ]
+}
