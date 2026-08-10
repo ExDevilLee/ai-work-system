@@ -31,3 +31,17 @@ Pilot 只能说明：该配置是否在一个冻结合成场景中完成了指�
 - 机械评分通过 `12/15` 格。`coverage-gap`、`review-due`、`governance-queue` 与 `source-trace` 的三种条件均通过。
 - `scope-slice` 的三种条件均未显式给出人工下一步。根因是冻结 Prompt 只要求范围边界和来源，没有把设计中要求的人工治理动作写成任务要求。
 - 因此本 Pilot 标记为 `needs-protocol-revision`：不运行第二个模型配置，不进入正式矩阵，也不作条件效果结论。后续修订必须使用新标签、重新冻结 Prompt 与 rubric，并从头运行该 Pilot。
+
+## Pilot-02 冻结修订
+
+- `pilot-02` 保留 Pilot-01 的同一合成事实源、五个任务、三种条件和隔离执行方式；不会覆盖或重算 Pilot-01。
+- 唯一任务契约改动是 `scope-slice`：对每个需要治理的主题域，必须给出最小人工复核下一步，并明确不自动创建规则、作出决定或扩展范围。
+- 本轮使用独立的 `rubrics/pilot-02.json`；只有 `15/15` 格通过机械门禁，才可接受该单配置 Pilot。否则继续标记为 `needs-protocol-revision`。
+- 即使 Pilot-02 全部通过，仍不运行第二个模型配置或正式矩阵，直到完成逐份只读 Review。
+
+## Pilot-02 结果与停止点
+
+- 已完成 `5 个任务 × 3 个条件 × 1 次 = 15 次` 独立隔离调用；每格均为零退出码且生成最终答复。
+- 机械评分通过 `14/15` 格；Pilot-01 中的 `scope-slice` 三格均在本轮通过，说明新增的人类复核任务契约已被执行。
+- 唯一失败为 `coverage-gap / coverage-governance-projection`：回答提出人工审阅，但未显式重申“不自动创建或改变规则”的边界。
+- 结果继续标记为 `needs-protocol-revision`。本轮已完成 15 格执行目标，但不接受为通过的单配置 Pilot，也不运行第二个模型配置或正式矩阵。

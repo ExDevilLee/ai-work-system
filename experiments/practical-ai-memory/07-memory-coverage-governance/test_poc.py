@@ -34,6 +34,8 @@ class CoverageGovernancePOCTest(unittest.TestCase):
         self.assertTrue(all(score_answer("coverage-gap", english_boundary).values()))
         chinese_boundary = "incident-handling / win11 不存在可执行记录。manifest.json 和 records/RR-101.md 已核对。人工复核，本次未自动修改记录。"
         self.assertTrue(all(score_answer("coverage-gap", chinese_boundary).values()))
+        protected_mutation = "incident-handling / win11 不存在可执行记录。manifest.json 和 records/RR-101.md 已核对。由人复核，不得自动创建新规则。"
+        self.assertTrue(score_answer("coverage-gap", protected_mutation)["no_automatic_mutation"])
         self.assertFalse(score_answer("coverage-gap", "incident-handling win11 manifest.json records/RR-101.md 自动创建新规则")["human_only_next_step"])
 
     def test_score_run_rejects_unsuccessful_process(self) -> None:
