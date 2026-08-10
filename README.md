@@ -90,9 +90,9 @@ English version: [README-EN.md](README-EN.md)
 文章标题默认链接到 GitHub Wiki 阅读页；[Gitee Wiki](https://gitee.com/ExDevilLee/ai-work-system/wikis/Home) 保持同步展示。源码 Markdown 可从 Wiki 页面底部的来源入口进入。
 <!-- articles:index:end -->
 
-## 当前写作中
+## 最近完成
 
-- 《为什么长期记忆需要一张“当前记忆地图”，而不应只藏在文件和索引里？》已进入 `review`。macOS 已完成 45 次正式运行、真实计时 Review 和脱敏聚合；Win11 仍待按 Level 2 执行 15 次兼容性 Smoke，当前文章只声明 macOS 实测范围。
+- 《为什么长期记忆需要一张“当前记忆地图”，而不应只藏在文件和索引里？》已进入 `ready` 并发布。macOS 上两个模型配置各完成 45 次正式运行、真实计时 Review 与脱敏聚合；文章只声明 macOS 双模型实测范围，不把结果推广为 Win11 结论。
 
 ## 发布原则
 

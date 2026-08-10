@@ -94,9 +94,9 @@ Article titles link to the GitHub Wiki reading pages by default; [Gitee Wiki](ht
 Article bodies are currently written in Chinese first. English titles are provided for navigation; full English translations may be added selectively.
 <!-- articles:index:end -->
 
-## Work In Progress
+## Latest Completed
 
-- *When Does a Temporary Experience Deserve to Become Long-Term Memory?* is in `review`, with cross-platform results from 45 formal macOS runs and 45 formal Win11 runs. The sanitized Win11 aggregation is included in the POC; the article awaits human review before moving to `ready`.
+- *Why Does Long-Term Memory Need a Current Memory Map Instead of Only Files and Indexes?* is now `ready` and published. Two macOS model configurations each completed 45 formal runs with timed review and sanitized aggregation; the article limits its claims to the macOS dual-model evidence and does not generalize them to Win11.
 
 ## Publishing Principle
 
