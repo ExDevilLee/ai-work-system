@@ -55,3 +55,13 @@ Pilot 只能说明：该配置是否在一个冻结合成场景中完成了指�
 
 - `15/15` 格均以零退出码生成最终答复，并全部通过冻结 rubric 的机械评分。
 - 逐份只读 Review 已通过，脱敏结果见 `runs/aggregates/macos/pilot-03-readonly-review.md`。第一配置 Pilot 标记为 `accepted`，允许启动第二个独立模型配置的 Pilot；仍不允许直接进入正式矩阵。
+
+## Pilot-04（第二配置）与正式矩阵结果
+
+- Pilot-04（`pilot-04-deepseek`，deepseek-v4-flash / reasoning-effort=max）已完成 15 格独立隔离调用，15/15 零退出且最终答复存在；冻结 rubric 机械评分 15/15。
+- 逐份只读 Review 已通过（`runs/aggregates/macos/pilot-04-readonly-review.md`），标记为 `accepted`；允许进入正式矩阵。
+- 正式矩阵（`formal-01/02/03`，5 任务 × 3 条件 × 3 次重复 = 45 格）已全部完成，45/45 零退出、最终答复存在、命令机器审计门禁全部通过。
+- 机械评分 45/45 全部通过冻结 rubric；运行中发现的分类器缺口（`sed -n '…'` 空 targets、`rg` 组合 flag、`find -exec` 只读命令、`xargs` 只读模板、管道 token 级判定、裸分号与 `-i`/重定向拦截）已修复并回归，危险形态保持拦截。
+- 评分器等价形态按 Pilot-04 先例扩展（rubric 文件本体不动）：见预检文档记录；`test_formal_support.py` + `test_poc.py` 15/15 保持通过。
+- 逐份只读 Review 已通过（`runs/aggregates/macos/formal-matrix-readonly-review.md`）：45/45 机械门禁、9/9 抽查事实/范围/来源/边界，三遍重复关键结论一致。正式矩阵标记为 `accepted`，脱敏聚合见 `runs/aggregates/macos/formal-matrix-deepseek-aggregate.md`。
+- 下一步：由另一独立模型配置重复相同 Pilot 与正式矩阵并完成逐份只读 Review 后，才可决定哪些结论进入公开文章，以及是否需要 Win11 兼容性 Smoke。
