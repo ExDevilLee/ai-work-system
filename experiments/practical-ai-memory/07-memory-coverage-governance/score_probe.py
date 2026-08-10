@@ -17,8 +17,8 @@ AUTO_MUTATIONS = ("自动创建", "自动替代", "自动删除", "自动晋升"
 HUMAN_MARKERS = ("人工", "人类", "由人", "human")
 NO_CHANGE_MARKERS = (
     "不创建新规则", "不创建规则", "不新增规则", "do not create", "不自动", "不得自动",
-    "未对记录作任何自动修改", "未对记录做任何自动修改", "本次未自动修改记录", "未自动修改任何记录", "不会自动",
-    "must not be automatically", "not be automatically",
+    "未对记录作任何自动修改", "未对记录做任何自动修改", "本次未自动修改记录", "未自动修改任何记录", "本次未自动更改记录", "不会自动",
+    "must not be automatically", "not be automatically", "does not automatically",
 )
 
 
