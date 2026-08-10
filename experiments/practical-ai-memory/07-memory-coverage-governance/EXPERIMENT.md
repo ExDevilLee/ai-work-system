@@ -64,4 +64,5 @@ Pilot 只能说明：该配置是否在一个冻结合成场景中完成了指�
 - 机械评分 45/45 全部通过冻结 rubric；运行中发现的分类器缺口（`sed -n '…'` 空 targets、`rg` 组合 flag、`find -exec` 只读命令、`xargs` 只读模板、管道 token 级判定、裸分号与 `-i`/重定向拦截）已修复并回归，危险形态保持拦截。
 - 评分器等价形态按 Pilot-04 先例扩展（rubric 文件本体不动）：见预检文档记录；`test_formal_support.py` + `test_poc.py` 15/15 保持通过。
 - 逐份只读 Review 已通过（`runs/aggregates/macos/formal-matrix-readonly-review.md`）：45/45 机械门禁、9/9 抽查事实/范围/来源/边界，三遍重复关键结论一致。正式矩阵标记为 `accepted`，脱敏聚合见 `runs/aggregates/macos/formal-matrix-deepseek-aggregate.md`。
+- 人工评分（读 final.md 对照冻结 rubric 独立给 0/1，score.json 落 `runs/private/macos/*/score.json`，模式 600）：45/45 全部满分；无 unsupported claims、无 irrelevant facts；计时方式 batch_average（45 格一批 1.2 分钟）。聚合 `data/formal-macos-deepseek-v4-flash-max.{csv,json}` 已生成：45 行、protocol_valid 全 true、每条件 15 格 score 96/96。
 - 下一步：由另一独立模型配置重复相同 Pilot 与正式矩阵并完成逐份只读 Review 后，才可决定哪些结论进入公开文章，以及是否需要 Win11 兼容性 Smoke。
