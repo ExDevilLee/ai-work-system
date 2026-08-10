@@ -54,4 +54,4 @@ Pilot 只能说明：该配置是否在一个冻结合成场景中完成了指�
 ## Pilot-03 结果
 
 - `15/15` 格均以零退出码生成最终答复，并全部通过冻结 rubric 的机械评分。
-- Pilot-03 已满足“进入逐份只读 Review”的前置条件；在 Review 完成前，它仍不是第二模型或正式矩阵的授权。
+- 逐份只读 Review 已通过，脱敏结果见 `runs/aggregates/macos/pilot-03-readonly-review.md`。第一配置 Pilot 标记为 `accepted`，允许启动第二个独立模型配置的 Pilot；仍不允许直接进入正式矩阵。
