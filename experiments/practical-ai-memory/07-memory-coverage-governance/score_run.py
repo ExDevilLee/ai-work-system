@@ -23,6 +23,7 @@ FIXTURE_SET = "pilot-01"
 CONDITIONS = ("source-only", "state-projection", "coverage-governance-projection")
 PLATFORMS = ("macos", "win11")
 SAFE_IDENTIFIER = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]*$")
+FORMAL_PREFIX = re.compile(r"^formal(?:-[A-Za-z0-9._]+)*-$")
 
 
 def parse_args() -> argparse.Namespace:
@@ -122,10 +123,14 @@ def _safe_run_directory(path: Path) -> tuple[Path, str]:
 
 
 def _formal_slot_matches(run_name: str, task: str, condition: str) -> bool:
-    return any(
-        run_name == f"formal-{repeat:02d}-{task}-{condition}"
-        for repeat in range(1, 4)
-    )
+    suffix = f"-{task}-{condition}"
+    if not run_name.endswith(suffix):
+        return False
+    stem = run_name[: -len(suffix)]
+    if len(stem) < 2:
+        return False
+    prefix, repeat = stem[:-2], stem[-2:]
+    return repeat in {"01", "02", "03"} and bool(FORMAL_PREFIX.fullmatch(prefix))
 
 
 def _validate_score_target(path: Path) -> None:

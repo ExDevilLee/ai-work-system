@@ -7,10 +7,18 @@ from unittest import mock
 
 import run_experiment
 import score_run
-from aggregate_results import frozen_tasks
+from aggregate_results import expected_run_names, frozen_tasks
 from matrix_support import expected_run_contract, is_complete_successful_run
 from run_experiment import assemble_fixture, build_codex_command
-from run_formal_matrix import CONDITIONS, MODEL, REASONING_EFFORT, SCHEDULE, rotated_runs
+from run_formal_matrix import (
+    CONDITIONS,
+    MODEL,
+    REASONING_EFFORT,
+    SCHEDULE,
+    formal_schedule,
+    is_usage_limited_run,
+    rotated_runs,
+)
 from validate_fixtures import TASKS
 
 
@@ -101,6 +109,47 @@ class AdaptedFormalSupportTest(unittest.TestCase):
         self.assertIn('model_providers.opencode-go.wire_api="responses"', joined)
         self.assertIn('model_providers.opencode-go.env_key="OPENCODE_GO_API_KEY"', joined)
 
+    def test_build_codex_command_uses_direct_model_without_provider(self) -> None:
+        command = build_codex_command(
+            "codex",
+            Path("/tmp/ws"),
+            Path("/tmp/final.md"),
+            model="gpt-5.6-terra",
+            reasoning_effort="medium",
+        )
+        joined = " ".join(command)
+        self.assertIn("--model gpt-5.6-terra", joined)
+        self.assertIn('model_reasoning_effort="medium"', joined)
+        self.assertNotIn("model_provider=", joined)
+        self.assertNotIn("model_providers.", joined)
+
+    def test_stage_direct_codex_auth_restricts_permissions(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            source = root / "source-auth.json"
+            source.write_text('{"tokens":{"access_token":"test"}}', encoding="utf-8")
+            source.chmod(0o600)
+            isolated_home = root / "isolated-home"
+            isolated_home.mkdir(mode=0o700)
+            with mock.patch.object(run_experiment, "DIRECT_CODEX_AUTH_FILE", source):
+                staged = run_experiment.stage_direct_codex_auth(isolated_home)
+            self.assertEqual(staged.read_text(encoding="utf-8"), source.read_text(encoding="utf-8"))
+            self.assertEqual(staged.stat().st_mode & 0o777, 0o600)
+
+    def test_usage_limit_skip_only_matches_explicit_service_error(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            run_dir = Path(temporary)
+            (run_dir / "raw.jsonl").write_text(
+                '{"type":"error","message":"You\'ve hit your usage limit"}\n',
+                encoding="utf-8",
+            )
+            self.assertTrue(is_usage_limited_run(run_dir))
+            (run_dir / "raw.jsonl").write_text(
+                '{"type":"error","message":"network unavailable"}\n',
+                encoding="utf-8",
+            )
+            self.assertFalse(is_usage_limited_run(run_dir))
+
     def test_rotated_schedule_covers_45_slots(self) -> None:
         slots = [f"{label}-{task}-{condition}" for label, runs in SCHEDULE for task, condition in runs]
         self.assertEqual(len(slots), 45)
@@ -111,6 +160,34 @@ class AdaptedFormalSupportTest(unittest.TestCase):
             self.assertEqual({task for task, _ in runs}, set(TASKS))
         self.assertEqual([label for label, _ in SCHEDULE], ["formal-01", "formal-02", "formal-03"])
         self.assertEqual(rotated_runs(0)[0], ("coverage-gap", "source-only"))
+
+    def test_model_specific_formal_prefix_preserves_all_slots(self) -> None:
+        schedule = formal_schedule("formal-terra-")
+        slots = [
+            f"{label}-{task}-{condition}"
+            for label, runs in schedule
+            for task, condition in runs
+        ]
+        self.assertEqual(len(slots), 45)
+        self.assertEqual(len(set(slots)), 45)
+        self.assertEqual(
+            set(slots),
+            expected_run_names("formal-terra-", frozen_tasks()),
+        )
+        self.assertTrue(
+            score_run._formal_slot_matches(
+                "formal-terra-01-coverage-gap-source-only",
+                "coverage-gap",
+                "source-only",
+            )
+        )
+        self.assertFalse(
+            score_run._formal_slot_matches(
+                "formal-terra-04-coverage-gap-source-only",
+                "coverage-gap",
+                "source-only",
+            )
+        )
 
     def test_load_api_key_fails_cleanly_when_missing(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:

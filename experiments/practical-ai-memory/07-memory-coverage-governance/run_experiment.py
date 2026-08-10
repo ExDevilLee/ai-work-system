@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
-"""Run one isolated POC 07 memory-coverage-governance probe with an explicitly
-locked model, isolated HOME, and injected provider credentials."""
+"""Run one isolated POC 07 probe with an explicitly locked model.
 
+Deepseek uses an injected provider credential; direct Codex models receive only
+an ephemeral, mode-restricted authentication copy inside the isolated HOME.
+"""
 from __future__ import annotations
 
 import argparse
@@ -14,6 +16,7 @@ import re
 import shlex
 import shutil
 import subprocess
+import stat
 import tempfile
 import time
 from collections import Counter
@@ -44,6 +47,8 @@ PROVIDER_BASE_URL = "https://opencode.ai/zen/go/v1"
 PROVIDER_WIRE_API = "responses"
 PROVIDER_ENV_KEY = "OPENCODE_GO_API_KEY"
 API_KEY_FILE = Path("~/.config/opencode-go/api-key").expanduser()
+DIRECT_CODEX_AUTH_FILE = Path.home() / ".codex" / "auth.json"
+INJECTED_PROVIDER_MODELS = frozenset({"deepseek-v4-flash"})
 MIN_FIXTURE_FRAGMENT_BYTES = 32
 NODE_REPL_FILE_MARKERS = (
     "fs.",
@@ -1307,6 +1312,33 @@ def resolve_codex_executable() -> str:
     return executable
 
 
+def uses_injected_provider(model: Optional[str]) -> bool:
+    return model in INJECTED_PROVIDER_MODELS
+
+
+def stage_direct_codex_auth(isolated_home: Path) -> Path:
+    """Copy the required direct-Codex credential into the ephemeral HOME."""
+    try:
+        source_mode = DIRECT_CODEX_AUTH_FILE.lstat().st_mode
+    except OSError as error:
+        raise SystemExit(
+            f"direct Codex authentication is unavailable: {type(error).__name__}"
+        ) from error
+    if not stat.S_ISREG(source_mode):
+        raise SystemExit("direct Codex authentication must be a regular file")
+    destination_dir = isolated_home / ".codex"
+    destination_dir.mkdir(mode=0o700)
+    destination = destination_dir / "auth.json"
+    try:
+        shutil.copyfile(DIRECT_CODEX_AUTH_FILE, destination)
+        os.chmod(destination, 0o600)
+    except OSError as error:
+        raise SystemExit(
+            f"direct Codex authentication staging failed: {type(error).__name__}"
+        ) from error
+    return destination
+
+
 def run_utf8_command(
     command: Sequence[str], *, check: bool = False, input_text: Optional[str] = None,
     cwd: Optional[Path] = None,
@@ -1365,19 +1397,23 @@ def build_codex_command(
         "features.plugins=false",
         "--config",
         "mcp_servers={}",
-        "--config",
-        f'model_provider="{PROVIDER_NAME}"',
-        "--config",
-        f'model_providers.{PROVIDER_NAME}.name="{PROVIDER_NAME}"',
-        "--config",
-        f'model_providers.{PROVIDER_NAME}.base_url="{PROVIDER_BASE_URL}"',
-        "--config",
-        f'model_providers.{PROVIDER_NAME}.wire_api="{PROVIDER_WIRE_API}"',
-        "--config",
-        f'model_providers.{PROVIDER_NAME}.env_key="{PROVIDER_ENV_KEY}"',
-        "--output-last-message",
-        str(final_path),
     ]
+    if uses_injected_provider(model):
+        command.extend(
+            [
+                "--config",
+                f'model_provider="{PROVIDER_NAME}"',
+                "--config",
+                f'model_providers.{PROVIDER_NAME}.name="{PROVIDER_NAME}"',
+                "--config",
+                f'model_providers.{PROVIDER_NAME}.base_url="{PROVIDER_BASE_URL}"',
+                "--config",
+                f'model_providers.{PROVIDER_NAME}.wire_api="{PROVIDER_WIRE_API}"',
+                "--config",
+                f'model_providers.{PROVIDER_NAME}.env_key="{PROVIDER_ENV_KEY}"',
+            ]
+        )
+    command.extend(["--output-last-message", str(final_path)])
     if model:
         command.extend(["--model", model])
     if reasoning_effort:
@@ -1514,7 +1550,10 @@ def main() -> int:
         env = os.environ.copy()
         env["HOME"] = str(isolated_home)
         env.pop("CODEX_HOME", None)
-        env[PROVIDER_ENV_KEY] = load_api_key()
+        if uses_injected_provider(args.model):
+            env[PROVIDER_ENV_KEY] = load_api_key()
+        else:
+            stage_direct_codex_auth(isolated_home)
 
         started = time.monotonic()
         result = run_utf8_command(
@@ -1590,7 +1629,11 @@ def main() -> int:
         "sandbox": "read-only",
         "ephemeral": True,
         "plugins_enabled": False,
-        "command_execution_policy": "isolated-home-provider-injection",
+        "command_execution_policy": (
+            "isolated-home-provider-injection"
+            if uses_injected_provider(args.model)
+            else "isolated-home-auth-staging"
+        ),
         "runtime_tool_access_calls": runtime_access_calls,
         "protocol_environment_isolated": runtime_access_calls == 0,
         "exit_code": result.returncode,
@@ -1618,7 +1661,24 @@ def main() -> int:
         )
         + mcp_workspace_bytes,
         "resident_instruction_bytes": resident_instruction_bytes(fixture),
-        "command_shape": "codex exec -C <isolated-workspace> --skip-git-repo-check --ignore-rules --sandbox read-only --ephemeral --json --config features.plugins=false --config mcp_servers={} --config model_provider=<injected> --config model_providers.<injected>.{name,base_url,wire_api,env_key} --output-last-message <file> [--model <model>] [--config model_reasoning_effort=<effort>] -; prompt transport: UTF-8 stdin; env: HOME=<isolated-home>, CODEX_HOME removed, provider key injected from local key file",
+        "command_shape": (
+            "codex exec -C <isolated-workspace> --skip-git-repo-check "
+            "--ignore-rules --sandbox read-only --ephemeral --json --config "
+            "features.plugins=false --config mcp_servers={} "
+            + (
+                "--config model_provider=<injected> --config "
+                "model_providers.<injected>.{name,base_url,wire_api,env_key} "
+                "--output-last-message <file> [--model <model>] [--config "
+                "model_reasoning_effort=<effort>] -; prompt transport: UTF-8 stdin; "
+                "env: HOME=<isolated-home>, CODEX_HOME removed, provider key injected "
+                "from local key file"
+                if uses_injected_provider(args.model)
+                else "--output-last-message <file> [--model <model>] [--config "
+                "model_reasoning_effort=<effort>] -; prompt transport: UTF-8 stdin; "
+                "env: HOME=<isolated-home>, CODEX_HOME removed, direct Codex auth "
+                "staged with mode 600"
+            )
+        ),
     }
     metadata["project_context_bytes_reliable"] = metadata[
         "workspace_output_bytes_reliable"

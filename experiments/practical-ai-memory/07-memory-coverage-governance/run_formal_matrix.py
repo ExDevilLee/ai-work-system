@@ -7,6 +7,7 @@ import argparse
 import subprocess
 import sys
 from pathlib import Path
+import re
 
 from matrix_support import expected_run_contract, is_complete_successful_run
 from run_experiment import argparse_path_identifier
@@ -23,6 +24,7 @@ TASKS = (
     "source-trace",
 )
 CONDITIONS = ("source-only", "state-projection", "coverage-governance-projection")
+USAGE_LIMIT_MARKER = "You've hit your usage limit"
 
 
 def rotated_runs(offset: int) -> tuple[tuple[str, str], ...]:
@@ -34,10 +36,19 @@ def rotated_runs(offset: int) -> tuple[tuple[str, str], ...]:
     return tuple(runs)
 
 
-SCHEDULE = tuple(
-    (f"formal-{repeat:02d}", rotated_runs(repeat - 1))
-    for repeat in range(1, 4)
-)
+FORMAL_PREFIX = re.compile(r"^formal(?:-[A-Za-z0-9._]+)*-$")
+
+
+def formal_schedule(prefix: str) -> tuple[tuple[str, tuple[tuple[str, str], ...]], ...]:
+    if not FORMAL_PREFIX.fullmatch(prefix):
+        raise ValueError("formal run prefix must start with formal- and end with -")
+    return tuple(
+        (f"{prefix}{repeat:02d}", rotated_runs(repeat - 1))
+        for repeat in range(1, 4)
+    )
+
+
+SCHEDULE = formal_schedule("formal-")
 
 
 def parse_args() -> argparse.Namespace:
@@ -53,14 +64,34 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument("--model", default=MODEL)
     parser.add_argument("--reasoning-effort", default=REASONING_EFFORT)
+    parser.add_argument("--run-prefix", default="formal-")
+    parser.add_argument(
+        "--continue-on-usage-limit",
+        action="store_true",
+        help="preserve and skip only cells rejected for direct Codex usage limits",
+    )
     return parser.parse_args()
+
+
+def is_usage_limited_run(run_dir: Path) -> bool:
+    try:
+        return USAGE_LIMIT_MARKER in (run_dir / "raw.jsonl").read_text(
+            encoding="utf-8"
+        )
+    except (OSError, UnicodeDecodeError):
+        return False
 
 
 def main() -> int:
     args = parse_args()
+    try:
+        schedule = formal_schedule(args.run_prefix)
+    except ValueError as error:
+        raise SystemExit(str(error)) from error
     completed = 0
     skipped = 0
-    for label, runs in SCHEDULE:
+    usage_limited = 0
+    for label, runs in schedule:
         for task, condition in runs:
             run_name = f"{label}-{task}-{condition}"
             run_dir = ROOT / "runs" / "private" / args.platform_tag / run_name
@@ -87,6 +118,10 @@ def main() -> int:
                 skipped += 1
                 continue
             if run_dir.exists():
+                if args.continue_on_usage_limit and is_usage_limited_run(run_dir):
+                    print(f"SKIP usage-limited {run_name}", flush=True)
+                    usage_limited += 1
+                    continue
                 print(f"STOP incomplete run directory: {run_name}", file=sys.stderr)
                 return 1
             command = [
@@ -109,14 +144,21 @@ def main() -> int:
             print(f"RUN  {run_name}", flush=True)
             result = subprocess.run(command)
             if result.returncode != 0:
+                if args.continue_on_usage_limit and is_usage_limited_run(run_dir):
+                    print(f"SKIP usage-limited {run_name}", flush=True)
+                    usage_limited += 1
+                    continue
                 print(f"STOP failed run: {run_name}", file=sys.stderr)
                 return result.returncode
             if not is_complete_successful_run(run_dir, expected):
                 print(f"STOP incomplete successful run: {run_name}", file=sys.stderr)
                 return 1
             completed += 1
-    print(f"formal matrix complete: completed={completed}, skipped={skipped}")
-    return 0
+    print(
+        "formal matrix complete: "
+        f"completed={completed}, skipped={skipped}, usage_limited={usage_limited}"
+    )
+    return 1 if usage_limited else 0
 
 
 if __name__ == "__main__":

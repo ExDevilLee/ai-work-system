@@ -30,6 +30,7 @@ REPEATS = range(1, 4)
 FIXTURE_SET = "pilot-01"
 SAFE_IDENTIFIER = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]*$")
 SAFE_CODEX_VERSION = re.compile(r"^codex-cli [A-Za-z0-9][A-Za-z0-9._-]*$")
+FORMAL_PREFIX = re.compile(r"^formal(?:-[A-Za-z0-9._]+)*-$")
 CSV_FIELDS = (
     "run_name",
     "task",
@@ -204,11 +205,16 @@ def validate_saved_rubric_items(
         raise SystemExit("score rubric item totals disagree with correctness totals")
 
 
+def require_formal_prefix(prefix: str) -> str:
+    if not isinstance(prefix, str) or not FORMAL_PREFIX.fullmatch(prefix):
+        raise SystemExit("formal aggregation prefix must start with formal- and end with -")
+    return prefix
+
+
 def expected_run_names(prefix: str, tasks: Iterable[str]) -> set[str]:
-    if prefix != "formal-":
-        raise SystemExit("current-map formal aggregation requires prefix formal-")
+    prefix = require_formal_prefix(prefix)
     return {
-        f"formal-{repeat:02d}-{task}-{condition}"
+        f"{prefix}{repeat:02d}-{task}-{condition}"
         for repeat in REPEATS
         for task in tasks
         for condition in CONDITIONS
@@ -218,10 +224,9 @@ def expected_run_names(prefix: str, tasks: Iterable[str]) -> set[str]:
 def expected_run_slots(
     prefix: str, tasks: Iterable[str]
 ) -> dict[str, tuple[str, str]]:
-    if prefix != "formal-":
-        raise SystemExit("current-map formal aggregation requires prefix formal-")
+    prefix = require_formal_prefix(prefix)
     return {
-        f"formal-{repeat:02d}-{task}-{condition}": (task, condition)
+        f"{prefix}{repeat:02d}-{task}-{condition}": (task, condition)
         for repeat in REPEATS
         for task in tasks
         for condition in CONDITIONS

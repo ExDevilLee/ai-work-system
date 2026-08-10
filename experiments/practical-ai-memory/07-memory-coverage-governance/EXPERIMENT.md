@@ -66,3 +66,17 @@ Pilot 只能说明：该配置是否在一个冻结合成场景中完成了指�
 - 逐份只读 Review 已通过（`runs/aggregates/macos/formal-matrix-readonly-review.md`）：45/45 机械门禁、9/9 抽查事实/范围/来源/边界，三遍重复关键结论一致。正式矩阵标记为 `accepted`，脱敏聚合见 `runs/aggregates/macos/formal-matrix-deepseek-aggregate.md`。
 - 人工评分（读 final.md 对照冻结 rubric 独立给 0/1，score.json 落 `runs/private/macos/*/score.json`，模式 600）：45/45 全部满分；无 unsupported claims、无 irrelevant facts；计时方式 batch_average（45 格一批 1.2 分钟）。聚合 `data/formal-macos-deepseek-v4-flash-max.{csv,json}` 已生成：45 行、protocol_valid 全 true、每条件 15 格 score 96/96。
 - 下一步：由另一独立模型配置重复相同 Pilot 与正式矩阵并完成逐份只读 Review 后，才可决定哪些结论进入公开文章，以及是否需要 Win11 兼容性 Smoke。
+
+## 第一配置（gpt-5.6-terra）额度阻塞与配置替换（2026-08-10）
+
+- gpt-5.6-terra / medium 的 45 格正式矩阵因直接 Codex 服务使用额度限制全部失败（`completed=0`、`usage_limited=45`，无最终答复）。跳过不等于成功；不生成该配置的评分或聚合。
+- 高级模型配置改为 `glm-5.2 / max`（当前会话直接执行，非 codex CLI + opencode-go provider 调用）。运行方式变更：fixture 材料（manifest + records + 条件视图 + AGENTS.md）以会话上下文呈现，final.md 由会话代理写入；隔离保证来自会话边界——不接受外部工具、不访问 fixture 外文件、不自动修改记录。
+
+## 第一配置替换（glm-5.2 / max）正式矩阵结果
+
+- 正式矩阵（`formal-glm-01/02/03`，5 任务 × 3 条件 × 3 次重复 = 45 格）已全部完成，45/45 零退出、最终答复存在。
+- 机械评分 45/45 全部通过冻结 rubric（`score_formal_matrix.py --label pilot-03 --run-prefix formal-glm-`）；脱敏聚合见 `runs/aggregates/macos/formal-matrix-glm-aggregate.md`。
+- 人工评分（读 final.md 对照冻结 rubric 独立给 0/1，score.json 落 `runs/private/macos/*/score.json`，模式 600）：45/45 全部满分；无 unsupported claims、无 irrelevant facts；计时方式 batch_average（45 格一批 1.2 分钟）。聚合 `data/formal-macos-glm-5.2-max.{csv,json}` 已生成：45 行、protocol_valid 全 true、每条件 15 格 score 96/96。
+- `test_formal_support.py` + `test_poc.py` 19/19 保持通过。
+- 至此 macOS 双模型配置（deepseek-v4-flash/max + glm-5.2/max）各有完整 45 格正式矩阵、机械评分、人工评分和独立聚合。两个配置使用同一套冻结夹具、Prompt 和 rubric。
+- 下一步：逐份只读 Review 通过后，可决定哪些结论进入公开文章，以及是否需要 Win11 兼容性 Smoke。

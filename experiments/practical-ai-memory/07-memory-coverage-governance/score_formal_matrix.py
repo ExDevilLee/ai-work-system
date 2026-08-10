@@ -26,12 +26,15 @@ CONDITIONS = ("source-only", "state-projection", "coverage-governance-projection
 REPETITIONS = 3
 
 
-def collect_run_dirs() -> list[Path]:
+def collect_run_dirs(run_prefix: str) -> list[Path]:
     run_dirs: list[Path] = []
     for repetition in range(1, REPETITIONS + 1):
         for task in TASKS:
             for condition in CONDITIONS:
-                run_dir = FORMAL_RUNS_ROOT / f"formal-{repetition:02d}-{task}-{condition}"
+                run_dir = (
+                    FORMAL_RUNS_ROOT
+                    / f"{run_prefix}{repetition:02d}-{task}-{condition}"
+                )
                 if not (run_dir / "metadata.json").is_file() or not (run_dir / "final.md").is_file():
                     raise SystemExit(f"missing completed run: {run_dir.name}")
                 run_dirs.append(run_dir)
@@ -78,8 +81,9 @@ def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--label", default="pilot-04-deepseek")
     parser.add_argument("--aggregate-name", default="formal-matrix-deepseek-aggregate")
+    parser.add_argument("--run-prefix", default="formal-")
     args = parser.parse_args()
-    results = [score_run(run_dir, args.label) for run_dir in collect_run_dirs()]
+    results = [score_run(run_dir, args.label) for run_dir in collect_run_dirs(args.run_prefix)]
     PUBLIC_ROOT.mkdir(parents=True, exist_ok=True)
     aggregate = PUBLIC_ROOT / f"{args.aggregate_name}.md"
     aggregate.write_text(render_aggregate(results, args.label), encoding="utf-8")
