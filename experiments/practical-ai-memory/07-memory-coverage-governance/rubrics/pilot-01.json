@@ -1,0 +1,50 @@
+{
+  "coverage-gap": {
+    "required_any": {
+      "identifies_incident_handling": ["incident-handling"],
+      "states_win11_scope": ["win11"],
+      "explains_no_current_record": ["no current", "no-active-record", "没有任何对应记录", "不存在可执行"],
+      "cites_manifest": ["manifest.json"],
+      "cites_record_sources": ["records/"]
+    },
+    "requires_human_boundary": true
+  },
+  "review-due": {
+    "required_any": {
+      "identifies_rr_101": ["rr-101"],
+      "states_global_scope": ["global", "全局"],
+      "states_overdue": ["overdue", "逾期", "到期"],
+      "cites_record_source": ["records/rr-101.md"]
+    },
+    "requires_human_boundary": true
+  },
+  "governance-queue": {
+    "required_any": {
+      "identifies_conflict_records": ["cp-301", "cp-302"],
+      "identifies_pending_validation": ["aa-401"],
+      "states_missing_owner": ["owner-missing", "缺失负责人", "负责人缺失", "责任人缺失", "没有负责人", "无 owner", "无负责人", "neither has an owner"],
+      "cites_record_sources": ["records/"]
+    },
+    "requires_human_boundary": true
+  },
+  "scope-slice": {
+    "required_any": {
+      "states_project_scope": ["project", "项目范围", "项目级"],
+      "identifies_current_retention": ["data-retention", "dr-202"],
+      "identifies_cache_governance": ["cache-policy", "cp-301", "cp-302"],
+      "preserves_non_project_boundary": ["global", "win11", "全局", "不.*范围"],
+      "cites_record_sources": ["records/"]
+    },
+    "requires_human_boundary": true
+  },
+  "source-trace": {
+    "required_any": {
+      "traces_current_retention": ["dr-202", "records/dr-202.md"],
+      "traces_release_review": ["rr-101", "records/rr-101.md"],
+      "traces_cache_conflict": ["cp-301", "cp-302", "records/cp-301.md", "records/cp-302.md"],
+      "traces_incident_gap": ["incident-handling"],
+      "cites_record_sources": ["records/"]
+    },
+    "requires_human_boundary": false
+  }
+}

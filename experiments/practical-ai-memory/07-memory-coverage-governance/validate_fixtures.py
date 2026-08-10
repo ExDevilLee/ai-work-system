@@ -49,6 +49,13 @@ def validate() -> list[str]:
     for task in TASKS:
         if not (ROOT / "prompts" / f"{task}.md").is_file():
             errors.append(f"missing prompt: {task}")
+    rubric_path = ROOT / "rubrics" / "pilot-01.json"
+    if not rubric_path.is_file():
+        errors.append("missing pilot rubric")
+    else:
+        rubric = json.loads(rubric_path.read_text(encoding="utf-8"))
+        if set(rubric) != set(TASKS):
+            errors.append("pilot rubric must define exactly one entry per task")
     flat = render_flat_index(manifest)
     projection = json.dumps(build_state_projection(manifest), ensure_ascii=False, sort_keys=True, separators=(",", ":")) + "\n"
     coverage = render_coverage_governance(manifest)
@@ -58,7 +65,7 @@ def validate() -> list[str]:
         path = generated / name
         if not path.is_file() or path.read_text(encoding="utf-8") != text:
             errors.append(f"generated artifact drift: {name}")
-    for path in list(FIXTURE.rglob("*")) + list((ROOT / "prompts").glob("*.md")):
+    for path in list(FIXTURE.rglob("*")) + list((ROOT / "prompts").glob("*.md")) + [rubric_path]:
         if path.is_file() and PRIVATE.search(path.read_text(encoding="utf-8")):
             errors.append(f"private marker in {path.relative_to(ROOT)}")
     return errors

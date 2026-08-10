@@ -27,15 +27,19 @@ class CoverageGovernancePOCTest(unittest.TestCase):
 
     def test_coverage_gap_score_requires_human_only_boundary(self) -> None:
         good = "incident-handling / win11 has no current record. manifest.json and records/RR-101.md were used. 人工复核，本次不创建新规则。"
-        self.assertTrue(all(score_answer(good).values()))
+        self.assertTrue(all(score_answer("coverage-gap", good).values()))
         human_owner = "incident-handling / win11 has no current record. manifest.json and records/RR-101.md were used. 人类负责人复核，本次不新增规则。"
-        self.assertTrue(all(score_answer(human_owner).values()))
-        self.assertFalse(score_answer("incident-handling win11 manifest.json records/RR-101.md 自动创建新规则")["human_only_next_step"])
+        self.assertTrue(all(score_answer("coverage-gap", human_owner).values()))
+        english_boundary = "incident-handling / win11 has no current record. manifest.json and records/RR-101.md were used. A human reviewer says it must not be automatically changed."
+        self.assertTrue(all(score_answer("coverage-gap", english_boundary).values()))
+        chinese_boundary = "incident-handling / win11 不存在可执行记录。manifest.json 和 records/RR-101.md 已核对。人工复核，本次未自动修改记录。"
+        self.assertTrue(all(score_answer("coverage-gap", chinese_boundary).values()))
+        self.assertFalse(score_answer("coverage-gap", "incident-handling win11 manifest.json records/RR-101.md 自动创建新规则")["human_only_next_step"])
 
     def test_score_run_rejects_unsuccessful_process(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:
             run_dir = Path(temporary)
-            (run_dir / "metadata.json").write_text('{"condition":"source-only","exit_code":1,"final_answer_present":true}', encoding="utf-8")
+            (run_dir / "metadata.json").write_text('{"task":"coverage-gap","condition":"source-only","exit_code":1,"final_answer_present":true}', encoding="utf-8")
             (run_dir / "final.md").write_text("incident-handling win11 no current manifest.json records/RR-101.md 人工不创建新规则", encoding="utf-8")
             self.assertFalse(score_run(run_dir)["passed"])
 
