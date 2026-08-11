@@ -1,0 +1,90 @@
+{
+  "schema_version": 1,
+  "fixture_id": "pilot-01",
+  "as_of": "2026-08-11",
+  "description": "Synthetic backup-recovery-migration fixture with deterministic records covering six failure scenarios.",
+  "records": [
+    {
+      "id": "RR-801",
+      "title": "Release runbook",
+      "path": "records/RR-801.md",
+      "content_sha256": "ac5b07dcfbb998c66bcfc1b41f83257ad31becf5189034a9c1e237c3c51683c4",
+      "logical_version": 2,
+      "scope": "global",
+      "status": "active",
+      "is_derived": false,
+      "source_relations": [],
+      "summary": "Release runbook requiring manual sign-off and rollback verification before delivery."
+    },
+    {
+      "id": "BK-802",
+      "title": "Backup schedule rule",
+      "path": "records/BK-802.md",
+      "content_sha256": "7c058920c13e39831e1e9846bfb246ac894517d623f0011dc79d1e44c539e142",
+      "logical_version": 1,
+      "scope": "project",
+      "status": "active",
+      "is_derived": false,
+      "source_relations": [],
+      "summary": "Rule requiring all active source records in each backup batch."
+    },
+    {
+      "id": "IG-803",
+      "title": "Integrity gate rule",
+      "path": "records/IG-803.md",
+      "content_sha256": "261956e15d1c1f69f4417f6dfc71efc56d32875a2818f1388f8ab7fa67d92bbd",
+      "logical_version": 1,
+      "scope": "project",
+      "status": "active",
+      "is_derived": false,
+      "source_relations": [],
+      "summary": "Rule requiring content-hash verification before trusting any backed-up file."
+    },
+    {
+      "id": "TD-804",
+      "title": "Target deployment rule",
+      "path": "records/TD-804.md",
+      "content_sha256": "b928e730709e88b51385108df373a8d056e0b5c1de9a289dea0123cbceb38ee5",
+      "logical_version": 2,
+      "scope": "project",
+      "status": "active",
+      "is_derived": false,
+      "source_relations": [],
+      "summary": "Rule requiring human decision when target holds a different active version."
+    },
+    {
+      "id": "DI-805",
+      "title": "Data retention rule",
+      "path": "records/DI-805.md",
+      "content_sha256": "543b5b3be45e22c5d965fa64d09ef783f96a07ce16a42808e55f9b747b376164",
+      "logical_version": 1,
+      "scope": "project",
+      "status": "active",
+      "is_derived": false,
+      "source_relations": [],
+      "summary": "Rule defining retention windows with a derived compact index for fast lookup."
+    },
+    {
+      "id": "RB-806",
+      "title": "Rollback procedure rule",
+      "path": "records/RB-806.md",
+      "content_sha256": "1e06ef508d39e3ce5a1b3fdab5a411c5dee0261c97e96675963f30db51af9573",
+      "logical_version": 1,
+      "scope": "global",
+      "status": "active",
+      "is_derived": false,
+      "source_relations": [],
+      "summary": "Rule requiring rollback and human notification when post-restore verification fails."
+    }
+  ],
+  "derived_artifacts": [
+    {
+      "id": "DI-805-index",
+      "path": "derived/retention-index.md",
+      "content_sha256": "7fde0a91be5e9c056dc73760f24e89f35d47c17ff89f3c163a83778e68e4b7dc",
+      "derived_from": "DI-805",
+      "is_derived": true,
+      "exclusion_reason": "derived index; rebuild from verified source after restore"
+    }
+  ]
+}

@@ -1,0 +1,23 @@
+{
+  "schema_version": 1,
+  "device_label": "target-device-synthetic",
+  "as_of": "2026-08-11",
+  "inventory": [
+    {
+      "id": "TD-804",
+      "path": "records/TD-804.md",
+      "current_version": 3,
+      "current_sha256": "0b8cb0909cc48bad42ea77019255a781a0111e658ddb6afbaeb34f404b744c15",
+      "status": "active",
+      "note": "target version 3; backup holds version 2"
+    },
+    {
+      "id": "RR-801",
+      "path": "records/RR-801.md",
+      "current_version": 2,
+      "current_sha256": "ac5b07dcfbb998c66bcfc1b41f83257ad31becf5189034a9c1e237c3c51683c4",
+      "status": "active",
+      "note": "matches backup version 2 and hash"
+    }
+  ]
+}

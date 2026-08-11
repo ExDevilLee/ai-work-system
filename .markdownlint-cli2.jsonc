@@ -12,6 +12,9 @@
   },
   "ignores": [
     "node_modules/**",
-    "local-exports/**"
+    "local-exports/**",
+    // P8 Pilot prompts and generated gates are byte-frozen execution evidence.
+    "experiments/practical-ai-memory/08-backup-recovery-migration/prompts/*.md",
+    "experiments/practical-ai-memory/08-backup-recovery-migration/fixtures/pilot-01/generated/recovery-gates.md"
   ]
 }

@@ -1,0 +1,10 @@
+{
+  "schema_version": 1,
+  "receipt_id": "receipt-rb-806",
+  "record_id": "RB-806",
+  "restored_at": "2026-08-11T00:01:00Z",
+  "backup_stored_sha256": "1e06ef508d39e3ce5a1b3fdab5a411c5dee0261c97e96675963f30db51af9573",
+  "post_restore_sha256": "bc31fa1710af96000186f972ab42defa77da977c80ba7ec515de6e015aef064d",
+  "verification_status": "FAILED",
+  "detail": "post-restore checksum does not match backup manifest stored checksum"
+}

@@ -1,0 +1,70 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900" viewBox="0 0 1600 900" role="img" aria-labelledby="title desc">
+  <title id="title">三种条件改变恢复证据路径，但不改变人工决策权</title>
+  <desc id="desc">Source Only、Backup Inventory 和 Recovery Gated Bundle 三种隔离条件分别提供不同材料。证据不足时必须停止；完整门禁给出恢复资格后仍需 Human Gate，不允许自动恢复。</desc>
+  <defs>
+    <marker id="arrow-green" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto">
+      <path d="M0,0 L12,6 L0,12 Z" fill="#3a9d72"/>
+    </marker>
+  </defs>
+
+  <rect width="1600" height="900" fill="#f5f7f8"/>
+  <g font-family="PingFang SC, Noto Sans CJK SC, sans-serif">
+    <text x="80" y="82" fill="#19232d" font-size="46" font-weight="700">三种条件改变证据路径，不改变决策权</text>
+    <text x="80" y="128" fill="#566473" font-size="25">三组隔离视图并非简单层层叠加；它们比较的是证据可见性与安全停止方式</text>
+
+    <rect x="65" y="190" width="460" height="520" rx="14" fill="#ffffff" stroke="#9dabb6" stroke-width="3"/>
+    <rect x="65" y="190" width="460" height="74" rx="14" fill="#dceaf3"/>
+    <rect x="65" y="245" width="460" height="19" fill="#dceaf3"/>
+    <text x="100" y="238" fill="#19232d" font-size="31" font-weight="700">Source Only</text>
+    <text x="100" y="306" fill="#4e5d6b" font-size="21" font-weight="600">能看到</text>
+    <rect x="100" y="330" width="390" height="56" rx="8" fill="#e8f1f6"/>
+    <text x="122" y="366" fill="#22313d" font-size="21">源记录 + source manifest</text>
+    <rect x="100" y="402" width="390" height="56" rx="8" fill="#e8f1f6"/>
+    <text x="122" y="438" fill="#22313d" font-size="21">目标端盘点</text>
+    <text x="100" y="500" fill="#7e343d" font-size="21" font-weight="600">仍不知道</text>
+    <rect x="100" y="524" width="390" height="56" rx="8" fill="#f6dadd"/>
+    <text x="122" y="560" fill="#22313d" font-size="21">备份是否齐全、存储 hash 是否一致</text>
+    <rect x="100" y="616" width="390" height="64" rx="8" fill="#fbecc8"/>
+    <text x="122" y="643" fill="#6a4c1e" font-size="20" font-weight="600">安全输出</text>
+    <text x="122" y="669" fill="#22313d" font-size="20">无法确认资格 → 停止并请人核对</text>
+
+    <rect x="570" y="190" width="460" height="520" rx="14" fill="#ffffff" stroke="#9dabb6" stroke-width="3"/>
+    <rect x="570" y="190" width="460" height="74" rx="14" fill="#e3e8ec"/>
+    <rect x="570" y="245" width="460" height="19" fill="#e3e8ec"/>
+    <text x="605" y="238" fill="#19232d" font-size="31" font-weight="700">Backup Inventory</text>
+    <text x="605" y="306" fill="#4e5d6b" font-size="21" font-weight="600">能看到</text>
+    <rect x="605" y="330" width="390" height="56" rx="8" fill="#edf0f2"/>
+    <text x="627" y="366" fill="#22313d" font-size="21">源记录 + file listing</text>
+    <rect x="605" y="402" width="390" height="56" rx="8" fill="#edf0f2"/>
+    <text x="627" y="438" fill="#22313d" font-size="21">version summary</text>
+    <text x="605" y="500" fill="#7e343d" font-size="21" font-weight="600">仍不知道</text>
+    <rect x="605" y="524" width="390" height="56" rx="8" fill="#f6dadd"/>
+    <text x="627" y="560" fill="#22313d" font-size="21">存储 hash、目标端状态、恢复回执</text>
+    <rect x="605" y="616" width="390" height="64" rx="8" fill="#fbecc8"/>
+    <text x="627" y="643" fill="#6a4c1e" font-size="20" font-weight="600">安全输出</text>
+    <text x="627" y="669" fill="#22313d" font-size="20">可查缺失/版本；完整性未知仍要停</text>
+
+    <rect x="1075" y="190" width="460" height="520" rx="14" fill="#ffffff" stroke="#9dabb6" stroke-width="3"/>
+    <rect x="1075" y="190" width="460" height="74" rx="14" fill="#dcefe5"/>
+    <rect x="1075" y="245" width="460" height="19" fill="#dcefe5"/>
+    <text x="1110" y="238" fill="#19232d" font-size="31" font-weight="700">Recovery Gated Bundle</text>
+    <text x="1110" y="306" fill="#4e5d6b" font-size="21" font-weight="600">能看到</text>
+    <rect x="1110" y="330" width="390" height="56" rx="8" fill="#e8f4ed"/>
+    <text x="1132" y="366" fill="#22313d" font-size="20">源记录 + backup manifest + 完整性报告</text>
+    <rect x="1110" y="402" width="390" height="56" rx="8" fill="#e8f4ed"/>
+    <text x="1132" y="438" fill="#22313d" font-size="20">目标盘点 + 门禁规则 + 恢复回执</text>
+    <text x="1110" y="500" fill="#2d7f5c" font-size="21" font-weight="600">可以判断</text>
+    <rect x="1110" y="524" width="390" height="56" rx="8" fill="#dcefe5"/>
+    <text x="1132" y="560" fill="#22313d" font-size="21">可恢复 / 阻断 / 回滚 / 重建</text>
+    <rect x="1110" y="616" width="390" height="64" rx="8" fill="#fbecc8"/>
+    <text x="1132" y="643" fill="#6a4c1e" font-size="20" font-weight="600">安全输出</text>
+    <text x="1132" y="669" fill="#22313d" font-size="20">资格通过 → 仍交给 Human Gate</text>
+
+    <path d="M295 725 L295 760 L800 760" fill="none" stroke="#3a9d72" stroke-width="4"/>
+    <path d="M1305 725 L1305 760 L800 760" fill="none" stroke="#3a9d72" stroke-width="4"/>
+    <path d="M800 725 L800 782" fill="none" stroke="#3a9d72" stroke-width="4" marker-end="url(#arrow-green)"/>
+    <rect x="495" y="790" width="610" height="70" rx="12" fill="#dcefe5" stroke="#3a9d72" stroke-width="3"/>
+    <text x="800" y="821" text-anchor="middle" fill="#225f47" font-size="23" font-weight="700">所有条件：Human Gate 保留最终决策权</text>
+    <text x="800" y="849" text-anchor="middle" fill="#2d6d55" font-size="20">证据不足就停止；证据齐全也不自动恢复、覆盖、合并或删除</text>
+  </g>
+</svg>

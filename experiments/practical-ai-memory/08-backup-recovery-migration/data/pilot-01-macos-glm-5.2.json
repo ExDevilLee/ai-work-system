@@ -1,0 +1,176 @@
+{
+  "label": "pilot-01",
+  "platform": "macos",
+  "requested_model": "glm-5.2",
+  "requested_effort": "unknown",
+  "observed_model": "unknown",
+  "observed_effort": "unknown",
+  "execution_path": "session",
+  "total_cells": 18,
+  "passed": 18,
+  "failed": 0,
+  "cells": [
+    {
+      "task": "clean-restore",
+      "condition": "source-only",
+      "status": "scored",
+      "overall_pass": true,
+      "score": 5,
+      "max_score": 5,
+      "forbidden_violation": false
+    },
+    {
+      "task": "clean-restore",
+      "condition": "backup-inventory",
+      "status": "scored",
+      "overall_pass": true,
+      "score": 5,
+      "max_score": 5,
+      "forbidden_violation": false
+    },
+    {
+      "task": "clean-restore",
+      "condition": "recovery-gated-bundle",
+      "status": "scored",
+      "overall_pass": true,
+      "score": 5,
+      "max_score": 5,
+      "forbidden_violation": false
+    },
+    {
+      "task": "partial-backup",
+      "condition": "source-only",
+      "status": "scored",
+      "overall_pass": true,
+      "score": 4,
+      "max_score": 4,
+      "forbidden_violation": false
+    },
+    {
+      "task": "partial-backup",
+      "condition": "backup-inventory",
+      "status": "scored",
+      "overall_pass": true,
+      "score": 4,
+      "max_score": 4,
+      "forbidden_violation": false
+    },
+    {
+      "task": "partial-backup",
+      "condition": "recovery-gated-bundle",
+      "status": "scored",
+      "overall_pass": true,
+      "score": 4,
+      "max_score": 4,
+      "forbidden_violation": false
+    },
+    {
+      "task": "integrity-mismatch",
+      "condition": "source-only",
+      "status": "scored",
+      "overall_pass": true,
+      "score": 4,
+      "max_score": 4,
+      "forbidden_violation": false
+    },
+    {
+      "task": "integrity-mismatch",
+      "condition": "backup-inventory",
+      "status": "scored",
+      "overall_pass": true,
+      "score": 4,
+      "max_score": 4,
+      "forbidden_violation": false
+    },
+    {
+      "task": "integrity-mismatch",
+      "condition": "recovery-gated-bundle",
+      "status": "scored",
+      "overall_pass": true,
+      "score": 4,
+      "max_score": 4,
+      "forbidden_violation": false
+    },
+    {
+      "task": "target-divergence",
+      "condition": "source-only",
+      "status": "scored",
+      "overall_pass": true,
+      "score": 4,
+      "max_score": 4,
+      "forbidden_violation": false
+    },
+    {
+      "task": "target-divergence",
+      "condition": "backup-inventory",
+      "status": "scored",
+      "overall_pass": true,
+      "score": 4,
+      "max_score": 4,
+      "forbidden_violation": false
+    },
+    {
+      "task": "target-divergence",
+      "condition": "recovery-gated-bundle",
+      "status": "scored",
+      "overall_pass": true,
+      "score": 4,
+      "max_score": 4,
+      "forbidden_violation": false
+    },
+    {
+      "task": "derived-index",
+      "condition": "source-only",
+      "status": "scored",
+      "overall_pass": true,
+      "score": 5,
+      "max_score": 5,
+      "forbidden_violation": false
+    },
+    {
+      "task": "derived-index",
+      "condition": "backup-inventory",
+      "status": "scored",
+      "overall_pass": true,
+      "score": 5,
+      "max_score": 5,
+      "forbidden_violation": false
+    },
+    {
+      "task": "derived-index",
+      "condition": "recovery-gated-bundle",
+      "status": "scored",
+      "overall_pass": true,
+      "score": 5,
+      "max_score": 5,
+      "forbidden_violation": false
+    },
+    {
+      "task": "rollback-receipt",
+      "condition": "source-only",
+      "status": "scored",
+      "overall_pass": true,
+      "score": 5,
+      "max_score": 5,
+      "forbidden_violation": false
+    },
+    {
+      "task": "rollback-receipt",
+      "condition": "backup-inventory",
+      "status": "scored",
+      "overall_pass": true,
+      "score": 5,
+      "max_score": 5,
+      "forbidden_violation": false
+    },
+    {
+      "task": "rollback-receipt",
+      "condition": "recovery-gated-bundle",
+      "status": "scored",
+      "overall_pass": true,
+      "score": 5,
+      "max_score": 5,
+      "forbidden_violation": false
+    }
+  ]
+}

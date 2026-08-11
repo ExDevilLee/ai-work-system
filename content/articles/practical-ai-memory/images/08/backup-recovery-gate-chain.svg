@@ -1,0 +1,79 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900" viewBox="0 0 1600 900" role="img" aria-labelledby="title desc">
+  <title id="title">恢复不是复制，而是一条资格判断链</title>
+  <desc id="desc">权威源生成确定性备份清单，恢复前依次检查完整性、哈希和目标端分歧；任何失败都停止并交给人工处置。全部通过后仍需人工批准，恢复后再校验并重建派生索引。</desc>
+  <defs>
+    <marker id="arrow" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto">
+      <path d="M0,0 L12,6 L0,12 Z" fill="#71808d"/>
+    </marker>
+    <marker id="arrow-red" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto">
+      <path d="M0,0 L12,6 L0,12 Z" fill="#ad4c55"/>
+    </marker>
+    <marker id="arrow-green" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto">
+      <path d="M0,0 L12,6 L0,12 Z" fill="#3a9d72"/>
+    </marker>
+  </defs>
+
+  <rect width="1600" height="900" fill="#f5f7f8"/>
+  <g font-family="PingFang SC, Noto Sans CJK SC, sans-serif">
+    <text x="80" y="82" fill="#19232d" font-size="46" font-weight="700">恢复不是复制，而是一条资格判断链</text>
+    <text x="80" y="128" fill="#566473" font-size="25">副本先证明完整性与版本边界，通过 Human Gate 后才允许写入目标端</text>
+
+    <rect x="65" y="205" width="300" height="400" rx="14" fill="#ffffff" stroke="#9dabb6" stroke-width="3"/>
+    <text x="100" y="263" fill="#19232d" font-size="30" font-weight="700">1. 权威源</text>
+    <text x="100" y="304" fill="#4e5d6b" font-size="21">声明哪些记录可以被信任</text>
+    <rect x="100" y="350" width="230" height="58" rx="8" fill="#dceaf3"/>
+    <text x="121" y="387" fill="#22313d" font-size="21">source-manifest.json</text>
+    <rect x="100" y="428" width="230" height="58" rx="8" fill="#e3e8ec"/>
+    <text x="121" y="465" fill="#22313d" font-size="21">ID · 路径 · hash · version</text>
+    <rect x="100" y="506" width="230" height="58" rx="8" fill="#e3e8ec"/>
+    <text x="121" y="543" fill="#22313d" font-size="21">范围 · 状态 · 来源关系</text>
+    <text x="100" y="587" fill="#2d7f5c" font-size="19" font-weight="600">唯一规范化事实源</text>
+
+    <path d="M377 405 L408 405" fill="none" stroke="#71808d" stroke-width="4" marker-end="url(#arrow)"/>
+
+    <rect x="425" y="205" width="300" height="400" rx="14" fill="#ffffff" stroke="#9dabb6" stroke-width="3"/>
+    <text x="460" y="263" fill="#19232d" font-size="30" font-weight="700">2. 备份清单</text>
+    <text x="460" y="304" fill="#4e5d6b" font-size="21">由源文件与 manifest 生成</text>
+    <rect x="460" y="350" width="230" height="58" rx="8" fill="#dceaf3"/>
+    <text x="481" y="387" fill="#22313d" font-size="21">源 manifest 的 hash</text>
+    <rect x="460" y="428" width="230" height="58" rx="8" fill="#dceaf3"/>
+    <text x="481" y="465" fill="#22313d" font-size="21">文件清单与存储 hash</text>
+    <rect x="460" y="506" width="230" height="58" rx="8" fill="#fbecc8"/>
+    <text x="481" y="543" fill="#22313d" font-size="21">派生索引及排除理由</text>
+    <text x="460" y="587" fill="#6a4c1e" font-size="19" font-weight="600">确定性生成，不手工补写</text>
+
+    <path d="M737 405 L768 405" fill="none" stroke="#71808d" stroke-width="4" marker-end="url(#arrow)"/>
+
+    <rect x="785" y="205" width="350" height="400" rx="14" fill="#ffffff" stroke="#9dabb6" stroke-width="3"/>
+    <text x="820" y="263" fill="#19232d" font-size="30" font-weight="700">3. 恢复前门禁</text>
+    <text x="820" y="304" fill="#4e5d6b" font-size="21">先判断资格，不执行写入</text>
+    <rect x="820" y="350" width="280" height="58" rx="8" fill="#dcefe5"/>
+    <text x="842" y="387" fill="#22313d" font-size="21">完整性：active 记录齐全</text>
+    <rect x="820" y="428" width="280" height="58" rx="8" fill="#dcefe5"/>
+    <text x="842" y="465" fill="#22313d" font-size="21">内容：存储 hash 与源一致</text>
+    <rect x="820" y="506" width="280" height="58" rx="8" fill="#fbecc8"/>
+    <text x="842" y="543" fill="#22313d" font-size="21">目标：无未裁决版本分歧</text>
+    <text x="820" y="587" fill="#ad4c55" font-size="19" font-weight="600">任一失败或未知：立即停止</text>
+
+    <path d="M1147 405 L1178 405" fill="none" stroke="#71808d" stroke-width="4" marker-end="url(#arrow)"/>
+
+    <rect x="1195" y="205" width="340" height="400" rx="14" fill="#ffffff" stroke="#9dabb6" stroke-width="3"/>
+    <text x="1230" y="263" fill="#19232d" font-size="30" font-weight="700">4. Human Gate</text>
+    <text x="1230" y="304" fill="#4e5d6b" font-size="21">人确认是否进入恢复阶段</text>
+    <rect x="1230" y="350" width="270" height="58" rx="8" fill="#dcefe5"/>
+    <text x="1252" y="387" fill="#22313d" font-size="21">显式批准后写入目标端</text>
+    <rect x="1230" y="428" width="270" height="58" rx="8" fill="#dcefe5"/>
+    <text x="1252" y="465" fill="#22313d" font-size="21">恢复后 checksum 再验证</text>
+    <rect x="1230" y="506" width="270" height="58" rx="8" fill="#dcefe5"/>
+    <text x="1252" y="543" fill="#22313d" font-size="21">由已验证源重建派生索引</text>
+    <text x="1230" y="587" fill="#2d7f5c" font-size="19" font-weight="600">通过门禁也不等于自动恢复</text>
+
+    <path d="M960 618 L960 663" fill="none" stroke="#ad4c55" stroke-width="4" stroke-dasharray="10 8" marker-end="url(#arrow-red)"/>
+    <rect x="700" y="680" width="520" height="90" rx="12" fill="#f6dadd" stroke="#ad4c55" stroke-width="3"/>
+    <text x="740" y="718" fill="#7e343d" font-size="24" font-weight="700">停止并生成处置清单</text>
+    <text x="740" y="750" fill="#6b3d43" font-size="20">缺失 · hash 不一致 · 目标端分歧 · 恢复后验证失败</text>
+
+    <path d="M1365 620 L1365 800 C1365 824, 1345 835, 1320 835 L280 835 C242 835, 215 810, 215 772 L215 620" fill="none" stroke="#3a9d72" stroke-width="5" stroke-dasharray="12 10" marker-end="url(#arrow-green)"/>
+    <text x="430" y="882" fill="#2d7f5c" font-size="23" font-weight="600">人工决定回写事实源，再重新生成 manifest；派生索引不能反向成为事实源</text>
+  </g>
+</svg>

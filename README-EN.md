@@ -76,7 +76,7 @@ From one-off AI chats to a long-term collaboration system with memory, workflows
 
 [MoWen series collection](https://note.mowen.cn/detail/CGAIy3ZJS0VwC6wlH3je-)
 
-### Practical AI Long-Term Memory (In Progress, 7 articles)
+### Practical AI Long-Term Memory (In Progress, 8 articles)
 
 Build a layered, searchable, governable, and recoverable AI long-term memory system through locally validated POCs.
 
@@ -87,6 +87,7 @@ Build a layered, searchable, governable, and recoverable AI long-term memory sys
 - [Why Does Retrieving Information with RAG Not Yet Mean the System Has Long-Term Memory?](https://github.com/ExDevilLee/ai-work-system/wiki/20-RAG-%E8%83%BD%E6%8A%8A%E8%B5%84%E6%96%99%E6%89%BE%E5%9B%9E%E6%9D%A5%EF%BC%8C%E4%B8%BA%E4%BB%80%E4%B9%88%E8%BF%98%E4%B8%8D%E7%AD%89%E4%BA%8E%E7%B3%BB%E7%BB%9F%E5%BD%A2%E6%88%90%E4%BA%86%E9%95%BF%E6%9C%9F%E8%AE%B0%E5%BF%86%EF%BC%9F)
 - [Why Does Long-Term Memory Need a Current Memory Map Instead of Only Files and Indexes?](https://github.com/ExDevilLee/ai-work-system/wiki/21-%E4%B8%BA%E4%BB%80%E4%B9%88%E9%95%BF%E6%9C%9F%E8%AE%B0%E5%BF%86%E9%9C%80%E8%A6%81%E4%B8%80%E5%BC%A0%E2%80%9C%E5%BD%93%E5%89%8D%E8%AE%B0%E5%BF%86%E5%9C%B0%E5%9B%BE%E2%80%9D%EF%BC%8C%E8%80%8C%E4%B8%8D%E5%BA%94%E5%8F%AA%E8%97%8F%E5%9C%A8%E6%96%87%E4%BB%B6%E5%92%8C%E7%B4%A2%E5%BC%95%E9%87%8C%EF%BC%9F)
 - [As Long-Term Memory Grows, How Do We Find Coverage Gaps and Governance Tasks?](https://github.com/ExDevilLee/ai-work-system/wiki/22-%E9%95%BF%E6%9C%9F%E8%AE%B0%E5%BF%86%E8%B6%8A%E6%9D%A5%E8%B6%8A%E5%A4%9A%EF%BC%8C%E6%80%8E%E6%A0%B7%E5%8F%91%E7%8E%B0%E8%A6%86%E7%9B%96%E7%BC%BA%E5%8F%A3%E5%92%8C%E5%BE%85%E6%B2%BB%E7%90%86%E4%BA%8B%E9%A1%B9%EF%BC%9F)
+- [Why Copying Files Is Not Enough to Restore AI Long-Term Memory](https://github.com/ExDevilLee/ai-work-system/wiki/23-AI-%E8%AE%B0%E5%BF%86%E6%81%A2%E5%A4%8D%EF%BC%9A%E5%A4%8D%E5%88%B6%E6%96%87%E4%BB%B6%E4%B8%BA%E4%BB%80%E4%B9%88%E4%B8%8D%E5%A4%9F%EF%BC%9F)
 
 [MoWen series collection](https://note.mowen.cn/detail/IH2-o1ke6IjnS1LnhX2fJ)
 
