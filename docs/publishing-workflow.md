@@ -266,3 +266,7 @@ content/articles/
 - 知乎或其他平台：生成平台适配版本。
 
 这些展示层都应该从主仓库生成，不直接成为源稿。
+
+独立静态站作为主展示层的候选边界、暂缓决定与恢复触发词，记录在
+[`docs/records/2026-08-11-static-site-display-layer-deferred.md`](records/2026-08-11-static-site-display-layer-deferred.md)。
+在 Lee 明确重新开启前，不启动 POC、框架选型或部署工作。
