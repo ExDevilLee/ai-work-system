@@ -207,7 +207,7 @@
           "uuid": "WhMJXaEAYFpbVLrlDaqHQ-TMP"
         }
       },
-      "content_sha256": "5ffe434d6ab931e58366507695e2f0d8f7276526df91edac670da9f6bae6a284",
+      "content_sha256": "c90ddc6f50bf228e55f1b475d0f87666c034779cbf3ccd1f594ab783877b4fb7",
       "note_id": "6lD9GoSg8TA8e1CjQ4kC9",
       "published": true,
       "url": "https://note.mowen.cn/detail/6lD9GoSg8TA8e1CjQ4kC9"
@@ -220,7 +220,7 @@
           "uuid": "vdNnS6zh8w3GRoZ3v8mYe-TMP"
         }
       },
-      "content_sha256": "576267c60bc3c34a7bd350574ecd6a19ecb6a58242ec00848cf9d69715e849ee",
+      "content_sha256": "e787f43e6d7716eab560e2f63f2635173309abc325ae1b3baf3a24ce00e33847",
       "note_id": "8tUmwpitUN-yU0d6bulKF",
       "published": true,
       "url": "https://note.mowen.cn/detail/8tUmwpitUN-yU0d6bulKF"
@@ -233,7 +233,7 @@
           "uuid": "vOnpBwbDLDZURJvyKst4z-TMP"
         }
       },
-      "content_sha256": "617ceca561ff2e63234f07ca321bde4deff827567e8b55015a29bf9e4db57f25",
+      "content_sha256": "601cad6292fb7df3c682f704058ac891760b56cc028808065e043a94bb8ebb4e",
       "note_id": "vn0YyzvJ-eylIy_S8KTRB",
       "published": true,
       "url": "https://note.mowen.cn/detail/vn0YyzvJ-eylIy_S8KTRB"
@@ -246,7 +246,7 @@
           "uuid": "h8LkYh7hHpp4qTlMbKdzq-TMP"
         }
       },
-      "content_sha256": "dfd935ab1d28b8776ddc5ea7cc3ec92ed6b4ab84b411b7640583235cf879657a",
+      "content_sha256": "70fc781775f7d2485341aa1c8e13bdb3c4a6b91e26821f0dff758315b4162218",
       "note_id": "xTc6rcjMwtLKnuhL6CmRL",
       "published": true,
       "url": "https://note.mowen.cn/detail/xTc6rcjMwtLKnuhL6CmRL"
@@ -259,7 +259,7 @@
           "uuid": "7-gU0IdgKL8IvJSXrQeOJ-TMP"
         }
       },
-      "content_sha256": "f01242586aebd15c0cf9edba89561241bec2fd56176f715233bf452ae2581955",
+      "content_sha256": "e87cfa01df4f1497dc3f00414db61a83cc679d82d1f01aad91f43aa111375f57",
       "note_id": "Pf0au855jIC-dzcssDCcI",
       "published": true,
       "url": "https://note.mowen.cn/detail/Pf0au855jIC-dzcssDCcI"
@@ -272,14 +272,9 @@
           "uuid": "mFFqPZ5waIqiFKahlRhtT-TMP"
         }
       },
-      "content_sha256": "e1fb40f8083d3cc967cfd36fde4465e606b609ca6558b6c1cf946b48b9227078",
+      "content_sha256": "5b3939d5e37d027879d7897f6444b66dbab4670b99ba4040bd562f6b70be7813",
       "note_id": "ddtCa5C54BHu_xbPvehrQ",
-      "publication_blocked": {
-        "content_sha256": "e1fb40f8083d3cc967cfd36fde4465e606b609ca6558b6c1cf946b48b9227078",
-        "message": "MoWen MCP error: error: code = 403 reason = RISKY message = svc [NoteSvc.SetPrivacy]: note risky. metadata = map[] cause = <nil>",
-        "reason": "RISKY"
-      },
-      "published": false,
+      "published": true,
       "url": "https://note.mowen.cn/detail/ddtCa5C54BHu_xbPvehrQ"
     },
     "content/articles/practical-ai-memory/2026-08-10-what-belongs-in-coverage-governance-projection.md": {
@@ -295,7 +290,7 @@
           "uuid": "3YnkHMl9w4wwiVuy9qEnQ-TMP"
         }
       },
-      "content_sha256": "581cf4f547f066404e1f982cd0b82069e676b7531ceed98f7b6dc4933ef1a072",
+      "content_sha256": "8678db4ac3f40b79f7efde0e19a8b54feac1fef57e1b324e4284c9b3caee77ee",
       "note_id": "cWtGSP7lt3HZD8-bhbjow",
       "published": true,
       "url": "https://note.mowen.cn/detail/cWtGSP7lt3HZD8-bhbjow"
@@ -312,7 +307,7 @@
       "url": "https://note.mowen.cn/detail/CGAIy3ZJS0VwC6wlH3je-"
     },
     "practical-ai-memory": {
-      "content_sha256": "59939012d862a3606fd58ba964dc74953fcf3361ad76daa0a8c3386f6b1952b0",
+      "content_sha256": "bfa7de91e346191e382964f0d5e2fcb773dcb3d252e5e658a7cd1693f3ee6a39",
       "cover_sha256": "a094a84d9f46451ef40e5a1a5ba6df688cfc5bdd538003aeeaef4ae7803ebfb8",
       "cover_source_url": "https://gitee.com/ExDevilLee/ai-work-system/raw/main/content/articles/practical-ai-memory/images/01/three-layer-memory-system.png",
       "cover_uuid": "n_fKIeIyNXYrZr2Si3y_c-TMP",
