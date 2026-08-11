@@ -17,7 +17,7 @@
 基线说明：
 
 - macOS gpt 基线：`data/formal-macos-gpt-5.6-sol-medium.{json,csv}`，45 次（5 任务 × 3 条件 × 3 次），`codex-cli 0.145.0`，推理强度 `medium`。
-- Win11 gpt 基线：`data/formal-win11-gpt-5.6-sol-medium.{json,csv}`，45 次。本报告以 macOS gpt 作为同平台控制变量对照。
+- Win11 gpt 基线：`data/formal-win11-gpt-5.6-sol-medium.{json,csv}`，45 次。本报告以 macOS gpt 作为同平台配置敏感性参照。
 
 ## 协议有效性
 
@@ -79,18 +79,18 @@ deepseek 单次耗时更短（21–27 秒 vs 40–60 秒）、input tokens 少�
 
 ## 可以支持的结论
 
-1. 条件梯度跨模型复现：memory-governed（100%）> rag-only（86.8% / 89.3%）> rag-with-recency（77.9% / 82.1%），两个模型方向完全一致。显式批准状态与范围限定是 05 场景下最有效的治理形式；裸加"日期优先"反而成为负资产——这与 04 中 latest-wins 优于 append-only 的方向不同，说明日期优先的价值取决于"较新的记录是否更权威"这一前提是否成立。
-2. 全部丢分集中在同样的 3 个格子，且失败模式在模型间稳定：最新记录优先把较新但未批准的方案（NAV-202）静默当作当前决定、仅检索包证据不足时表述保守。这确认"较新即权威"是机制设计问题而非模型缺陷。
+1. 条件梯度在第二组配置下复现：memory-governed（100%）> rag-only（86.8% / 89.3%）> rag-with-recency（77.9% / 82.1%），当前两组配置方向一致。显式批准状态与范围限定是 05 场景下最有效的治理形式；裸加"日期优先"反而成为负资产——这与 04 中 latest-wins 优于 append-only 的方向不同，说明日期优先的价值取决于"较新的记录是否更权威"这一前提是否成立。
+2. 全部丢分集中在同样的 3 个格子：最新记录优先把较新但未批准的方案（NAV-202）静默当作当前决定、仅检索包证据不足时表述保守。这支持优先检查"较新即权威"这一机制缺口，但不能据此排除配置变量的影响。
 3. deepseek 得分率与 gpt 同档（88.1% vs 90.5%，百分比口径；样本数不同）。approved-decision:rag-with-recency 的日期陷阱两模型都踩（3/18 vs 6/18）；scope-bound-rule:rag-with-recency deepseek 满分而 gpt 丢 3 分，说明日期优先在无冲突时无害。
-4. memory-governed 满分跨模型复现（66/66 与 84/84）：approved-decision 任务在 memory-governed 下 12/12，而 rag-only 13/18、rag-with-recency 3/18——批准状态标注把同一任务的得分率从最低 16.7% 拉回 100%，是 05 中最强的单一治理杠杆。
+4. memory-governed 满分在第二组配置下复现（66/66 与 84/84）：approved-decision 任务在 memory-governed 下 12/12，而 rag-only 13/18、rag-with-recency 3/18——在当前冻结任务中，批准状态标注把同一任务的得分率从最低 16.7% 拉回 100%。
 
 ## 不能支持的结论
 
 1. 不能声称 deepseek 比 gpt 更"安全"或更"谨慎"：每格仅 2–3 次样本，approved-decision:rag-only 出现 3 分与 5 分两轮波动，同格差异存在随机性。
 2. 不能把耗时和 token 差异归因于模型本身：两个模型使用不同 Codex CLI 版本（0.146.1 vs 0.145.0），平台、硬件、缓存状态不完全相同，只能作为量级参考。
 3. 不能把 36 次样本推广为一般结论：排程与 gpt 不同（36 vs 45），单次运行的翻转即可改变一个格子的得分率。
-4. 模型对照只在 macOS 上进行，Win11 仅有 gpt 一组配置，不能据此声称结论在 Win11 上跨模型成立。
+4. 配置敏感性复核只在 macOS 上进行，Win11 仅有 gpt 一组配置，不能据此声称结果已在 Win11 的另一组配置下复现。
 
 ## 当前判断
 
-截至 2026-08-06，05-rag-vs-memory 的 macOS deepseek-v4-flash(max) 对照已完成：36/36 协议有效，178/202（88.1%）。memory-governed 满分复现；rag-with-recency 的 approved-decision 日期陷阱（较新但未批准的 NAV-202 被静默采纳）是两模型共有的最大失分源；日期优先在无冲突时无害。文章结论可以表述为：批准状态与范围限定的治理收益跨模型成立，"较新即权威"的默认是机制缺口而非某一个模型的特例。
+截至 2026-08-06，05-rag-vs-memory 的 macOS deepseek-v4-flash(max) 敏感性复核已完成：36/36 协议有效，178/202（88.1%）。memory-governed 满分在第二组配置下复现；rag-with-recency 的 approved-decision 日期陷阱（较新但未批准的 NAV-202 被静默采纳）是当前两组配置共有的最大失分源；日期优先在无冲突时无害。文章可以说明批准状态与范围限定的治理结果在另一组配置下复现，并优先检查"较新即权威"的机制缺口；不能写成单变量模型因果。

@@ -5,7 +5,7 @@ date: 2026-07-29
 status: ready
 series: practical-ai-memory
 lang: zh
-summary: 通过 macOS 上两个模型配置共 90 次正式 Agent 运行，验证当前记忆地图能否在不复制原始资料的前提下，显式表达状态、范围、关系和来源；实验没有证明地图让答案更准确或更快，但说明了它真正应该解决的治理问题；从本篇起验证策略改为 macOS 双模型对比（强力配置加快速配置）。
+summary: 通过 macOS 上两个模型配置共 90 次正式 Agent 运行，验证当前记忆地图能否在不复制原始资料的前提下，显式表达状态、范围、关系和来源；实验没有证明地图让答案更准确或更快，但说明了它真正应该解决的治理问题；从本篇起验证策略改为 macOS 双模型配置敏感性复核（强力配置加快速配置）。
 tags:
   - AI Memory
   - Memory Governance
@@ -180,12 +180,12 @@ Agent 先通过投影识别候选状态，再回到来源文件核对事实。�
 
 ## 6. 90 次正式运行：两个模型、三种条件全部答对
 
-为了让结论不只属于一个模型配置，本篇在 macOS 上用两个模型配置各跑了一次完整矩阵：
+为了观察结论对模型配置是否敏感，本篇在 macOS 上用两个模型配置各跑了一次完整矩阵：
 
 - 强力配置：`gpt-5.6-sol`，推理强度 `medium`，Codex CLI `0.145.0`。
 - 快速配置：`deepseek-v4-flash`，推理强度 `max`，Codex CLI `0.146.1`。
 
-两个配置使用同一套冻结夹具、提示和评分表，只改变模型与推理强度。这也是本系列验证策略的调整：从这一篇起，不再在 Win11 上重复完整矩阵，而是在 macOS 上用两个定位不同的模型配置互为对照——一个更强力、一个更快速，检验治理结论是否跨模型成立[5]。
+两个配置复用同一套冻结夹具、提示和评分表，但模型、推理强度和 Codex CLI 版本均不同。因此本轮属于模型配置敏感性复核，只观察正确性方向能否在另一组配置下复现，不能把过程差异归因于模型或推理强度。这也是本系列验证策略的调整：从这一篇起，不再在 Win11 上重复完整矩阵，而是在 macOS 上用一个强力配置和一个快速配置分别运行，检查治理结论在两组配置下是否保持一致[5]。
 
 结果都没有出现我原本可能期待的“地图组明显更准确”：
 
@@ -334,7 +334,7 @@ macOS 上两个模型配置共 90 次正式运行支持以下阶段性判断：
 
 MemGPT 等研究探索了分层存储、检索与上下文调度，以支持超出固定上下文窗口的持续任务[4]。它提供了有价值的背景，但不能替本 POC 证明当前地图在大规模系统中的通用效果。
 
-本篇正式结果来自 macOS 上两个模型配置。从这一篇起，系列不再在 Win11 上重复完整矩阵，改为在 macOS 上用两个定位不同的模型配置互为对照[5]；两个配置都满分，只说明治理语义在小规模、来源清晰的合成任务上跨模型稳定，不能推广成一般结论。
+本篇正式结果来自 macOS 上两个模型配置。从这一篇起，系列不再在 Win11 上重复完整矩阵，改为在 macOS 上用两个定位不同的模型配置进行敏感性复核[5]；两个配置都满分，只说明治理语义在小规模、来源清晰的合成任务上呈现相同方向，不能分离模型、推理强度和 CLI 版本的影响，也不能推广成一般结论。
 
 ## 12. 实验与复现
 
@@ -382,4 +382,4 @@ MemGPT 等研究探索了分层存储、检索与上下文调度，以支持超�
 
 [4] Packer, C., Fang, V., Patil, S. G., Lin, K., Wooders, S., & Gonzalez, J. E. (2023). *MemGPT: Towards LLMs as Operating Systems*. arXiv. <https://arxiv.org/abs/2310.08560>
 
-[5] ExDevilLee. (2026). *第二系列 POC 验证策略：macOS 双模型对比*. 项目一手验证策略。<https://github.com/ExDevilLee/ai-work-system/tree/main/experiments/practical-ai-memory/CROSS-PLATFORM-VALIDATION-STRATEGY.md>
+[5] ExDevilLee. (2026). *第二系列 POC 验证策略：macOS 双配置敏感性复核*. 项目一手验证策略。<https://github.com/ExDevilLee/ai-work-system/tree/main/experiments/practical-ai-memory/CROSS-PLATFORM-VALIDATION-STRATEGY.md>

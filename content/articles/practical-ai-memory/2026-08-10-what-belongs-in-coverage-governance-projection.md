@@ -110,7 +110,7 @@ NIST AI RMF 的 `GOVERN 1.5` 要求规划持续监控和周期复核，并明确
 
 ## 5. 90 次正式运行，三种条件都答对了
 
-本篇在 macOS 上使用两组执行配置，各完成 `5 个任务 × 3 个条件 × 3 次重复 = 45 次`正式运行[1]、[2]。
+本篇在 macOS 上使用两组执行配置，各完成 `5 个任务 × 3 个条件 × 3 次重复 = 45 次` 正式运行[1]、[2]。
 
 | 条件 | deepseek-v4-flash / max | glm-5.2 / max |
 | --- | ---: | ---: |
@@ -273,7 +273,7 @@ Martin Fowler 对 Event Sourcing 的说明区分了事件日志和应用状态�
 
 ## 参考文献
 
-[1] ExDevilLee. (2026). *第二系列 POC 验证策略：macOS 双模型对比*. 项目一手验证策略。<https://github.com/ExDevilLee/ai-work-system/blob/main/experiments/practical-ai-memory/CROSS-PLATFORM-VALIDATION-STRATEGY.md>
+[1] ExDevilLee. (2026). *第二系列 POC 验证策略：macOS 双配置敏感性复核*. 项目一手验证策略。<https://github.com/ExDevilLee/ai-work-system/blob/main/experiments/practical-ai-memory/CROSS-PLATFORM-VALIDATION-STRATEGY.md>
 
 [2] ExDevilLee. (2026). *覆盖治理投影 POC：冻结协议与脱敏正式聚合数据*. 项目一手实验记录。<https://github.com/ExDevilLee/ai-work-system/tree/main/experiments/practical-ai-memory/07-memory-coverage-governance>
 
