@@ -281,6 +281,29 @@
       },
       "published": false,
       "url": "https://note.mowen.cn/detail/ddtCa5C54BHu_xbPvehrQ"
+    },
+    "content/articles/practical-ai-memory/2026-08-10-what-belongs-in-coverage-governance-projection.md": {
+      "assets": {
+        "images/07/coverage-governance-editorial.png": {
+          "sha256": "5c0c309ea56d5258458c2a566fd1d52966dfa32007950be7247e99c6a4eea83b",
+          "source_url": "https://gitee.com/ExDevilLee/ai-work-system/raw/main/content/articles/practical-ai-memory/images/07/coverage-governance-editorial.png",
+          "uuid": "E4zNOEk7UeVSVHBYHkrIk-TMP"
+        },
+        "images/07/coverage-governance-loop.png": {
+          "sha256": "b7be16a50726a76af2a3dc80b0627e5807a6ad1b347a8bc5dd40c47256b08492",
+          "source_url": "https://gitee.com/ExDevilLee/ai-work-system/raw/main/content/articles/practical-ai-memory/images/07/coverage-governance-loop.png",
+          "uuid": "3YnkHMl9w4wwiVuy9qEnQ-TMP"
+        }
+      },
+      "content_sha256": "581cf4f547f066404e1f982cd0b82069e676b7531ceed98f7b6dc4933ef1a072",
+      "note_id": "cWtGSP7lt3HZD8-bhbjow",
+      "publication_blocked": {
+        "content_sha256": "581cf4f547f066404e1f982cd0b82069e676b7531ceed98f7b6dc4933ef1a072",
+        "message": "MoWen MCP error: error: code = 403 reason = RISKY message = svc [NoteSvc.SetPrivacy]: note risky. metadata = map[] cause = <nil>",
+        "reason": "RISKY"
+      },
+      "published": false,
+      "url": "https://note.mowen.cn/detail/cWtGSP7lt3HZD8-bhbjow"
     }
   },
   "directories": {
