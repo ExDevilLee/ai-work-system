@@ -297,12 +297,7 @@
       },
       "content_sha256": "581cf4f547f066404e1f982cd0b82069e676b7531ceed98f7b6dc4933ef1a072",
       "note_id": "cWtGSP7lt3HZD8-bhbjow",
-      "publication_blocked": {
-        "content_sha256": "581cf4f547f066404e1f982cd0b82069e676b7531ceed98f7b6dc4933ef1a072",
-        "message": "MoWen MCP error: error: code = 403 reason = RISKY message = svc [NoteSvc.SetPrivacy]: note risky. metadata = map[] cause = <nil>",
-        "reason": "RISKY"
-      },
-      "published": false,
+      "published": true,
       "url": "https://note.mowen.cn/detail/cWtGSP7lt3HZD8-bhbjow"
     }
   },
@@ -317,7 +312,7 @@
       "url": "https://note.mowen.cn/detail/CGAIy3ZJS0VwC6wlH3je-"
     },
     "practical-ai-memory": {
-      "content_sha256": "363d23c410846c2746a33c2720a2bfe9f78f2d0f753118310305d093c318b124",
+      "content_sha256": "59939012d862a3606fd58ba964dc74953fcf3361ad76daa0a8c3386f6b1952b0",
       "cover_sha256": "a094a84d9f46451ef40e5a1a5ba6df688cfc5bdd538003aeeaef4ae7803ebfb8",
       "cover_source_url": "https://gitee.com/ExDevilLee/ai-work-system/raw/main/content/articles/practical-ai-memory/images/01/three-layer-memory-system.png",
       "cover_uuid": "n_fKIeIyNXYrZr2Si3y_c-TMP",
