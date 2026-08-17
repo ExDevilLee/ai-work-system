@@ -1,0 +1,23 @@
+{
+  "run_name": "sensitivity-guide-assisted-03-apply-scope-01",
+  "dataset": "second-model-sensitivity",
+  "fixture_set": "pilot-01",
+  "condition": "guide-assisted",
+  "task": "apply-scope",
+  "variant_index": 1,
+  "requested_model": "deepseek-v4-flash",
+  "requested_effort": "max",
+  "observed_model": "deepseek-v4-flash",
+  "observed_effort": "max",
+  "platform": "macOS",
+  "sandbox": "read-only",
+  "session": "ephemeral",
+  "review": {
+    "status": "passed",
+    "rubric": "scope-source-human-review-no-auto-promotion",
+    "review_script_sha256": "11ab03dff4946dd6174717f22ebe0d476472c8a27ec77027c588154c92ea4f6f"
+  },
+  "tasks_sha256": "91e685c7c61afb67eaa25bec8e34dcaadea924bf41d996519ff73feac039f2c2",
+  "material_sha256": "05f242564b041bd80438ab8eed0f10a5c92a19b29a4aea52e26e8327c6ca24bb",
+  "answer_sha256": "7a132626ae9a005187e3c991c8676939d2a92b72ce87b82e57a3eab5442609d6"
+}

@@ -1,0 +1,9 @@
+{
+  "cell": "distill-candidate｜三次同类 Review 出现相同遗漏",
+  "answer": {
+    "scope": "仅限形成「三次同类 Review 相同遗漏」这一条候选观察",
+    "source": "按 Guide 先核验三次 Review 原始记录与遗漏证据",
+    "human_review": "人工 Review 确认证据真实与归纳无偏差后再决定是否沉淀",
+    "refuse_automatic": "候选须经重复证据与人工 Review 才能晋升，不自动写入 Guide/Skill/长期记忆"
+  }
+}

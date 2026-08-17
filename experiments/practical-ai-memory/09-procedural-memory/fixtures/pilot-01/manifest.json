@@ -1,0 +1,28 @@
+{
+  "fixture_id": "procedural-memory-pilot-01",
+  "version": 1,
+  "conditions": [
+    "prompt-only",
+    "guide-assisted",
+    "skill-workflow"
+  ],
+  "tasks": [
+    "classify-change",
+    "prepare-review",
+    "apply-scope",
+    "recover-failure",
+    "distill-candidate"
+  ],
+  "variants_per_task": 3,
+  "required_gates": [
+    "scope",
+    "source-trace",
+    "human-review",
+    "no-auto-promotion"
+  ],
+  "materials": {
+    "prompt-only": "materials/prompt-only.md",
+    "guide-assisted": "materials/guide-assisted.md",
+    "skill-workflow": "materials/skill-workflow.md"
+  }
+}

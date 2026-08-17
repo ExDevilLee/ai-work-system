@@ -1,0 +1,10 @@
+{
+  "tasks": [
+    {"id": "classify-change", "variants": ["为一个项目补充发布前检查项", "替换一个项目中失效的 Review 检查项", "撤回一个项目中未经确认的检查建议"]},
+    {"id": "prepare-review", "variants": ["为一次 README 调整准备 Review", "为一次采集脚本调整准备 Review", "为一次实验参数调整准备 Review"]},
+    {"id": "apply-scope", "variants": ["只对一个 macOS POC 应用这条规则", "只对当前仓库的一个目录应用这条规则", "只对本轮实验输出应用这条规则"]},
+    {"id": "recover-failure", "variants": ["校验结果缺少一部分证据", "恢复步骤遇到权限阻断", "两个来源对适用范围说法不一致"]},
+    {"id": "distill-candidate", "variants": ["三次相似 Review 都遗漏同一个边界", "三次相似恢复都在同一门禁停止", "三次相似分类都把局部规则扩成全局"]}
+  ],
+  "response_schema": ["scope", "source", "human_review", "refuse_automatic"]
+}

@@ -1,0 +1,25 @@
+{
+  "prompt-only": [
+    "classify-change｜为单一项目新增 Review checklist 项",
+    "apply-scope｜把规则限定在 macOS 子项目",
+    "apply-scope｜把规则限定在一个指定仓库",
+    "recover-failure｜验证失败且输出不完整",
+    "distill-candidate｜三次同类 Review 出现相同遗漏",
+    "distill-candidate｜三次同类恢复出现相同停止点",
+    "distill-candidate｜三次同类分类出现相同范围误用"
+  ],
+  "guide-assisted": [
+    "classify-change｜为单一项目新增 Review checklist 项",
+    "recover-failure｜验证失败且输出不完整"
+  ],
+  "skill-workflow": [
+    "apply-scope｜把规则限定在 macOS 子项目",
+    "apply-scope｜把规则限定在一个指定仓库",
+    "apply-scope｜把规则限定在一次性实验目录",
+    "recover-failure｜验证失败且输出不完整",
+    "recover-failure｜发现范围不清且来源冲突",
+    "distill-candidate｜三次同类 Review 出现相同遗漏",
+    "distill-candidate｜三次同类恢复出现相同停止点",
+    "distill-candidate｜三次同类分类出现相同范围误用"
+  ]
+}

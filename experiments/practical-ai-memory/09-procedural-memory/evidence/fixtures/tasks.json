@@ -1,0 +1,10 @@
+{
+  "tasks": [
+    {"id": "classify-change", "variants": ["为单一项目新增 Review checklist 项", "调整单一项目现有 Review checklist 项", "移除单一项目过时的 Review checklist 项"]},
+    {"id": "prepare-review", "variants": ["准备一次范围明确的文档变更 Review", "准备一次范围明确的脚本变更 Review", "准备一次范围明确的配置变更 Review"]},
+    {"id": "apply-scope", "variants": ["把规则限定在 macOS 子项目", "把规则限定在一个指定仓库", "把规则限定在一次性实验目录"]},
+    {"id": "recover-failure", "variants": ["验证失败且输出不完整", "依赖不可用且无法继续", "发现范围不清且来源冲突"]},
+    {"id": "distill-candidate", "variants": ["三次同类 Review 出现相同遗漏", "三次同类恢复出现相同停止点", "三次同类分类出现相同范围误用"]}
+  ],
+  "response_schema": ["scope", "source", "human_review", "refuse_automatic"]
+}

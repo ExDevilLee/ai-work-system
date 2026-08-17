@@ -1,0 +1,23 @@
+{
+  "run_name": "sensitivity-prompt-only-05-distill-candidate-01",
+  "dataset": "second-model-sensitivity",
+  "fixture_set": "pilot-01",
+  "condition": "prompt-only",
+  "task": "distill-candidate",
+  "variant_index": 1,
+  "requested_model": "deepseek-v4-flash",
+  "requested_effort": "max",
+  "observed_model": "deepseek-v4-flash",
+  "observed_effort": "max",
+  "platform": "macOS",
+  "sandbox": "read-only",
+  "session": "ephemeral",
+  "review": {
+    "status": "passed",
+    "rubric": "scope-source-human-review-no-auto-promotion",
+    "review_script_sha256": "11ab03dff4946dd6174717f22ebe0d476472c8a27ec77027c588154c92ea4f6f"
+  },
+  "tasks_sha256": "91e685c7c61afb67eaa25bec8e34dcaadea924bf41d996519ff73feac039f2c2",
+  "material_sha256": "80adee87e9c924e56003d851c21f183ec85ad9e537f59e2a18fd03fc9768b7ba",
+  "answer_sha256": "6e38f47c7974e9683e57f556edac3fa0705e53684d2b3072c18df7766319483d"
+}

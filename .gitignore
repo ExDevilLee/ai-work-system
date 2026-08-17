@@ -8,3 +8,6 @@ docs/superpowers/
 docs/reviews/
 docs/plans/
 .worktrees/
+# P9 实验证据分层（poc-evidence-publication.md）：原始记录与脱敏中间层不入库
+experiments/practical-ai-memory/09-procedural-memory/runs/private/
+experiments/practical-ai-memory/09-procedural-memory/runs/public/

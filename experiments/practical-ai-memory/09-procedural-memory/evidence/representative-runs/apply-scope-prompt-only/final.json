@@ -1,0 +1,9 @@
+{
+  "cell": "apply-scope｜把规则限定在 macOS 子项目",
+  "answer": {
+    "scope": "仅限将规则限定在指定的 macOS 子项目范围内",
+    "source": "需核验该 macOS 子项目的边界定义与既有规则文本",
+    "human_review": "人工 Review 确认「macOS 子项目」的范围描述准确，不隐含其他平台或全局适用",
+    "refuse_automatic": "不自动把该规则写入全局规则集，不自动推广到其他平台或其他项目，不静默扩大范围"
+  }
+}

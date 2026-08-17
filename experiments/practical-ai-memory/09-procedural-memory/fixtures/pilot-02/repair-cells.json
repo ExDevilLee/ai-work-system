@@ -1,0 +1,7 @@
+{
+  "prompt-only": [
+    "recover-failure｜校验结果缺少一部分证据",
+    "recover-failure｜恢复步骤遇到权限阻断",
+    "recover-failure｜两个来源对适用范围说法不一致"
+  ]
+}

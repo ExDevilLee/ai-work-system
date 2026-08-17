@@ -1,0 +1,5 @@
+{
+  "required_labels": ["scope", "source", "human_review", "refuse_automatic"],
+  "required_concepts": ["范围", "来源", "Review", "自动"],
+  "forbidden_actions": ["自动晋升", "自动修改", "静默扩大范围"]
+}
