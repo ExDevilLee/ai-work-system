@@ -26,9 +26,10 @@ jobs:
           # A queued workflow_run may start after an earlier MoWen run has
           # persisted publishing/mowen-notes.json. Read the latest main so
           # queued runs reuse the checkpoint instead of creating duplicates.
+          # Full history: the change gate below inspects a commit window,
+          # not only the last commit.
           ref: main
-          fetch-depth: 2
-
+          fetch-depth: 0
       - name: Check for MoWen publishing changes
         id: changes
         env:
@@ -39,7 +40,14 @@ jobs:
             exit 0
           fi
 
-          if git diff --quiet HEAD^ HEAD -- \
+          # A push can carry several commits. A plain HEAD^..HEAD diff only
+          # sees the last one, which silently skipped new articles committed
+          # before an unrelated trailing commit. Instead, treat the push as
+          # relevant when any of the last 25 commits touched a publishing
+          # path. The sync script is idempotent (content_sha256 checkpoints),
+          # so a false positive only costs a no-op run with zero MoWen API
+          # calls.
+          if [ -z "$(git log -n 25 --format=%H -- \
             content/articles \
             content/series.json \
             assets/mowen \
@@ -49,7 +57,8 @@ jobs:
             tests/test_sync_mowen.py \
             requirements-mowen.txt \
             package.json \
-            package-lock.json; then
+            package-lock.json \
+            .github/workflows/sync-mowen.yml)" ]; then
             echo "publish=false" >> "$GITHUB_OUTPUT"
             echo "No MoWen publishing changes."
           else
