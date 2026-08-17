@@ -310,12 +310,7 @@
       },
       "content_sha256": "543016362e8540dedec75e4d152f31a5035823e11d1cba829a1de0b602f56950",
       "note_id": "Lc0HHbfMquA19mvSOtsQs",
-      "publication_blocked": {
-        "content_sha256": "543016362e8540dedec75e4d152f31a5035823e11d1cba829a1de0b602f56950",
-        "message": "MoWen MCP error: error: code = 403 reason = RISKY message = svc [NoteSvc.SetPrivacy]: note risky. metadata = map[] cause = <nil>",
-        "reason": "RISKY"
-      },
-      "published": false,
+      "published": true,
       "url": "https://note.mowen.cn/detail/Lc0HHbfMquA19mvSOtsQs"
     },
     "content/articles/practical-ai-memory/2026-08-17-how-rules-skills-workflows-become-memory.md": {
@@ -328,12 +323,7 @@
       },
       "content_sha256": "f0bc8dc17e0d7c90bb133c60b18b906912754130ce7b9c9c5324cb9d81557fed",
       "note_id": "NZ7-eZPzbJ_mRjBWpfWps",
-      "publication_blocked": {
-        "content_sha256": "f0bc8dc17e0d7c90bb133c60b18b906912754130ce7b9c9c5324cb9d81557fed",
-        "message": "MoWen MCP error: error: code = 403 reason = RISKY message = svc [NoteSvc.SetPrivacy]: note risky. metadata = map[] cause = <nil>",
-        "reason": "RISKY"
-      },
-      "published": false,
+      "published": true,
       "url": "https://note.mowen.cn/detail/NZ7-eZPzbJ_mRjBWpfWps"
     }
   },
