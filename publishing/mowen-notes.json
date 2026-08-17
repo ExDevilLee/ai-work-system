@@ -294,6 +294,29 @@
       "note_id": "cWtGSP7lt3HZD8-bhbjow",
       "published": true,
       "url": "https://note.mowen.cn/detail/cWtGSP7lt3HZD8-bhbjow"
+    },
+    "content/articles/practical-ai-memory/2026-08-11-how-to-backup-recover-ai-memory-without-conflicts.md": {
+      "assets": {
+        "images/08/backup-recovery-gate-chain.png": {
+          "sha256": "dcd5e0a4f7a8cbc48dc659aa1b092bdffccfa72c6da7a59c36d12c18f8aa9f08",
+          "source_url": "https://gitee.com/ExDevilLee/ai-work-system/raw/main/content/articles/practical-ai-memory/images/08/backup-recovery-gate-chain.png",
+          "uuid": "q3hUHMzxG5_5OeepjCX5Q-TMP"
+        },
+        "images/08/recovery-evidence-conditions.png": {
+          "sha256": "355688a74300ea76c92e3312b7b9de47af8c81a1e8e404a03c52fe458726d872",
+          "source_url": "https://gitee.com/ExDevilLee/ai-work-system/raw/main/content/articles/practical-ai-memory/images/08/recovery-evidence-conditions.png",
+          "uuid": "bIfSNe7ozyhCqwOY8e0V0-TMP"
+        }
+      },
+      "content_sha256": "543016362e8540dedec75e4d152f31a5035823e11d1cba829a1de0b602f56950",
+      "note_id": "Lc0HHbfMquA19mvSOtsQs",
+      "publication_blocked": {
+        "content_sha256": "543016362e8540dedec75e4d152f31a5035823e11d1cba829a1de0b602f56950",
+        "message": "MoWen MCP error: error: code = 403 reason = RISKY message = svc [NoteSvc.SetPrivacy]: note risky. metadata = map[] cause = <nil>",
+        "reason": "RISKY"
+      },
+      "published": false,
+      "url": "https://note.mowen.cn/detail/Lc0HHbfMquA19mvSOtsQs"
     }
   },
   "directories": {
