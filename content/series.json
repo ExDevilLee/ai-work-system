@@ -26,7 +26,7 @@
       "title_en": "Practical AI Long-Term Memory",
       "description": "用经过本地验证的 POC，逐步搭建可分层、可检索、可治理、可恢复的 AI 长期记忆系统。",
       "description_en": "Build a layered, searchable, governable, and recoverable AI long-term memory system through locally validated POCs.",
-      "status": "active",
+      "status": "complete",
       "wiki_page": "Series-02-Practical-AI-Memory",
       "mowen_directory_title": "AI 长期记忆实战",
       "mowen_directory_introduction": [

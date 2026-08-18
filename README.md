@@ -45,7 +45,7 @@ English version: [README-EN.md](README-EN.md)
 
 ## 当前方向
 
-- “AI 长期记忆实战”系列正在更新。第一篇已经完成三层记忆 POC，下一篇将验证哪些信息应该常驻、哪些应该按需读取。
+- “AI 长期记忆实战”系列 9 篇已经完成。它从信息分层和加载边界出发，依次讨论经验晋升、冲突治理、RAG 与当前行动、状态与覆盖投影、恢复门禁，最后收束到规则、Skill 和工作流怎样成为程序性记忆。
 - [ROADMAP](docs/series-roadmap.md)
 - [更多选题（MORE Topic Pool）](docs/topic-pool.md)
 
@@ -74,7 +74,7 @@ English version: [README-EN.md](README-EN.md)
 
 [墨问系列目录](https://note.mowen.cn/detail/CGAIy3ZJS0VwC6wlH3je-)
 
-### AI 长期记忆实战（更新中，共 9 篇）
+### AI 长期记忆实战（已完成，共 9 篇）
 
 用经过本地验证的 POC，逐步搭建可分层、可检索、可治理、可恢复的 AI 长期记忆系统。
 
@@ -95,7 +95,7 @@ English version: [README-EN.md](README-EN.md)
 
 ## 最近完成
 
-- 《为什么长期记忆需要一张“当前记忆地图”，而不应只藏在文件和索引里？》已进入 `ready` 并发布。macOS 上两个模型配置各完成 45 次正式运行、真实计时 Review 与脱敏聚合；文章只声明 macOS 双模型实测范围，不把结果推广为 Win11 结论。
+- 《AI 不只要记住事实：规则、Skill 和工作流怎样成为长期记忆？》已进入 `ready` 并发布，第二系列 9 篇完成收束。第 9 篇保留两组配置公开证据完整性不同的限制，不把载体形式写成稳定的效果排序；下一条实践主线候选为 Loop Engineering。
 
 ## 发布原则
 

@@ -47,7 +47,7 @@ The fourth article turns the series toward practical project memory. The fifth e
 
 ## Current Direction
 
-- The "Practical Long-Term AI Memory" series is now in progress. Its first article validates a three-layer memory POC, and the next will test what should stay resident versus load on demand.
+- The nine-article "Practical Long-Term AI Memory" series is complete. It progresses from information layering and loading boundaries through promotion, conflict governance, RAG and current action, state and coverage projections, recovery gates, and finally procedural memory for rules, skills, and workflows.
 - [ROADMAP](docs/series-roadmap.md)
 - [MORE: Topic Pool](docs/topic-pool.md)
 
@@ -76,7 +76,7 @@ From one-off AI chats to a long-term collaboration system with memory, workflows
 
 [MoWen series collection](https://note.mowen.cn/detail/CGAIy3ZJS0VwC6wlH3je-)
 
-### Practical AI Long-Term Memory (In Progress, 9 articles)
+### Practical AI Long-Term Memory (Complete, 9 articles)
 
 Build a layered, searchable, governable, and recoverable AI long-term memory system through locally validated POCs.
 
@@ -99,7 +99,7 @@ Article bodies are currently written in Chinese first. English titles are provid
 
 ## Latest Completed
 
-- *Why Does Long-Term Memory Need a Current Memory Map Instead of Only Files and Indexes?* is now `ready` and published. Two macOS model configurations each completed 45 formal runs with timed review and sanitized aggregation; the article limits its claims to the macOS dual-model evidence and does not generalize them to Win11.
+- *Beyond Facts: How Do Rules, Skills, and Workflows Become Long-Term Memory?* is now `ready` and published, completing the nine-article second series. The final article preserves the different public-evidence limits of its two configurations and does not turn artifact format into a stable effectiveness ranking; Loop Engineering is the candidate next practice line.
 
 ## Publishing Principle
 
