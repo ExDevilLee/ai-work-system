@@ -164,6 +164,18 @@ class TestGeneratedArtifacts(unittest.TestCase):
         self.assertEqual(overalls["DI-805"], "pass")
         self.assertEqual(overalls["RB-806"], "fail-post-restore")
 
+    def test_integrity_report_references_source_manifest_file_hash(self) -> None:
+        source = load_source_manifest()
+        backup = load_backup_manifest()
+        target = load_target_state()
+        receipts = load_verification_receipts()
+        report = build_integrity_report(source, backup, target, receipts)
+        from fixture_model import FIXTURE, file_sha256
+        self.assertEqual(
+            report["source_manifest_sha256"],
+            file_sha256(FIXTURE / "source-manifest.json"),
+        )
+
     def test_file_listing_excludes_hashes(self) -> None:
         """backup-inventory condition: file listing must NOT contain hash fields."""
         source = load_source_manifest()

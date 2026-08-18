@@ -208,7 +208,7 @@ def is_complete_successful_run(run_dir: Path, expected: ExpectedRun) -> bool:
         and metadata.get("condition") == expected.condition
         and metadata.get("platform_tag") == expected.platform
         and metadata.get("requested_model") == expected.model
-        and metadata.get("reasoning_effort") == expected.reasoning_effort
+        and metadata.get("requested_effort") == expected.reasoning_effort
         and metadata.get("fixture_sha256") == expected.fixture_sha256
         and metadata.get("prompt_sha256") == expected.prompt_sha256
         and fixture_sha256 == expected.fixture_sha256
@@ -219,5 +219,39 @@ def is_complete_successful_run(run_dir: Path, expected: ExpectedRun) -> bool:
         and metadata.get("exit_code") == 0
         and isinstance(metadata.get("usage"), dict)
         and metadata.get("protocol_environment_isolated") is True
-        and metadata.get("execution_path") == "session"
+        and metadata.get("execution_path") in {"session", "omp-cli"}
+    )
+
+
+def is_recorded_execution_failure(run_dir: Path, expected: ExpectedRun) -> bool:
+    """Accept only an identity-matched, auditable nonzero run as a kept failure."""
+    if not _run_location_is_safe(run_dir, expected):
+        return False
+    if not all(_is_regular_file(run_dir / name) for name in REQUIRED_FILES):
+        return False
+    if not _tree_has_only_real_files(run_dir / "fixture-snapshot"):
+        return False
+    try:
+        metadata = json.loads((run_dir / "metadata.json").read_text(encoding="utf-8"))
+        prompt_sha256 = hashlib.sha256((run_dir / "prompt.md").read_bytes()).hexdigest()
+        fixture_sha256 = tree_checksum(run_dir / "fixture-snapshot")
+        final_present = bool((run_dir / "final.md").read_text(encoding="utf-8").strip())
+    except (json.JSONDecodeError, OSError, UnicodeDecodeError):
+        return False
+    return bool(
+        metadata.get("run_name") == expected.run_name
+        and metadata.get("fixture_set") == expected.fixture_set
+        and metadata.get("task") == expected.task
+        and metadata.get("condition") == expected.condition
+        and metadata.get("platform_tag") == expected.platform
+        and metadata.get("requested_model") == expected.model
+        and metadata.get("requested_effort") == expected.reasoning_effort
+        and metadata.get("fixture_sha256") == expected.fixture_sha256 == fixture_sha256
+        and metadata.get("prompt_sha256") == expected.prompt_sha256 == prompt_sha256
+        and isinstance(metadata.get("exit_code"), int)
+        and metadata.get("exit_code") != 0
+        and metadata.get("final_answer_present") is False
+        and not final_present
+        and metadata.get("protocol_environment_isolated") is True
+        and metadata.get("execution_path") == "omp-cli"
     )

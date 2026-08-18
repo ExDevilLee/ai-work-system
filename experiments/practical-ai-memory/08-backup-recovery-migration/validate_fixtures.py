@@ -139,6 +139,15 @@ def validate_backup_manifest(errors: list[str], source: dict[str, Any]) -> dict[
     expected_hash = file_sha256(FIXTURE / "source-manifest.json")
     if backup.get("source_manifest_sha256") != expected_hash:
         errors.append("backup-manifest source_manifest_sha256 does not match source-manifest")
+    integrity_path = FIXTURE / "generated" / "integrity-report.json"
+    if integrity_path.is_file():
+        try:
+            integrity = json.loads(integrity_path.read_text(encoding="utf-8"))
+        except (json.JSONDecodeError, OSError, UnicodeDecodeError):
+            errors.append("integrity-report must be valid UTF-8 JSON")
+        else:
+            if integrity.get("source_manifest_sha256") != expected_hash:
+                errors.append("integrity-report source_manifest_sha256 does not match source-manifest")
 
     return backup
 

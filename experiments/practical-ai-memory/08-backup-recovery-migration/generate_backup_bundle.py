@@ -7,11 +7,11 @@ produce byte-identical files.
 
 from __future__ import annotations
 
-import hashlib
 from typing import Any
 
 from fixture_model import (
     FIXTURE,
+    file_sha256,
     json_canonical,
     load_backup_manifest,
     load_source_manifest,
@@ -148,12 +148,9 @@ def build_integrity_report(
             }
         )
 
-    source_manifest_text = json_canonical(source)
     return {
         "schema_version": 1,
-        "source_manifest_sha256": hashlib.sha256(
-            source_manifest_text.encode("utf-8")
-        ).hexdigest(),
+        "source_manifest_sha256": file_sha256(FIXTURE / "source-manifest.json"),
         "backup_batch_id": backup["backup_batch_id"],
         "checks": checks,
         "derived_artifacts": derived,
