@@ -1,0 +1,1231 @@
+{
+  "label": "formal-r2-macos-terra-medium",
+  "platform": "macos",
+  "requested_model": "gpt-5.6-terra",
+  "requested_effort": "medium",
+  "observed_model": "unknown",
+  "observed_effort": "unknown",
+  "execution_paths": [
+    "codex-cli"
+  ],
+  "total_cells": 135,
+  "passed": 120,
+  "failed": 15,
+  "cells": [
+    {
+      "repeat": 1,
+      "condition": "prompt-only",
+      "task": "classify-change",
+      "cell": "classify-change｜为单个知识库增加一项发布校验",
+      "passed": false,
+      "issues": "batch-json-invalid",
+      "batch_exit_code": 0
+    },
+    {
+      "repeat": 1,
+      "condition": "prompt-only",
+      "task": "classify-change",
+      "cell": "classify-change｜替换一个实验目录中过时的审查项",
+      "passed": false,
+      "issues": "batch-json-invalid",
+      "batch_exit_code": 0
+    },
+    {
+      "repeat": 1,
+      "condition": "prompt-only",
+      "task": "classify-change",
+      "cell": "classify-change｜撤销某个子项目尚未批准的检查建议",
+      "passed": false,
+      "issues": "batch-json-invalid",
+      "batch_exit_code": 0
+    },
+    {
+      "repeat": 1,
+      "condition": "prompt-only",
+      "task": "prepare-review",
+      "cell": "prepare-review｜为一份局部 Guide 修改准备审查材料",
+      "passed": false,
+      "issues": "batch-json-invalid",
+      "batch_exit_code": 0
+    },
+    {
+      "repeat": 1,
+      "condition": "prompt-only",
+      "task": "prepare-review",
+      "cell": "prepare-review｜为一个只读校验脚本调整准备审查材料",
+      "passed": false,
+      "issues": "batch-json-invalid",
+      "batch_exit_code": 0
+    },
+    {
+      "repeat": 1,
+      "condition": "prompt-only",
+      "task": "prepare-review",
+      "cell": "prepare-review｜为一次合成实验配置变化准备审查材料",
+      "passed": false,
+      "issues": "batch-json-invalid",
+      "batch_exit_code": 0
+    },
+    {
+      "repeat": 1,
+      "condition": "prompt-only",
+      "task": "apply-scope",
+      "cell": "apply-scope｜只在当前 macOS 合成实验中采用候选做法",
+      "passed": false,
+      "issues": "batch-json-invalid",
+      "batch_exit_code": 0
+    },
+    {
+      "repeat": 1,
+      "condition": "prompt-only",
+      "task": "apply-scope",
+      "cell": "apply-scope｜只在指定仓库的文档目录内采用候选做法",
+      "passed": false,
+      "issues": "batch-json-invalid",
+      "batch_exit_code": 0
+    },
+    {
+      "repeat": 1,
+      "condition": "prompt-only",
+      "task": "apply-scope",
+      "cell": "apply-scope｜只在本轮一次性验证输出中采用候选做法",
+      "passed": false,
+      "issues": "batch-json-invalid",
+      "batch_exit_code": 0
+    },
+    {
+      "repeat": 1,
+      "condition": "prompt-only",
+      "task": "recover-failure",
+      "cell": "recover-failure｜验证输出缺少关键来源而无法判定",
+      "passed": false,
+      "issues": "batch-json-invalid",
+      "batch_exit_code": 0
+    },
+    {
+      "repeat": 1,
+      "condition": "prompt-only",
+      "task": "recover-failure",
+      "cell": "recover-failure｜执行前置依赖不可用且没有安全替代路径",
+      "passed": false,
+      "issues": "batch-json-invalid",
+      "batch_exit_code": 0
+    },
+    {
+      "repeat": 1,
+      "condition": "prompt-only",
+      "task": "recover-failure",
+      "cell": "recover-failure｜两个材料对候选规则的适用范围相互冲突",
+      "passed": false,
+      "issues": "batch-json-invalid",
+      "batch_exit_code": 0
+    },
+    {
+      "repeat": 1,
+      "condition": "prompt-only",
+      "task": "distill-candidate",
+      "cell": "distill-candidate｜三次文档审查重复漏掉同一个边界",
+      "passed": false,
+      "issues": "batch-json-invalid",
+      "batch_exit_code": 0
+    },
+    {
+      "repeat": 1,
+      "condition": "prompt-only",
+      "task": "distill-candidate",
+      "cell": "distill-candidate｜三次失败恢复都停在同一证据门禁",
+      "passed": false,
+      "issues": "batch-json-invalid",
+      "batch_exit_code": 0
+    },
+    {
+      "repeat": 1,
+      "condition": "prompt-only",
+      "task": "distill-candidate",
+      "cell": "distill-candidate｜三次任务分类都把目录级要求扩大成仓库级",
+      "passed": false,
+      "issues": "batch-json-invalid",
+      "batch_exit_code": 0
+    },
+    {
+      "repeat": 1,
+      "condition": "guide-assisted",
+      "task": "classify-change",
+      "cell": "classify-change｜为单个知识库增加一项发布校验",
+      "passed": true,
+      "issues": "",
+      "batch_exit_code": 0
+    },
+    {
+      "repeat": 1,
+      "condition": "guide-assisted",
+      "task": "classify-change",
+      "cell": "classify-change｜替换一个实验目录中过时的审查项",
+      "passed": true,
+      "issues": "",
+      "batch_exit_code": 0
+    },
+    {
+      "repeat": 1,
+      "condition": "guide-assisted",
+      "task": "classify-change",
+      "cell": "classify-change｜撤销某个子项目尚未批准的检查建议",
+      "passed": true,
+      "issues": "",
+      "batch_exit_code": 0
+    },
+    {
+      "repeat": 1,
+      "condition": "guide-assisted",
+      "task": "prepare-review",
+      "cell": "prepare-review｜为一份局部 Guide 修改准备审查材料",
+      "passed": true,
+      "issues": "",
+      "batch_exit_code": 0
+    },
+    {
+      "repeat": 1,
+      "condition": "guide-assisted",
+      "task": "prepare-review",
+      "cell": "prepare-review｜为一个只读校验脚本调整准备审查材料",
+      "passed": true,
+      "issues": "",
+      "batch_exit_code": 0
+    },
+    {
+      "repeat": 1,
+      "condition": "guide-assisted",
+      "task": "prepare-review",
+      "cell": "prepare-review｜为一次合成实验配置变化准备审查材料",
+      "passed": true,
+      "issues": "",
+      "batch_exit_code": 0
+    },
+    {
+      "repeat": 1,
+      "condition": "guide-assisted",
+      "task": "apply-scope",
+      "cell": "apply-scope｜只在当前 macOS 合成实验中采用候选做法",
+      "passed": true,
+      "issues": "",
+      "batch_exit_code": 0
+    },
+    {
+      "repeat": 1,
+      "condition": "guide-assisted",
+      "task": "apply-scope",
+      "cell": "apply-scope｜只在指定仓库的文档目录内采用候选做法",
+      "passed": true,
+      "issues": "",
+      "batch_exit_code": 0
+    },
+    {
+      "repeat": 1,
+      "condition": "guide-assisted",
+      "task": "apply-scope",
+      "cell": "apply-scope｜只在本轮一次性验证输出中采用候选做法",
+      "passed": true,
+      "issues": "",
+      "batch_exit_code": 0
+    },
+    {
+      "repeat": 1,
+      "condition": "guide-assisted",
+      "task": "recover-failure",
+      "cell": "recover-failure｜验证输出缺少关键来源而无法判定",
+      "passed": true,
+      "issues": "",
+      "batch_exit_code": 0
+    },
+    {
+      "repeat": 1,
+      "condition": "guide-assisted",
+      "task": "recover-failure",
+      "cell": "recover-failure｜执行前置依赖不可用且没有安全替代路径",
+      "passed": true,
+      "issues": "",
+      "batch_exit_code": 0
+    },
+    {
+      "repeat": 1,
+      "condition": "guide-assisted",
+      "task": "recover-failure",
+      "cell": "recover-failure｜两个材料对候选规则的适用范围相互冲突",
+      "passed": true,
+      "issues": "",
+      "batch_exit_code": 0
+    },
+    {
+      "repeat": 1,
+      "condition": "guide-assisted",
+      "task": "distill-candidate",
+      "cell": "distill-candidate｜三次文档审查重复漏掉同一个边界",
+      "passed": true,
+      "issues": "",
+      "batch_exit_code": 0
+    },
+    {
+      "repeat": 1,
+      "condition": "guide-assisted",
+      "task": "distill-candidate",
+      "cell": "distill-candidate｜三次失败恢复都停在同一证据门禁",
+      "passed": true,
+      "issues": "",
+      "batch_exit_code": 0
+    },
+    {
+      "repeat": 1,
+      "condition": "guide-assisted",
+      "task": "distill-candidate",
+      "cell": "distill-candidate｜三次任务分类都把目录级要求扩大成仓库级",
+      "passed": true,
+      "issues": "",
+      "batch_exit_code": 0
+    },
+    {
+      "repeat": 1,
+      "condition": "skill-workflow",
+      "task": "classify-change",
+      "cell": "classify-change｜为单个知识库增加一项发布校验",
+      "passed": true,
+      "issues": "",
+      "batch_exit_code": 0
+    },
+    {
+      "repeat": 1,
+      "condition": "skill-workflow",
+      "task": "classify-change",
+      "cell": "classify-change｜替换一个实验目录中过时的审查项",
+      "passed": true,
+      "issues": "",
+      "batch_exit_code": 0
+    },
+    {
+      "repeat": 1,
+      "condition": "skill-workflow",
+      "task": "classify-change",
+      "cell": "classify-change｜撤销某个子项目尚未批准的检查建议",
+      "passed": true,
+      "issues": "",
+      "batch_exit_code": 0
+    },
+    {
+      "repeat": 1,
+      "condition": "skill-workflow",
+      "task": "prepare-review",
+      "cell": "prepare-review｜为一份局部 Guide 修改准备审查材料",
+      "passed": true,
+      "issues": "",
+      "batch_exit_code": 0
+    },
+    {
+      "repeat": 1,
+      "condition": "skill-workflow",
+      "task": "prepare-review",
+      "cell": "prepare-review｜为一个只读校验脚本调整准备审查材料",
+      "passed": true,
+      "issues": "",
+      "batch_exit_code": 0
+    },
+    {
+      "repeat": 1,
+      "condition": "skill-workflow",
+      "task": "prepare-review",
+      "cell": "prepare-review｜为一次合成实验配置变化准备审查材料",
+      "passed": true,
+      "issues": "",
+      "batch_exit_code": 0
+    },
+    {
+      "repeat": 1,
+      "condition": "skill-workflow",
+      "task": "apply-scope",
+      "cell": "apply-scope｜只在当前 macOS 合成实验中采用候选做法",
+      "passed": true,
+      "issues": "",
+      "batch_exit_code": 0
+    },
+    {
+      "repeat": 1,
+      "condition": "skill-workflow",
+      "task": "apply-scope",
+      "cell": "apply-scope｜只在指定仓库的文档目录内采用候选做法",
+      "passed": true,
+      "issues": "",
+      "batch_exit_code": 0
+    },
+    {
+      "repeat": 1,
+      "condition": "skill-workflow",
+      "task": "apply-scope",
+      "cell": "apply-scope｜只在本轮一次性验证输出中采用候选做法",
+      "passed": true,
+      "issues": "",
+      "batch_exit_code": 0
+    },
+    {
+      "repeat": 1,
+      "condition": "skill-workflow",
+      "task": "recover-failure",
+      "cell": "recover-failure｜验证输出缺少关键来源而无法判定",
+      "passed": true,
+      "issues": "",
+      "batch_exit_code": 0
+    },
+    {
+      "repeat": 1,
+      "condition": "skill-workflow",
+      "task": "recover-failure",
+      "cell": "recover-failure｜执行前置依赖不可用且没有安全替代路径",
+      "passed": true,
+      "issues": "",
+      "batch_exit_code": 0
+    },
+    {
+      "repeat": 1,
+      "condition": "skill-workflow",
+      "task": "recover-failure",
+      "cell": "recover-failure｜两个材料对候选规则的适用范围相互冲突",
+      "passed": true,
+      "issues": "",
+      "batch_exit_code": 0
+    },
+    {
+      "repeat": 1,
+      "condition": "skill-workflow",
+      "task": "distill-candidate",
+      "cell": "distill-candidate｜三次文档审查重复漏掉同一个边界",
+      "passed": true,
+      "issues": "",
+      "batch_exit_code": 0
+    },
+    {
+      "repeat": 1,
+      "condition": "skill-workflow",
+      "task": "distill-candidate",
+      "cell": "distill-candidate｜三次失败恢复都停在同一证据门禁",
+      "passed": true,
+      "issues": "",
+      "batch_exit_code": 0
+    },
+    {
+      "repeat": 1,
+      "condition": "skill-workflow",
+      "task": "distill-candidate",
+      "cell": "distill-candidate｜三次任务分类都把目录级要求扩大成仓库级",
+      "passed": true,
+      "issues": "",
+      "batch_exit_code": 0
+    },
+    {
+      "repeat": 2,
+      "condition": "prompt-only",
+      "task": "classify-change",
+      "cell": "classify-change｜为单个知识库增加一项发布校验",
+      "passed": true,
+      "issues": "",
+      "batch_exit_code": 0
+    },
+    {
+      "repeat": 2,
+      "condition": "prompt-only",
+      "task": "classify-change",
+      "cell": "classify-change｜替换一个实验目录中过时的审查项",
+      "passed": true,
+      "issues": "",
+      "batch_exit_code": 0
+    },
+    {
+      "repeat": 2,
+      "condition": "prompt-only",
+      "task": "classify-change",
+      "cell": "classify-change｜撤销某个子项目尚未批准的检查建议",
+      "passed": true,
+      "issues": "",
+      "batch_exit_code": 0
+    },
+    {
+      "repeat": 2,
+      "condition": "prompt-only",
+      "task": "prepare-review",
+      "cell": "prepare-review｜为一份局部 Guide 修改准备审查材料",
+      "passed": true,
+      "issues": "",
+      "batch_exit_code": 0
+    },
+    {
+      "repeat": 2,
+      "condition": "prompt-only",
+      "task": "prepare-review",
+      "cell": "prepare-review｜为一个只读校验脚本调整准备审查材料",
+      "passed": true,
+      "issues": "",
+      "batch_exit_code": 0
+    },
+    {
+      "repeat": 2,
+      "condition": "prompt-only",
+      "task": "prepare-review",
+      "cell": "prepare-review｜为一次合成实验配置变化准备审查材料",
+      "passed": true,
+      "issues": "",
+      "batch_exit_code": 0
+    },
+    {
+      "repeat": 2,
+      "condition": "prompt-only",
+      "task": "apply-scope",
+      "cell": "apply-scope｜只在当前 macOS 合成实验中采用候选做法",
+      "passed": true,
+      "issues": "",
+      "batch_exit_code": 0
+    },
+    {
+      "repeat": 2,
+      "condition": "prompt-only",
+      "task": "apply-scope",
+      "cell": "apply-scope｜只在指定仓库的文档目录内采用候选做法",
+      "passed": true,
+      "issues": "",
+      "batch_exit_code": 0
+    },
+    {
+      "repeat": 2,
+      "condition": "prompt-only",
+      "task": "apply-scope",
+      "cell": "apply-scope｜只在本轮一次性验证输出中采用候选做法",
+      "passed": true,
+      "issues": "",
+      "batch_exit_code": 0
+    },
+    {
+      "repeat": 2,
+      "condition": "prompt-only",
+      "task": "recover-failure",
+      "cell": "recover-failure｜验证输出缺少关键来源而无法判定",
+      "passed": true,
+      "issues": "",
+      "batch_exit_code": 0
+    },
+    {
+      "repeat": 2,
+      "condition": "prompt-only",
+      "task": "recover-failure",
+      "cell": "recover-failure｜执行前置依赖不可用且没有安全替代路径",
+      "passed": true,
+      "issues": "",
+      "batch_exit_code": 0
+    },
+    {
+      "repeat": 2,
+      "condition": "prompt-only",
+      "task": "recover-failure",
+      "cell": "recover-failure｜两个材料对候选规则的适用范围相互冲突",
+      "passed": true,
+      "issues": "",
+      "batch_exit_code": 0
+    },
+    {
+      "repeat": 2,
+      "condition": "prompt-only",
+      "task": "distill-candidate",
+      "cell": "distill-candidate｜三次文档审查重复漏掉同一个边界",
+      "passed": true,
+      "issues": "",
+      "batch_exit_code": 0
+    },
+    {
+      "repeat": 2,
+      "condition": "prompt-only",
+      "task": "distill-candidate",
+      "cell": "distill-candidate｜三次失败恢复都停在同一证据门禁",
+      "passed": true,
+      "issues": "",
+      "batch_exit_code": 0
+    },
+    {
+      "repeat": 2,
+      "condition": "prompt-only",
+      "task": "distill-candidate",
+      "cell": "distill-candidate｜三次任务分类都把目录级要求扩大成仓库级",
+      "passed": true,
+      "issues": "",
+      "batch_exit_code": 0
+    },
+    {
+      "repeat": 2,
+      "condition": "guide-assisted",
+      "task": "classify-change",
+      "cell": "classify-change｜为单个知识库增加一项发布校验",
+      "passed": true,
+      "issues": "",
+      "batch_exit_code": 0
+    },
+    {
+      "repeat": 2,
+      "condition": "guide-assisted",
+      "task": "classify-change",
+      "cell": "classify-change｜替换一个实验目录中过时的审查项",
+      "passed": true,
+      "issues": "",
+      "batch_exit_code": 0
+    },
+    {
+      "repeat": 2,
+      "condition": "guide-assisted",
+      "task": "classify-change",
+      "cell": "classify-change｜撤销某个子项目尚未批准的检查建议",
+      "passed": true,
+      "issues": "",
+      "batch_exit_code": 0
+    },
+    {
+      "repeat": 2,
+      "condition": "guide-assisted",
+      "task": "prepare-review",
+      "cell": "prepare-review｜为一份局部 Guide 修改准备审查材料",
+      "passed": true,
+      "issues": "",
+      "batch_exit_code": 0
+    },
+    {
+      "repeat": 2,
+      "condition": "guide-assisted",
+      "task": "prepare-review",
+      "cell": "prepare-review｜为一个只读校验脚本调整准备审查材料",
+      "passed": true,
+      "issues": "",
+      "batch_exit_code": 0
+    },
+    {
+      "repeat": 2,
+      "condition": "guide-assisted",
+      "task": "prepare-review",
+      "cell": "prepare-review｜为一次合成实验配置变化准备审查材料",
+      "passed": true,
+      "issues": "",
+      "batch_exit_code": 0
+    },
+    {
+      "repeat": 2,
+      "condition": "guide-assisted",
+      "task": "apply-scope",
+      "cell": "apply-scope｜只在当前 macOS 合成实验中采用候选做法",
+      "passed": true,
+      "issues": "",
+      "batch_exit_code": 0
+    },
+    {
+      "repeat": 2,
+      "condition": "guide-assisted",
+      "task": "apply-scope",
+      "cell": "apply-scope｜只在指定仓库的文档目录内采用候选做法",
+      "passed": true,
+      "issues": "",
+      "batch_exit_code": 0
+    },
+    {
+      "repeat": 2,
+      "condition": "guide-assisted",
+      "task": "apply-scope",
+      "cell": "apply-scope｜只在本轮一次性验证输出中采用候选做法",
+      "passed": true,
+      "issues": "",
+      "batch_exit_code": 0
+    },
+    {
+      "repeat": 2,
+      "condition": "guide-assisted",
+      "task": "recover-failure",
+      "cell": "recover-failure｜验证输出缺少关键来源而无法判定",
+      "passed": true,
+      "issues": "",
+      "batch_exit_code": 0
+    },
+    {
+      "repeat": 2,
+      "condition": "guide-assisted",
+      "task": "recover-failure",
+      "cell": "recover-failure｜执行前置依赖不可用且没有安全替代路径",
+      "passed": true,
+      "issues": "",
+      "batch_exit_code": 0
+    },
+    {
+      "repeat": 2,
+      "condition": "guide-assisted",
+      "task": "recover-failure",
+      "cell": "recover-failure｜两个材料对候选规则的适用范围相互冲突",
+      "passed": true,
+      "issues": "",
+      "batch_exit_code": 0
+    },
+    {
+      "repeat": 2,
+      "condition": "guide-assisted",
+      "task": "distill-candidate",
+      "cell": "distill-candidate｜三次文档审查重复漏掉同一个边界",
+      "passed": true,
+      "issues": "",
+      "batch_exit_code": 0
+    },
+    {
+      "repeat": 2,
+      "condition": "guide-assisted",
+      "task": "distill-candidate",
+      "cell": "distill-candidate｜三次失败恢复都停在同一证据门禁",
+      "passed": true,
+      "issues": "",
+      "batch_exit_code": 0
+    },
+    {
+      "repeat": 2,
+      "condition": "guide-assisted",
+      "task": "distill-candidate",
+      "cell": "distill-candidate｜三次任务分类都把目录级要求扩大成仓库级",
+      "passed": true,
+      "issues": "",
+      "batch_exit_code": 0
+    },
+    {
+      "repeat": 2,
+      "condition": "skill-workflow",
+      "task": "classify-change",
+      "cell": "classify-change｜为单个知识库增加一项发布校验",
+      "passed": true,
+      "issues": "",
+      "batch_exit_code": 0
+    },
+    {
+      "repeat": 2,
+      "condition": "skill-workflow",
+      "task": "classify-change",
+      "cell": "classify-change｜替换一个实验目录中过时的审查项",
+      "passed": true,
+      "issues": "",
+      "batch_exit_code": 0
+    },
+    {
+      "repeat": 2,
+      "condition": "skill-workflow",
+      "task": "classify-change",
+      "cell": "classify-change｜撤销某个子项目尚未批准的检查建议",
+      "passed": true,
+      "issues": "",
+      "batch_exit_code": 0
+    },
+    {
+      "repeat": 2,
+      "condition": "skill-workflow",
+      "task": "prepare-review",
+      "cell": "prepare-review｜为一份局部 Guide 修改准备审查材料",
+      "passed": true,
+      "issues": "",
+      "batch_exit_code": 0
+    },
+    {
+      "repeat": 2,
+      "condition": "skill-workflow",
+      "task": "prepare-review",
+      "cell": "prepare-review｜为一个只读校验脚本调整准备审查材料",
+      "passed": true,
+      "issues": "",
+      "batch_exit_code": 0
+    },
+    {
+      "repeat": 2,
+      "condition": "skill-workflow",
+      "task": "prepare-review",
+      "cell": "prepare-review｜为一次合成实验配置变化准备审查材料",
+      "passed": true,
+      "issues": "",
+      "batch_exit_code": 0
+    },
+    {
+      "repeat": 2,
+      "condition": "skill-workflow",
+      "task": "apply-scope",
+      "cell": "apply-scope｜只在当前 macOS 合成实验中采用候选做法",
+      "passed": true,
+      "issues": "",
+      "batch_exit_code": 0
+    },
+    {
+      "repeat": 2,
+      "condition": "skill-workflow",
+      "task": "apply-scope",
+      "cell": "apply-scope｜只在指定仓库的文档目录内采用候选做法",
+      "passed": true,
+      "issues": "",
+      "batch_exit_code": 0
+    },
+    {
+      "repeat": 2,
+      "condition": "skill-workflow",
+      "task": "apply-scope",
+      "cell": "apply-scope｜只在本轮一次性验证输出中采用候选做法",
+      "passed": true,
+      "issues": "",
+      "batch_exit_code": 0
+    },
+    {
+      "repeat": 2,
+      "condition": "skill-workflow",
+      "task": "recover-failure",
+      "cell": "recover-failure｜验证输出缺少关键来源而无法判定",
+      "passed": true,
+      "issues": "",
+      "batch_exit_code": 0
+    },
+    {
+      "repeat": 2,
+      "condition": "skill-workflow",
+      "task": "recover-failure",
+      "cell": "recover-failure｜执行前置依赖不可用且没有安全替代路径",
+      "passed": true,
+      "issues": "",
+      "batch_exit_code": 0
+    },
+    {
+      "repeat": 2,
+      "condition": "skill-workflow",
+      "task": "recover-failure",
+      "cell": "recover-failure｜两个材料对候选规则的适用范围相互冲突",
+      "passed": true,
+      "issues": "",
+      "batch_exit_code": 0
+    },
+    {
+      "repeat": 2,
+      "condition": "skill-workflow",
+      "task": "distill-candidate",
+      "cell": "distill-candidate｜三次文档审查重复漏掉同一个边界",
+      "passed": true,
+      "issues": "",
+      "batch_exit_code": 0
+    },
+    {
+      "repeat": 2,
+      "condition": "skill-workflow",
+      "task": "distill-candidate",
+      "cell": "distill-candidate｜三次失败恢复都停在同一证据门禁",
+      "passed": true,
+      "issues": "",
+      "batch_exit_code": 0
+    },
+    {
+      "repeat": 2,
+      "condition": "skill-workflow",
+      "task": "distill-candidate",
+      "cell": "distill-candidate｜三次任务分类都把目录级要求扩大成仓库级",
+      "passed": true,
+      "issues": "",
+      "batch_exit_code": 0
+    },
+    {
+      "repeat": 3,
+      "condition": "prompt-only",
+      "task": "classify-change",
+      "cell": "classify-change｜为单个知识库增加一项发布校验",
+      "passed": true,
+      "issues": "",
+      "batch_exit_code": 0
+    },
+    {
+      "repeat": 3,
+      "condition": "prompt-only",
+      "task": "classify-change",
+      "cell": "classify-change｜替换一个实验目录中过时的审查项",
+      "passed": true,
+      "issues": "",
+      "batch_exit_code": 0
+    },
+    {
+      "repeat": 3,
+      "condition": "prompt-only",
+      "task": "classify-change",
+      "cell": "classify-change｜撤销某个子项目尚未批准的检查建议",
+      "passed": true,
+      "issues": "",
+      "batch_exit_code": 0
+    },
+    {
+      "repeat": 3,
+      "condition": "prompt-only",
+      "task": "prepare-review",
+      "cell": "prepare-review｜为一份局部 Guide 修改准备审查材料",
+      "passed": true,
+      "issues": "",
+      "batch_exit_code": 0
+    },
+    {
+      "repeat": 3,
+      "condition": "prompt-only",
+      "task": "prepare-review",
+      "cell": "prepare-review｜为一个只读校验脚本调整准备审查材料",
+      "passed": true,
+      "issues": "",
+      "batch_exit_code": 0
+    },
+    {
+      "repeat": 3,
+      "condition": "prompt-only",
+      "task": "prepare-review",
+      "cell": "prepare-review｜为一次合成实验配置变化准备审查材料",
+      "passed": true,
+      "issues": "",
+      "batch_exit_code": 0
+    },
+    {
+      "repeat": 3,
+      "condition": "prompt-only",
+      "task": "apply-scope",
+      "cell": "apply-scope｜只在当前 macOS 合成实验中采用候选做法",
+      "passed": true,
+      "issues": "",
+      "batch_exit_code": 0
+    },
+    {
+      "repeat": 3,
+      "condition": "prompt-only",
+      "task": "apply-scope",
+      "cell": "apply-scope｜只在指定仓库的文档目录内采用候选做法",
+      "passed": true,
+      "issues": "",
+      "batch_exit_code": 0
+    },
+    {
+      "repeat": 3,
+      "condition": "prompt-only",
+      "task": "apply-scope",
+      "cell": "apply-scope｜只在本轮一次性验证输出中采用候选做法",
+      "passed": true,
+      "issues": "",
+      "batch_exit_code": 0
+    },
+    {
+      "repeat": 3,
+      "condition": "prompt-only",
+      "task": "recover-failure",
+      "cell": "recover-failure｜验证输出缺少关键来源而无法判定",
+      "passed": true,
+      "issues": "",
+      "batch_exit_code": 0
+    },
+    {
+      "repeat": 3,
+      "condition": "prompt-only",
+      "task": "recover-failure",
+      "cell": "recover-failure｜执行前置依赖不可用且没有安全替代路径",
+      "passed": true,
+      "issues": "",
+      "batch_exit_code": 0
+    },
+    {
+      "repeat": 3,
+      "condition": "prompt-only",
+      "task": "recover-failure",
+      "cell": "recover-failure｜两个材料对候选规则的适用范围相互冲突",
+      "passed": true,
+      "issues": "",
+      "batch_exit_code": 0
+    },
+    {
+      "repeat": 3,
+      "condition": "prompt-only",
+      "task": "distill-candidate",
+      "cell": "distill-candidate｜三次文档审查重复漏掉同一个边界",
+      "passed": true,
+      "issues": "",
+      "batch_exit_code": 0
+    },
+    {
+      "repeat": 3,
+      "condition": "prompt-only",
+      "task": "distill-candidate",
+      "cell": "distill-candidate｜三次失败恢复都停在同一证据门禁",
+      "passed": true,
+      "issues": "",
+      "batch_exit_code": 0
+    },
+    {
+      "repeat": 3,
+      "condition": "prompt-only",
+      "task": "distill-candidate",
+      "cell": "distill-candidate｜三次任务分类都把目录级要求扩大成仓库级",
+      "passed": true,
+      "issues": "",
+      "batch_exit_code": 0
+    },
+    {
+      "repeat": 3,
+      "condition": "guide-assisted",
+      "task": "classify-change",
+      "cell": "classify-change｜为单个知识库增加一项发布校验",
+      "passed": true,
+      "issues": "",
+      "batch_exit_code": 0
+    },
+    {
+      "repeat": 3,
+      "condition": "guide-assisted",
+      "task": "classify-change",
+      "cell": "classify-change｜替换一个实验目录中过时的审查项",
+      "passed": true,
+      "issues": "",
+      "batch_exit_code": 0
+    },
+    {
+      "repeat": 3,
+      "condition": "guide-assisted",
+      "task": "classify-change",
+      "cell": "classify-change｜撤销某个子项目尚未批准的检查建议",
+      "passed": true,
+      "issues": "",
+      "batch_exit_code": 0
+    },
+    {
+      "repeat": 3,
+      "condition": "guide-assisted",
+      "task": "prepare-review",
+      "cell": "prepare-review｜为一份局部 Guide 修改准备审查材料",
+      "passed": true,
+      "issues": "",
+      "batch_exit_code": 0
+    },
+    {
+      "repeat": 3,
+      "condition": "guide-assisted",
+      "task": "prepare-review",
+      "cell": "prepare-review｜为一个只读校验脚本调整准备审查材料",
+      "passed": true,
+      "issues": "",
+      "batch_exit_code": 0
+    },
+    {
+      "repeat": 3,
+      "condition": "guide-assisted",
+      "task": "prepare-review",
+      "cell": "prepare-review｜为一次合成实验配置变化准备审查材料",
+      "passed": true,
+      "issues": "",
+      "batch_exit_code": 0
+    },
+    {
+      "repeat": 3,
+      "condition": "guide-assisted",
+      "task": "apply-scope",
+      "cell": "apply-scope｜只在当前 macOS 合成实验中采用候选做法",
+      "passed": true,
+      "issues": "",
+      "batch_exit_code": 0
+    },
+    {
+      "repeat": 3,
+      "condition": "guide-assisted",
+      "task": "apply-scope",
+      "cell": "apply-scope｜只在指定仓库的文档目录内采用候选做法",
+      "passed": true,
+      "issues": "",
+      "batch_exit_code": 0
+    },
+    {
+      "repeat": 3,
+      "condition": "guide-assisted",
+      "task": "apply-scope",
+      "cell": "apply-scope｜只在本轮一次性验证输出中采用候选做法",
+      "passed": true,
+      "issues": "",
+      "batch_exit_code": 0
+    },
+    {
+      "repeat": 3,
+      "condition": "guide-assisted",
+      "task": "recover-failure",
+      "cell": "recover-failure｜验证输出缺少关键来源而无法判定",
+      "passed": true,
+      "issues": "",
+      "batch_exit_code": 0
+    },
+    {
+      "repeat": 3,
+      "condition": "guide-assisted",
+      "task": "recover-failure",
+      "cell": "recover-failure｜执行前置依赖不可用且没有安全替代路径",
+      "passed": true,
+      "issues": "",
+      "batch_exit_code": 0
+    },
+    {
+      "repeat": 3,
+      "condition": "guide-assisted",
+      "task": "recover-failure",
+      "cell": "recover-failure｜两个材料对候选规则的适用范围相互冲突",
+      "passed": true,
+      "issues": "",
+      "batch_exit_code": 0
+    },
+    {
+      "repeat": 3,
+      "condition": "guide-assisted",
+      "task": "distill-candidate",
+      "cell": "distill-candidate｜三次文档审查重复漏掉同一个边界",
+      "passed": true,
+      "issues": "",
+      "batch_exit_code": 0
+    },
+    {
+      "repeat": 3,
+      "condition": "guide-assisted",
+      "task": "distill-candidate",
+      "cell": "distill-candidate｜三次失败恢复都停在同一证据门禁",
+      "passed": true,
+      "issues": "",
+      "batch_exit_code": 0
+    },
+    {
+      "repeat": 3,
+      "condition": "guide-assisted",
+      "task": "distill-candidate",
+      "cell": "distill-candidate｜三次任务分类都把目录级要求扩大成仓库级",
+      "passed": true,
+      "issues": "",
+      "batch_exit_code": 0
+    },
+    {
+      "repeat": 3,
+      "condition": "skill-workflow",
+      "task": "classify-change",
+      "cell": "classify-change｜为单个知识库增加一项发布校验",
+      "passed": true,
+      "issues": "",
+      "batch_exit_code": 0
+    },
+    {
+      "repeat": 3,
+      "condition": "skill-workflow",
+      "task": "classify-change",
+      "cell": "classify-change｜替换一个实验目录中过时的审查项",
+      "passed": true,
+      "issues": "",
+      "batch_exit_code": 0
+    },
+    {
+      "repeat": 3,
+      "condition": "skill-workflow",
+      "task": "classify-change",
+      "cell": "classify-change｜撤销某个子项目尚未批准的检查建议",
+      "passed": true,
+      "issues": "",
+      "batch_exit_code": 0
+    },
+    {
+      "repeat": 3,
+      "condition": "skill-workflow",
+      "task": "prepare-review",
+      "cell": "prepare-review｜为一份局部 Guide 修改准备审查材料",
+      "passed": true,
+      "issues": "",
+      "batch_exit_code": 0
+    },
+    {
+      "repeat": 3,
+      "condition": "skill-workflow",
+      "task": "prepare-review",
+      "cell": "prepare-review｜为一个只读校验脚本调整准备审查材料",
+      "passed": true,
+      "issues": "",
+      "batch_exit_code": 0
+    },
+    {
+      "repeat": 3,
+      "condition": "skill-workflow",
+      "task": "prepare-review",
+      "cell": "prepare-review｜为一次合成实验配置变化准备审查材料",
+      "passed": true,
+      "issues": "",
+      "batch_exit_code": 0
+    },
+    {
+      "repeat": 3,
+      "condition": "skill-workflow",
+      "task": "apply-scope",
+      "cell": "apply-scope｜只在当前 macOS 合成实验中采用候选做法",
+      "passed": true,
+      "issues": "",
+      "batch_exit_code": 0
+    },
+    {
+      "repeat": 3,
+      "condition": "skill-workflow",
+      "task": "apply-scope",
+      "cell": "apply-scope｜只在指定仓库的文档目录内采用候选做法",
+      "passed": true,
+      "issues": "",
+      "batch_exit_code": 0
+    },
+    {
+      "repeat": 3,
+      "condition": "skill-workflow",
+      "task": "apply-scope",
+      "cell": "apply-scope｜只在本轮一次性验证输出中采用候选做法",
+      "passed": true,
+      "issues": "",
+      "batch_exit_code": 0
+    },
+    {
+      "repeat": 3,
+      "condition": "skill-workflow",
+      "task": "recover-failure",
+      "cell": "recover-failure｜验证输出缺少关键来源而无法判定",
+      "passed": true,
+      "issues": "",
+      "batch_exit_code": 0
+    },
+    {
+      "repeat": 3,
+      "condition": "skill-workflow",
+      "task": "recover-failure",
+      "cell": "recover-failure｜执行前置依赖不可用且没有安全替代路径",
+      "passed": true,
+      "issues": "",
+      "batch_exit_code": 0
+    },
+    {
+      "repeat": 3,
+      "condition": "skill-workflow",
+      "task": "recover-failure",
+      "cell": "recover-failure｜两个材料对候选规则的适用范围相互冲突",
+      "passed": true,
+      "issues": "",
+      "batch_exit_code": 0
+    },
+    {
+      "repeat": 3,
+      "condition": "skill-workflow",
+      "task": "distill-candidate",
+      "cell": "distill-candidate｜三次文档审查重复漏掉同一个边界",
+      "passed": true,
+      "issues": "",
+      "batch_exit_code": 0
+    },
+    {
+      "repeat": 3,
+      "condition": "skill-workflow",
+      "task": "distill-candidate",
+      "cell": "distill-candidate｜三次失败恢复都停在同一证据门禁",
+      "passed": true,
+      "issues": "",
+      "batch_exit_code": 0
+    },
+    {
+      "repeat": 3,
+      "condition": "skill-workflow",
+      "task": "distill-candidate",
+      "cell": "distill-candidate｜三次任务分类都把目录级要求扩大成仓库级",
+      "passed": true,
+      "issues": "",
+      "batch_exit_code": 0
+    }
+  ]
+}

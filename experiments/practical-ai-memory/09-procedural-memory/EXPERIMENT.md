@@ -2,10 +2,10 @@
 
 ## 阶段状态
 
-`article-review`。静态协议验证、Pilot-01 修复复审和独立变体 Pilot-02 均已完成；Pilot-02 的
-45 格中 42 格首轮通过，3 格恢复任务修复后通过。第二模型敏感性复核（`deepseek-v4-flash` / `max`）
-已完成：三个条件 45/45 格首轮产出并一次通过逐份边界 Review，结果单独保存，不混合聚合。公开证据包
-已经生成，文章初稿已进入 `review`；当前仍不能据此宣称普遍收益。
+`formal-matrix-complete-review-complete`。旧 Pilot-01、修复复审、独立变体 Pilot-02 和第二配置
+敏感性复核均保留。正式矩阵使用 `formal-01` 新任务表，两组请求配置各完成 135 格与全量只读
+Review，合计 224/270 通过。文章已升级为正式矩阵口径；当前仍不能据此宣称载体优劣、普遍收益
+或跨平台复现。
 
 ## 当前请求配置与 Smoke
 
@@ -64,7 +64,23 @@ Pilot 最多支持“在冻结的合成重复任务中，某种程序性记忆�
 - 结果：三个条件均为 15/15 格首轮产出并一次通过逐份边界 Review（`reviewed=45 failures=0`），无需修复批次。
 - 过程数据：`prompt-only` 平均 120.7 字符/格，`guide-assisted` 平均 109.0，`skill-workflow` 平均 107.9。
 - 原始输出与 metadata：`runs/private/deepseek-v4-flash-max/` 与 `runs/public/deepseek-v4-flash-max/`。
-- 边界：本轮为单轮单配置合成矩阵数据，不比较 provider，不把单次差异解释为普遍模型能力；两模型边界稳定性比较待 Lee 决定后进行。
+- 边界：本轮为旧 Pilot 单轮数据，不比较 provider；后续正式矩阵已单独使用新任务表，不把 Pilot 差异解释为普遍模型能力。
+
+## 正式矩阵结果
+
+| 请求配置 | `prompt-only` | `guide-assisted` | `skill-workflow` | 合计 |
+| --- | ---: | ---: | ---: | ---: |
+| `gpt-5.6-terra / medium` | 30/45 | 45/45 | 45/45 | 120/135 |
+| `deepseek-v4-flash / max` | 30/45 | 30/45 | 44/45 | 104/135 |
+| 合计 | 60/90 | 75/90 | 89/90 | 224/270 |
+
+45 格失败来自三个 15 格批次的 JSON 结构错误；另有 1 格把“不自动晋升”写成“不自动晋缘”。
+在 225 个可独立解析格中，224 格通过语义边界 Review。请求配置 A 使用隔离 Codex CLI，请求配置
+B 使用 OMP JSONL 模式；两者执行路径和 effort 不同，因此禁止用总分比较模型或载体优劣。
+
+正式化过程保留三个协议修订标签：`formal-r1` 的 Terra OMP deadline、`formal-r2` 的 OMP text
+状态混流，以及 `formal-r3` 的 JSONL 事件提取。只有 Terra `formal-r2` 与 DeepSeek `formal-r3`
+进入最终正式聚合。
 
 ## 公开证据与文章状态
 
@@ -72,4 +88,4 @@ Pilot 最多支持“在冻结的合成重复任务中，某种程序性记忆�
 - `evidence/representative-runs/` 展开 9 个脱敏样本，覆盖三种条件和三类高风险任务。
 - Terra 的原始 final 当时写入临时目录，未进入 P9 的私有或脱敏运行目录；公开包将其标记为 `aggregate-only`，不支持逐格输出复算。
 - 允许在文章中对照两组配置各自的首轮边界结果，但不能把差异归因于模型、推理强度或执行路径中的单一变量。
-- 文章已进入 `status: review`。进入 `ready` 前仍需人工接受上述历史证据缺口，并完成公开内容 Review。
+- 文章已进入 `status: ready`；作者已在 Review 阶段接受上述历史证据缺口，文章与公开证据包均明确披露该边界。

@@ -247,6 +247,8 @@ def write_claim_matrix() -> None:
         "| 在第二模型配置的冻结 Pilot-01 中，三条件共 45 格均通过逐份边界 Review | `manifest.jsonl` 的 45 条 `cell` 记录与 9 个代表样本 | 可直接陈述 | 不等于生产率、真实任务质量或通用模型能力 |\n"
         "| Terra Pilot-01 首轮 28/45 通过，修复批次关闭已发现边界问题 | `aggregate-review` 记录与对应 Review 报告 | 只能按聚合历史陈述 | 原始临时 JSON 未保留，不能声称公开包支持逐格复算 |\n"
         "| Terra Pilot-02 首轮 42/45 通过，3 个失败均来自 `prompt-only` 恢复任务的范围表达，修复后 3/3 通过 | Pilot-02 聚合 Review 与修复报告 | 可按报告陈述 | 不代表 `guide-assisted` 或 `skill-workflow` 普遍优于提示词 |\n"
+        "| 双配置正式矩阵为 224/270；45 格为批次 JSON 结构失败，1 格为禁止自动晋升字段失真 | 两份正式脱敏聚合、分配置只读 Review 与合并汇总 | 可按失败分类直接陈述 | 不得把三条件通过率解释为载体优劣 |\n"
+        "| 225 个可独立解析格中 224 格通过边界 Review | 正式聚合与逐格 Review | 可按当前冻结任务陈述 | 不代表真实生产率、任意模型或跨平台能力 |\n"
         "| 两组配置出现不同首轮边界结果 | 分配置报告 | 只能称为配置敏感性信号 | 不能把差异归因于模型、推理强度或执行路径中的单一变量 |\n"
         "| 程序性记忆应保留范围、来源、人工门和禁止自动晋升 | 冻结协议与两组 Review 门禁 | 可作为本 POC 的设计结论 | 不能写成所有团队和工具的通用最佳实践 |\n"
         "| Windows 或真实项目已经验证 | 无 | 禁止 | 本 POC 只覆盖 macOS 合成任务 |\n",
@@ -257,20 +259,23 @@ def write_claim_matrix() -> None:
 def write_readme() -> None:
     (EVIDENCE / "README.md").write_text(
         "# P9 公开实验依据\n\n"
-        "本目录公开 P9「程序性记忆」在 macOS 合成任务上的可复查证据。两组模型配置始终分开记录，不合并成总分，也不比较运行平台提供方。\n\n"
+        "本目录公开 P9「程序性记忆」在 macOS 合成任务上的可复查证据。两组请求配置始终分开记录，不比较运行平台提供方；正式矩阵只在合并汇总中计算总体通过与失败分类。\n\n"
         "## 内容\n\n"
         "- `manifest.jsonl`：45 条第二模型逐格记录，加 5 条 Terra 聚合 Review 记录。\n"
         "- `representative-runs/`：9 个脱敏代表样本，覆盖范围限定、失败恢复和候选沉淀三类高风险任务，以及全部三种条件。\n"
         "- `fixtures/`：冻结任务表、条件材料和实验 manifest。\n"
         "- `claim-matrix.md`：文章可以使用与不得外推的主张边界。\n\n"
+        "- `../data/formal-r2-macos-terra-medium.*` 与 `../data/formal-r3-macos-deepseek-max.*`：正式矩阵脱敏聚合。\n"
+        "- `../runs/aggregates/macos/formal-*-readonly-review.md`：正式矩阵分配置 Review 与合并汇总。\n\n"
         "## 证据完整性边界\n\n"
         "第二模型的 45 格脱敏 final 仍在本机中间层，公开 manifest 可逐格校验并展开代表样本。Terra Pilot 的原始 final 当时写入临时目录，未进入 P9 的 `runs/private/` 或 `runs/public/`；当前只保留逐份 Review、修复 Review 与分析报告。因此 manifest 将这些历史记录明确标为 `aggregate-only`，不补造逐格输出或校验和。\n\n"
-        "这不影响文章讨论“程序性记忆需要哪些边界”，但会限制复现口径：公开包支持第二模型逐格复核，只支持 Terra 聚合结果审计。文章进入 `ready` 前，应由人工确认是否接受这一历史证据缺口。\n\n"
+        "这项不对称只适用于旧 Pilot。正式矩阵已经为两组配置保存 raw final 与 metadata，并公开脱敏聚合；完整事件流继续留在私有目录。\n\n"
         "## 本地验证\n\n"
         "```bash\n"
         "python3 validate_design.py\n"
         "python3 validate_protocol.py\n"
         "python3 validate_public_evidence.py\n"
+        "python3 -m unittest test_formal_matrix.py\n"
         "```\n\n"
         "这些命令只读取合成夹具和公开证据，不会调用模型、修改真实项目或访问私有记忆。\n",
         encoding="utf-8",

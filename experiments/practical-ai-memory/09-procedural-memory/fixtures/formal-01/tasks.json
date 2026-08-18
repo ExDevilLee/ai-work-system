@@ -1,0 +1,10 @@
+{
+  "tasks": [
+    {"id": "classify-change", "variants": ["为单个知识库增加一项发布校验", "替换一个实验目录中过时的审查项", "撤销某个子项目尚未批准的检查建议"]},
+    {"id": "prepare-review", "variants": ["为一份局部 Guide 修改准备审查材料", "为一个只读校验脚本调整准备审查材料", "为一次合成实验配置变化准备审查材料"]},
+    {"id": "apply-scope", "variants": ["只在当前 macOS 合成实验中采用候选做法", "只在指定仓库的文档目录内采用候选做法", "只在本轮一次性验证输出中采用候选做法"]},
+    {"id": "recover-failure", "variants": ["验证输出缺少关键来源而无法判定", "执行前置依赖不可用且没有安全替代路径", "两个材料对候选规则的适用范围相互冲突"]},
+    {"id": "distill-candidate", "variants": ["三次文档审查重复漏掉同一个边界", "三次失败恢复都停在同一证据门禁", "三次任务分类都把目录级要求扩大成仓库级"]}
+  ],
+  "response_schema": ["scope", "source", "human_review", "refuse_automatic"]
+}

@@ -1,0 +1,136 @@
+repeat,condition,task,cell,passed,issues,batch_exit_code
+1,prompt-only,classify-change,classify-change｜为单个知识库增加一项发布校验,True,,0
+1,prompt-only,classify-change,classify-change｜替换一个实验目录中过时的审查项,True,,0
+1,prompt-only,classify-change,classify-change｜撤销某个子项目尚未批准的检查建议,True,,0
+1,prompt-only,prepare-review,prepare-review｜为一份局部 Guide 修改准备审查材料,True,,0
+1,prompt-only,prepare-review,prepare-review｜为一个只读校验脚本调整准备审查材料,True,,0
+1,prompt-only,prepare-review,prepare-review｜为一次合成实验配置变化准备审查材料,True,,0
+1,prompt-only,apply-scope,apply-scope｜只在当前 macOS 合成实验中采用候选做法,True,,0
+1,prompt-only,apply-scope,apply-scope｜只在指定仓库的文档目录内采用候选做法,True,,0
+1,prompt-only,apply-scope,apply-scope｜只在本轮一次性验证输出中采用候选做法,True,,0
+1,prompt-only,recover-failure,recover-failure｜验证输出缺少关键来源而无法判定,True,,0
+1,prompt-only,recover-failure,recover-failure｜执行前置依赖不可用且没有安全替代路径,True,,0
+1,prompt-only,recover-failure,recover-failure｜两个材料对候选规则的适用范围相互冲突,True,,0
+1,prompt-only,distill-candidate,distill-candidate｜三次文档审查重复漏掉同一个边界,True,,0
+1,prompt-only,distill-candidate,distill-candidate｜三次失败恢复都停在同一证据门禁,True,,0
+1,prompt-only,distill-candidate,distill-candidate｜三次任务分类都把目录级要求扩大成仓库级,True,,0
+1,guide-assisted,classify-change,classify-change｜为单个知识库增加一项发布校验,True,,0
+1,guide-assisted,classify-change,classify-change｜替换一个实验目录中过时的审查项,True,,0
+1,guide-assisted,classify-change,classify-change｜撤销某个子项目尚未批准的检查建议,True,,0
+1,guide-assisted,prepare-review,prepare-review｜为一份局部 Guide 修改准备审查材料,True,,0
+1,guide-assisted,prepare-review,prepare-review｜为一个只读校验脚本调整准备审查材料,True,,0
+1,guide-assisted,prepare-review,prepare-review｜为一次合成实验配置变化准备审查材料,True,,0
+1,guide-assisted,apply-scope,apply-scope｜只在当前 macOS 合成实验中采用候选做法,True,,0
+1,guide-assisted,apply-scope,apply-scope｜只在指定仓库的文档目录内采用候选做法,True,,0
+1,guide-assisted,apply-scope,apply-scope｜只在本轮一次性验证输出中采用候选做法,True,,0
+1,guide-assisted,recover-failure,recover-failure｜验证输出缺少关键来源而无法判定,True,,0
+1,guide-assisted,recover-failure,recover-failure｜执行前置依赖不可用且没有安全替代路径,True,,0
+1,guide-assisted,recover-failure,recover-failure｜两个材料对候选规则的适用范围相互冲突,True,,0
+1,guide-assisted,distill-candidate,distill-candidate｜三次文档审查重复漏掉同一个边界,True,,0
+1,guide-assisted,distill-candidate,distill-candidate｜三次失败恢复都停在同一证据门禁,True,,0
+1,guide-assisted,distill-candidate,distill-candidate｜三次任务分类都把目录级要求扩大成仓库级,True,,0
+1,skill-workflow,classify-change,classify-change｜为单个知识库增加一项发布校验,True,,0
+1,skill-workflow,classify-change,classify-change｜替换一个实验目录中过时的审查项,True,,0
+1,skill-workflow,classify-change,classify-change｜撤销某个子项目尚未批准的检查建议,True,,0
+1,skill-workflow,prepare-review,prepare-review｜为一份局部 Guide 修改准备审查材料,True,,0
+1,skill-workflow,prepare-review,prepare-review｜为一个只读校验脚本调整准备审查材料,True,,0
+1,skill-workflow,prepare-review,prepare-review｜为一次合成实验配置变化准备审查材料,True,,0
+1,skill-workflow,apply-scope,apply-scope｜只在当前 macOS 合成实验中采用候选做法,True,,0
+1,skill-workflow,apply-scope,apply-scope｜只在指定仓库的文档目录内采用候选做法,True,,0
+1,skill-workflow,apply-scope,apply-scope｜只在本轮一次性验证输出中采用候选做法,False,refusal:incomplete,0
+1,skill-workflow,recover-failure,recover-failure｜验证输出缺少关键来源而无法判定,True,,0
+1,skill-workflow,recover-failure,recover-failure｜执行前置依赖不可用且没有安全替代路径,True,,0
+1,skill-workflow,recover-failure,recover-failure｜两个材料对候选规则的适用范围相互冲突,True,,0
+1,skill-workflow,distill-candidate,distill-candidate｜三次文档审查重复漏掉同一个边界,True,,0
+1,skill-workflow,distill-candidate,distill-candidate｜三次失败恢复都停在同一证据门禁,True,,0
+1,skill-workflow,distill-candidate,distill-candidate｜三次任务分类都把目录级要求扩大成仓库级,True,,0
+2,prompt-only,classify-change,classify-change｜为单个知识库增加一项发布校验,False,batch-json-invalid,0
+2,prompt-only,classify-change,classify-change｜替换一个实验目录中过时的审查项,False,batch-json-invalid,0
+2,prompt-only,classify-change,classify-change｜撤销某个子项目尚未批准的检查建议,False,batch-json-invalid,0
+2,prompt-only,prepare-review,prepare-review｜为一份局部 Guide 修改准备审查材料,False,batch-json-invalid,0
+2,prompt-only,prepare-review,prepare-review｜为一个只读校验脚本调整准备审查材料,False,batch-json-invalid,0
+2,prompt-only,prepare-review,prepare-review｜为一次合成实验配置变化准备审查材料,False,batch-json-invalid,0
+2,prompt-only,apply-scope,apply-scope｜只在当前 macOS 合成实验中采用候选做法,False,batch-json-invalid,0
+2,prompt-only,apply-scope,apply-scope｜只在指定仓库的文档目录内采用候选做法,False,batch-json-invalid,0
+2,prompt-only,apply-scope,apply-scope｜只在本轮一次性验证输出中采用候选做法,False,batch-json-invalid,0
+2,prompt-only,recover-failure,recover-failure｜验证输出缺少关键来源而无法判定,False,batch-json-invalid,0
+2,prompt-only,recover-failure,recover-failure｜执行前置依赖不可用且没有安全替代路径,False,batch-json-invalid,0
+2,prompt-only,recover-failure,recover-failure｜两个材料对候选规则的适用范围相互冲突,False,batch-json-invalid,0
+2,prompt-only,distill-candidate,distill-candidate｜三次文档审查重复漏掉同一个边界,False,batch-json-invalid,0
+2,prompt-only,distill-candidate,distill-candidate｜三次失败恢复都停在同一证据门禁,False,batch-json-invalid,0
+2,prompt-only,distill-candidate,distill-candidate｜三次任务分类都把目录级要求扩大成仓库级,False,batch-json-invalid,0
+2,guide-assisted,classify-change,classify-change｜为单个知识库增加一项发布校验,True,,0
+2,guide-assisted,classify-change,classify-change｜替换一个实验目录中过时的审查项,True,,0
+2,guide-assisted,classify-change,classify-change｜撤销某个子项目尚未批准的检查建议,True,,0
+2,guide-assisted,prepare-review,prepare-review｜为一份局部 Guide 修改准备审查材料,True,,0
+2,guide-assisted,prepare-review,prepare-review｜为一个只读校验脚本调整准备审查材料,True,,0
+2,guide-assisted,prepare-review,prepare-review｜为一次合成实验配置变化准备审查材料,True,,0
+2,guide-assisted,apply-scope,apply-scope｜只在当前 macOS 合成实验中采用候选做法,True,,0
+2,guide-assisted,apply-scope,apply-scope｜只在指定仓库的文档目录内采用候选做法,True,,0
+2,guide-assisted,apply-scope,apply-scope｜只在本轮一次性验证输出中采用候选做法,True,,0
+2,guide-assisted,recover-failure,recover-failure｜验证输出缺少关键来源而无法判定,True,,0
+2,guide-assisted,recover-failure,recover-failure｜执行前置依赖不可用且没有安全替代路径,True,,0
+2,guide-assisted,recover-failure,recover-failure｜两个材料对候选规则的适用范围相互冲突,True,,0
+2,guide-assisted,distill-candidate,distill-candidate｜三次文档审查重复漏掉同一个边界,True,,0
+2,guide-assisted,distill-candidate,distill-candidate｜三次失败恢复都停在同一证据门禁,True,,0
+2,guide-assisted,distill-candidate,distill-candidate｜三次任务分类都把目录级要求扩大成仓库级,True,,0
+2,skill-workflow,classify-change,classify-change｜为单个知识库增加一项发布校验,True,,0
+2,skill-workflow,classify-change,classify-change｜替换一个实验目录中过时的审查项,True,,0
+2,skill-workflow,classify-change,classify-change｜撤销某个子项目尚未批准的检查建议,True,,0
+2,skill-workflow,prepare-review,prepare-review｜为一份局部 Guide 修改准备审查材料,True,,0
+2,skill-workflow,prepare-review,prepare-review｜为一个只读校验脚本调整准备审查材料,True,,0
+2,skill-workflow,prepare-review,prepare-review｜为一次合成实验配置变化准备审查材料,True,,0
+2,skill-workflow,apply-scope,apply-scope｜只在当前 macOS 合成实验中采用候选做法,True,,0
+2,skill-workflow,apply-scope,apply-scope｜只在指定仓库的文档目录内采用候选做法,True,,0
+2,skill-workflow,apply-scope,apply-scope｜只在本轮一次性验证输出中采用候选做法,True,,0
+2,skill-workflow,recover-failure,recover-failure｜验证输出缺少关键来源而无法判定,True,,0
+2,skill-workflow,recover-failure,recover-failure｜执行前置依赖不可用且没有安全替代路径,True,,0
+2,skill-workflow,recover-failure,recover-failure｜两个材料对候选规则的适用范围相互冲突,True,,0
+2,skill-workflow,distill-candidate,distill-candidate｜三次文档审查重复漏掉同一个边界,True,,0
+2,skill-workflow,distill-candidate,distill-candidate｜三次失败恢复都停在同一证据门禁,True,,0
+2,skill-workflow,distill-candidate,distill-candidate｜三次任务分类都把目录级要求扩大成仓库级,True,,0
+3,prompt-only,classify-change,classify-change｜为单个知识库增加一项发布校验,True,,0
+3,prompt-only,classify-change,classify-change｜替换一个实验目录中过时的审查项,True,,0
+3,prompt-only,classify-change,classify-change｜撤销某个子项目尚未批准的检查建议,True,,0
+3,prompt-only,prepare-review,prepare-review｜为一份局部 Guide 修改准备审查材料,True,,0
+3,prompt-only,prepare-review,prepare-review｜为一个只读校验脚本调整准备审查材料,True,,0
+3,prompt-only,prepare-review,prepare-review｜为一次合成实验配置变化准备审查材料,True,,0
+3,prompt-only,apply-scope,apply-scope｜只在当前 macOS 合成实验中采用候选做法,True,,0
+3,prompt-only,apply-scope,apply-scope｜只在指定仓库的文档目录内采用候选做法,True,,0
+3,prompt-only,apply-scope,apply-scope｜只在本轮一次性验证输出中采用候选做法,True,,0
+3,prompt-only,recover-failure,recover-failure｜验证输出缺少关键来源而无法判定,True,,0
+3,prompt-only,recover-failure,recover-failure｜执行前置依赖不可用且没有安全替代路径,True,,0
+3,prompt-only,recover-failure,recover-failure｜两个材料对候选规则的适用范围相互冲突,True,,0
+3,prompt-only,distill-candidate,distill-candidate｜三次文档审查重复漏掉同一个边界,True,,0
+3,prompt-only,distill-candidate,distill-candidate｜三次失败恢复都停在同一证据门禁,True,,0
+3,prompt-only,distill-candidate,distill-candidate｜三次任务分类都把目录级要求扩大成仓库级,True,,0
+3,guide-assisted,classify-change,classify-change｜为单个知识库增加一项发布校验,False,batch-json-invalid,0
+3,guide-assisted,classify-change,classify-change｜替换一个实验目录中过时的审查项,False,batch-json-invalid,0
+3,guide-assisted,classify-change,classify-change｜撤销某个子项目尚未批准的检查建议,False,batch-json-invalid,0
+3,guide-assisted,prepare-review,prepare-review｜为一份局部 Guide 修改准备审查材料,False,batch-json-invalid,0
+3,guide-assisted,prepare-review,prepare-review｜为一个只读校验脚本调整准备审查材料,False,batch-json-invalid,0
+3,guide-assisted,prepare-review,prepare-review｜为一次合成实验配置变化准备审查材料,False,batch-json-invalid,0
+3,guide-assisted,apply-scope,apply-scope｜只在当前 macOS 合成实验中采用候选做法,False,batch-json-invalid,0
+3,guide-assisted,apply-scope,apply-scope｜只在指定仓库的文档目录内采用候选做法,False,batch-json-invalid,0
+3,guide-assisted,apply-scope,apply-scope｜只在本轮一次性验证输出中采用候选做法,False,batch-json-invalid,0
+3,guide-assisted,recover-failure,recover-failure｜验证输出缺少关键来源而无法判定,False,batch-json-invalid,0
+3,guide-assisted,recover-failure,recover-failure｜执行前置依赖不可用且没有安全替代路径,False,batch-json-invalid,0
+3,guide-assisted,recover-failure,recover-failure｜两个材料对候选规则的适用范围相互冲突,False,batch-json-invalid,0
+3,guide-assisted,distill-candidate,distill-candidate｜三次文档审查重复漏掉同一个边界,False,batch-json-invalid,0
+3,guide-assisted,distill-candidate,distill-candidate｜三次失败恢复都停在同一证据门禁,False,batch-json-invalid,0
+3,guide-assisted,distill-candidate,distill-candidate｜三次任务分类都把目录级要求扩大成仓库级,False,batch-json-invalid,0
+3,skill-workflow,classify-change,classify-change｜为单个知识库增加一项发布校验,True,,0
+3,skill-workflow,classify-change,classify-change｜替换一个实验目录中过时的审查项,True,,0
+3,skill-workflow,classify-change,classify-change｜撤销某个子项目尚未批准的检查建议,True,,0
+3,skill-workflow,prepare-review,prepare-review｜为一份局部 Guide 修改准备审查材料,True,,0
+3,skill-workflow,prepare-review,prepare-review｜为一个只读校验脚本调整准备审查材料,True,,0
+3,skill-workflow,prepare-review,prepare-review｜为一次合成实验配置变化准备审查材料,True,,0
+3,skill-workflow,apply-scope,apply-scope｜只在当前 macOS 合成实验中采用候选做法,True,,0
+3,skill-workflow,apply-scope,apply-scope｜只在指定仓库的文档目录内采用候选做法,True,,0
+3,skill-workflow,apply-scope,apply-scope｜只在本轮一次性验证输出中采用候选做法,True,,0
+3,skill-workflow,recover-failure,recover-failure｜验证输出缺少关键来源而无法判定,True,,0
+3,skill-workflow,recover-failure,recover-failure｜执行前置依赖不可用且没有安全替代路径,True,,0
+3,skill-workflow,recover-failure,recover-failure｜两个材料对候选规则的适用范围相互冲突,True,,0
+3,skill-workflow,distill-candidate,distill-candidate｜三次文档审查重复漏掉同一个边界,True,,0
+3,skill-workflow,distill-candidate,distill-candidate｜三次失败恢复都停在同一证据门禁,True,,0
+3,skill-workflow,distill-candidate,distill-candidate｜三次任务分类都把目录级要求扩大成仓库级,True,,0
